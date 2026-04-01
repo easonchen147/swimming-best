@@ -1,0 +1,14 @@
+{
+  "name": "swimming-best",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "frontend:dev": "npm --prefix frontend run dev",
+    "frontend:lint": "npm --prefix frontend run lint",
+    "frontend:build": "npm --prefix frontend run build",
+    "backend:run": "go -C backend run ./cmd/server",
+    "backend:test": "go -C backend test ./...",
+    "check": "npm run frontend:lint && npm run frontend:build && npm run backend:test"
+  }
+}
+

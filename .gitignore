@@ -2,6 +2,8 @@
 .superpowers/
 .worktrees/
 worktrees/
+.tmp/
+design-system/
 
 node_modules/
 frontend/node_modules/
@@ -22,3 +24,4 @@ data/
 .DS_Store
 Thumbs.db
 
+.tmp/*

@@ -1,9 +1,9 @@
 ## 1. Repository And Scaffolding
 
 - [x] 1.1 Create repo hygiene files, design docs, OpenSpec artifacts, and a feature branch for implementation
-- [ ] 1.2 Verify latest stable frontend/tooling versions and scaffold the Next.js frontend
-- [ ] 1.3 Initialize the Go backend module, dependencies, and shared run/test scripts
-- [ ] 1.4 Validate the clean scaffold with frontend lint/build and backend tests
+- [x] 1.2 Verify latest stable frontend/tooling versions and scaffold the Next.js frontend
+- [x] 1.3 Initialize the Go backend module, dependencies, and shared run/test scripts
+- [x] 1.4 Validate the clean scaffold with frontend lint/build and backend tests
 
 ## 2. Backend Core
 
