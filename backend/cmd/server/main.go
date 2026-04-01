@@ -1,25 +1,14 @@
 package main
 
 import (
-	"net/http"
 	"os"
 
-	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+
+	"swimming-best/backend/internal/auth"
+	"swimming-best/backend/internal/config"
+	httpapi "swimming-best/backend/internal/http"
 )
-
-func newRouter() *gin.Engine {
-	router := gin.New()
-	router.Use(gin.Recovery())
-
-	router.GET("/healthz", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"service": "swimming-best-backend",
-			"status":  "ok",
-		})
-	})
-
-	return router
-}
 
 func main() {
 	addr := os.Getenv("SWIMMING_BEST_ADDR")
@@ -27,7 +16,26 @@ func main() {
 		addr = ":8080"
 	}
 
-	if err := newRouter().Run(addr); err != nil {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	if err != nil {
+		panic(err)
+	}
+
+	authService, err := auth.New(config.AuthConfig{
+		SessionSecret: "dev-session-secret",
+		CookieName:    "swimming_best_admin",
+		Admins: []config.AdminConfig{
+			{
+				Username:     "admin",
+				PasswordHash: string(passwordHash),
+			},
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	if err := httpapi.NewRouter(authService).Run(addr); err != nil {
 		panic(err)
 	}
 }
