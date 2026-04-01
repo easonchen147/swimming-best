@@ -391,6 +391,144 @@ func (r *SQLiteRepository) CreateGoal(ctx context.Context, params domain.CreateG
 	return goal, nil
 }
 
+func (r *SQLiteRepository) ListPublicSwimmers(ctx context.Context) ([]domain.Swimmer, error) {
+	rows, err := r.exec.QueryContext(ctx, `
+		SELECT id, slug, real_name, nickname, public_name_mode, is_public, avatar_url, birth_year, team_name, notes, created_at, updated_at
+		FROM swimmers
+		WHERE is_public = 1 AND public_name_mode != ?
+		ORDER BY created_at ASC
+	`, string(domain.PublicNameModeHidden))
+	if err != nil {
+		return nil, fmt.Errorf("query public swimmers: %w", err)
+	}
+	defer rows.Close()
+
+	var swimmers []domain.Swimmer
+	for rows.Next() {
+		swimmer, err := scanSwimmer(rows)
+		if err != nil {
+			return nil, err
+		}
+		swimmers = append(swimmers, swimmer)
+	}
+
+	return swimmers, rows.Err()
+}
+
+func (r *SQLiteRepository) GetPublicSwimmerBySlug(ctx context.Context, slug string) (domain.Swimmer, error) {
+	row := r.exec.QueryRowContext(ctx, `
+		SELECT id, slug, real_name, nickname, public_name_mode, is_public, avatar_url, birth_year, team_name, notes, created_at, updated_at
+		FROM swimmers
+		WHERE slug = ? AND is_public = 1 AND public_name_mode != ?
+	`, slug, string(domain.PublicNameModeHidden))
+	return scanSwimmer(row)
+}
+
+func (r *SQLiteRepository) ListPerformancesForSwimmerEvent(ctx context.Context, swimmerID, eventID string) ([]domain.Performance, error) {
+	rows, err := r.exec.QueryContext(ctx, `
+		SELECT id, context_id, swimmer_id, event_id, time_ms, performed_on, result_status, public_note, admin_note, created_at, updated_at
+		FROM performances
+		WHERE swimmer_id = ? AND event_id = ?
+		ORDER BY performed_on ASC, created_at ASC
+	`, swimmerID, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("query swimmer performances: %w", err)
+	}
+	defer rows.Close()
+
+	var performances []domain.Performance
+	for rows.Next() {
+		performance, err := scanPerformance(rows)
+		if err != nil {
+			return nil, err
+		}
+		performances = append(performances, performance)
+	}
+
+	return performances, rows.Err()
+}
+
+func (r *SQLiteRepository) ListGoalsForSwimmerEvent(ctx context.Context, swimmerID, eventID string) ([]domain.Goal, error) {
+	rows, err := r.exec.QueryContext(ctx, `
+		SELECT id, swimmer_id, event_id, parent_goal_id, horizon, title, target_time_ms, target_date, baseline_time_ms, status, is_public, public_note, admin_note, achieved_at, created_at, updated_at
+		FROM goals
+		WHERE swimmer_id = ? AND event_id = ?
+		ORDER BY target_date ASC, created_at ASC
+	`, swimmerID, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("query goals: %w", err)
+	}
+	defer rows.Close()
+
+	var goals []domain.Goal
+	for rows.Next() {
+		goal, err := scanGoal(rows)
+		if err != nil {
+			return nil, err
+		}
+		goals = append(goals, goal)
+	}
+
+	return goals, rows.Err()
+}
+
+func (r *SQLiteRepository) ListPerformancesForEventAndSwimmers(ctx context.Context, eventID string, swimmerIDs []string) ([]domain.Performance, error) {
+	if len(swimmerIDs) == 0 {
+		return nil, nil
+	}
+
+	args := make([]any, 0, len(swimmerIDs)+1)
+	args = append(args, eventID)
+	for _, swimmerID := range swimmerIDs {
+		args = append(args, swimmerID)
+	}
+
+	query := fmt.Sprintf(`
+		SELECT id, context_id, swimmer_id, event_id, time_ms, performed_on, result_status, public_note, admin_note, created_at, updated_at
+		FROM performances
+		WHERE event_id = ? AND swimmer_id IN (%s)
+		ORDER BY swimmer_id ASC, performed_on ASC, created_at ASC
+	`, placeholders(len(swimmerIDs)))
+
+	rows, err := r.exec.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query compare performances: %w", err)
+	}
+	defer rows.Close()
+
+	var performances []domain.Performance
+	for rows.Next() {
+		performance, err := scanPerformance(rows)
+		if err != nil {
+			return nil, err
+		}
+		performances = append(performances, performance)
+	}
+
+	return performances, rows.Err()
+}
+
+func (r *SQLiteRepository) StrongestEventID(ctx context.Context, swimmerID string) (string, error) {
+	row := r.exec.QueryRowContext(ctx, `
+		SELECT event_id
+		FROM performances
+		WHERE swimmer_id = ? AND result_status = ?
+		GROUP BY event_id
+		ORDER BY MIN(time_ms) ASC
+		LIMIT 1
+	`, swimmerID, string(domain.ResultStatusValid))
+
+	var eventID string
+	if err := row.Scan(&eventID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return "", fmt.Errorf("query strongest event: %w", err)
+	}
+
+	return eventID, nil
+}
+
 func scanSwimmer(scanner interface{ Scan(...any) error }) (domain.Swimmer, error) {
 	var swimmer domain.Swimmer
 	var isPublic int64
@@ -493,6 +631,79 @@ func scanContext(scanner interface{ Scan(...any) error }) (domain.RecordContext,
 	return recordContext, nil
 }
 
+func scanPerformance(scanner interface{ Scan(...any) error }) (domain.Performance, error) {
+	var performance domain.Performance
+	var resultStatus string
+	var createdAt string
+	var updatedAt string
+
+	err := scanner.Scan(
+		&performance.ID,
+		&performance.ContextID,
+		&performance.SwimmerID,
+		&performance.EventID,
+		&performance.TimeMS,
+		&performance.PerformedOn,
+		&resultStatus,
+		&performance.PublicNote,
+		&performance.AdminNote,
+		&createdAt,
+		&updatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return performance, ErrNotFound
+		}
+		return performance, err
+	}
+
+	performance.ResultStatus = domain.ResultStatus(resultStatus)
+	performance.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+	performance.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
+	return performance, nil
+}
+
+func scanGoal(scanner interface{ Scan(...any) error }) (domain.Goal, error) {
+	var goal domain.Goal
+	var horizon string
+	var status string
+	var isPublic int64
+	var createdAt string
+	var updatedAt string
+
+	err := scanner.Scan(
+		&goal.ID,
+		&goal.SwimmerID,
+		&goal.EventID,
+		&goal.ParentGoalID,
+		&horizon,
+		&goal.Title,
+		&goal.TargetTimeMS,
+		&goal.TargetDate,
+		&goal.BaselineTimeMS,
+		&status,
+		&isPublic,
+		&goal.PublicNote,
+		&goal.AdminNote,
+		&goal.AchievedAt,
+		&createdAt,
+		&updatedAt,
+	)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return goal, ErrNotFound
+		}
+		return goal, err
+	}
+
+	goal.Horizon = domain.GoalHorizon(horizon)
+	goal.Status = domain.GoalStatus(status)
+	goal.IsPublic = isPublic == 1
+	goal.CreatedAt, _ = time.Parse(time.RFC3339, createdAt)
+	goal.UpdatedAt, _ = time.Parse(time.RFC3339, updatedAt)
+	return goal, nil
+}
+
 func normalizeError(err error) error {
 	if err == nil {
 		return nil
@@ -545,4 +756,12 @@ func buildSlug(value string) string {
 	}
 
 	return slug + "-" + uuid.NewString()[:8]
+}
+
+func placeholders(count int) string {
+	values := make([]string, count)
+	for index := range values {
+		values[index] = "?"
+	}
+	return strings.Join(values, ", ")
 }

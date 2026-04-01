@@ -14,9 +14,9 @@
 
 ## 3. Analytics And Public APIs
 
-- [ ] 3.1 Implement PB detection, trend data, goal progress, and same-event comparison services
-- [ ] 3.2 Implement public APIs with visibility filtering and public-safe payloads
-- [ ] 3.3 Validate analytics and public payloads with automated tests
+- [x] 3.1 Implement PB detection, trend data, goal progress, and same-event comparison services
+- [x] 3.2 Implement public APIs with visibility filtering and public-safe payloads
+- [x] 3.3 Validate analytics and public payloads with automated tests
 
 ## 4. Frontend Foundation
 

@@ -16,6 +16,7 @@ type RouterOption func(*routerOptions)
 
 type routerOptions struct {
 	adminService *service.AdminService
+	publicService *service.PublicService
 }
 
 type loginRequest struct {
@@ -95,6 +96,12 @@ func WithAdminService(adminService *service.AdminService) RouterOption {
 	}
 }
 
+func WithPublicService(publicService *service.PublicService) RouterOption {
+	return func(options *routerOptions) {
+		options.publicService = publicService
+	}
+}
+
 func NewRouter(authService *auth.Service, opts ...RouterOption) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
@@ -148,6 +155,10 @@ func NewRouter(authService *auth.Service, opts ...RouterOption) *gin.Engine {
 
 	if options.adminService != nil {
 		registerAdminRoutes(admin, options.adminService)
+	}
+
+	if options.publicService != nil {
+		registerPublicRoutes(router, options.publicService)
 	}
 
 	return router
@@ -325,6 +336,49 @@ func writeAdminError(c *gin.Context, err error) {
 		return
 	case errors.Is(err, repository.ErrConflict):
 		c.JSON(http.StatusConflict, gin.H{"error": "conflict"})
+	case errors.Is(err, repository.ErrNotFound):
+		c.JSON(http.StatusNotFound, gin.H{"error": "not_found"})
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+}
+
+func registerPublicRoutes(router *gin.Engine, publicService *service.PublicService) {
+	router.GET("/api/public/swimmers", func(c *gin.Context) {
+		swimmers, err := publicService.ListPublicSwimmers(c.Request.Context())
+		if err != nil {
+			writePublicError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"swimmers": swimmers})
+	})
+
+	router.GET("/api/public/swimmers/:slug/events/:eventId/analytics", func(c *gin.Context) {
+		payload, err := publicService.GetPublicEventAnalytics(c.Request.Context(), c.Param("slug"), c.Param("eventId"))
+		if err != nil {
+			writePublicError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, payload)
+	})
+
+	router.GET("/api/public/compare", func(c *gin.Context) {
+		payload, err := publicService.ComparePublicEvent(c.Request.Context(), c.Query("eventId"), c.QueryArray("swimmerId"))
+		if err != nil {
+			writePublicError(c, err)
+			return
+		}
+
+		c.JSON(http.StatusOK, payload)
+	})
+}
+
+func writePublicError(c *gin.Context, err error) {
+	switch {
+	case err == nil:
+		return
 	case errors.Is(err, repository.ErrNotFound):
 		c.JSON(http.StatusNotFound, gin.H{"error": "not_found"})
 	default:
