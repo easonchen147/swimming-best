@@ -8,9 +8,9 @@
 ## 2. Backend Core
 
 - [x] 2.1 Implement config loading, hashed admin authentication, cookie sessions, and auth middleware with tests
-- [ ] 2.2 Implement SQLite schema setup, migrations, and repositories for swimmers, events, contexts, performances, goals, and tags
-- [ ] 2.3 Implement admin APIs for swimmer management, event management, quick entry, context entry, and goal management
-- [ ] 2.4 Validate backend behavior with repository, service, and HTTP tests
+- [x] 2.2 Implement SQLite schema setup, migrations, and repositories for swimmers, events, contexts, performances, goals, and tags
+- [x] 2.3 Implement admin APIs for swimmer management, event management, quick entry, context entry, and goal management
+- [x] 2.4 Validate backend behavior with repository, service, and HTTP tests
 
 ## 3. Analytics And Public APIs
 
