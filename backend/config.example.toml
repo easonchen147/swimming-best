@@ -1,0 +1,30 @@
+# Flask service bind address. Change this for the backend process itself, not for
+# the public website domain exposed by your reverse proxy.
+[server]
+host = "127.0.0.1"
+port = 8080
+
+# SQLite database path. Relative paths are resolved from this config file.
+[database]
+path = "./data/swimming-best.db"
+
+[auth]
+# Cookie signing secret for the admin session. Replace with a long random string
+# before production use.
+session_secret = "swimming-best-dev-secret"
+# Admin cookie name. Usually no need to change unless multiple apps share a domain.
+cookie_name = "swimming_best_admin"
+
+# You can add multiple admin accounts. Generate password_hash values with
+# werkzeug.security.generate_password_hash("plain-text-password").
+[[auth.admins]]
+username = "admin"
+password_hash = "scrypt:32768:8:1$fkYgIC1TvmlpubYa$6e57de94960b280756e9ed7f4a4590472133e593db3e6fce3814d184b8ea06795304faadd7700b5c102d621bf3908bc195df37d1b9ea90cb0d726a3eaa1e189c"
+
+[app]
+# Default timezone used by the backend for dates and statistics.
+timezone = "Asia/Shanghai"
+# Public site origin seen by parents and swimmers, for example the frontend
+# domain. Keep this accurate for generated absolute links. The current version
+# keeps it as deployment config even though no API response consumes it yet.
+public_base_url = "https://swimming.example.com"

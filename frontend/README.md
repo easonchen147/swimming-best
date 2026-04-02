@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Frontend
 
-## Getting Started
+这里是 `Swimming Best` 的 Next.js 前端，负责：
 
-First, run the development server:
+- 管理后台页面
+- 公开成长档案页面
+- 同项目对比页
+- 事件详情和分享页
+
+前端页面对后端的调用统一使用 `/api/*`。
+
+- 浏览器请求始终走 `/api/...`
+- `next.config.ts` 里的 `BACKEND_ORIGIN` 只决定 Next.js standalone 服务器的 rewrite 目标
+- 如果线上反向代理已经把 `/api` 转发给后端，前端页面代码不需要改后端域名
+- 统一生产部署脚本 `../scripts/deploy.py` 默认会把 standalone rewrite 目标设为 `http://1.12.247.149:8082/`
+
+## 本地开发
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+如果后端不是运行在 `http://127.0.0.1:8080`，请设置：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+BACKEND_ORIGIN=http://127.0.0.1:8080 npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 常用命令
 
-## Learn More
+```bash
+npm run lint
+npm run test
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+`npm run build` 会生成 Next.js standalone 产物，供 `scripts/deploy.py` 复制到部署目录。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+生产部署时，脚本会在构建前端前注入 `BACKEND_ORIGIN`，但浏览器端接口路径仍保持
+`/api/*` 不变。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+完整项目的启动和验证流程请查看仓库根目录 [README](../README.md)。

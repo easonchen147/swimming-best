@@ -8,18 +8,43 @@ design-system/
 node_modules/
 frontend/node_modules/
 frontend/.next/
+frontend/dist/
 frontend/out/
 frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/
+frontend/.vercel/
+frontend/.turbo/
+frontend/.eslintcache
+frontend/*.tsbuildinfo
 
 backend/bin/
 backend/coverage.out
+backend/.venv/
+backend/.pytest_cache/
+backend/__pycache__/
+backend/.ruff_cache/
+backend/.mypy_cache/
+backend/.tox/
+backend/.coverage
+backend/htmlcov/
+backend/**/__pycache__/
+*.py[cod]
+backend/config.toml
+backend/data/
 
 data/
 *.db
 *.db-shm
 *.db-wal
+
+.env
+.env.*
+!.env.example
+frontend/.env*
+!frontend/.env.example
+backend/.env*
+!backend/.env.example
 
 .DS_Store
 Thumbs.db

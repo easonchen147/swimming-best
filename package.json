@@ -5,10 +5,16 @@
   "scripts": {
     "frontend:dev": "npm --prefix frontend run dev",
     "frontend:lint": "npm --prefix frontend run lint",
+    "frontend:test": "npm --prefix frontend run test",
     "frontend:build": "npm --prefix frontend run build",
-    "backend:run": "go -C backend run ./cmd/server",
-    "backend:test": "go -C backend test ./...",
-    "check": "npm run frontend:lint && npm run frontend:build && npm run backend:test"
+    "backend:install": "cd backend && poetry install --with dev",
+    "backend:sync:uv": "cd backend && uv sync",
+    "backend:run": "cd backend && poetry run python -m swimming_best",
+    "backend:run:uv": "cd backend && uv run python -m swimming_best",
+    "backend:lint": "cd backend && poetry run ruff check .",
+    "backend:test": "cd backend && poetry run python -m pytest -q",
+    "backend:test:uv": "cd backend && uv run python -m pytest -q",
+    "deploy:product": "python3 scripts/deploy.py",
+    "check": "npm run frontend:lint && npm run frontend:test && npm run frontend:build && npm run backend:lint && npm run backend:test"
   }
 }
-

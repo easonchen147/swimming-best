@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import "@fontsource/fira-sans/400.css";
+import "@fontsource/fira-sans/500.css";
+import "@fontsource/fira-sans/600.css";
+import "@fontsource/fira-code/400.css";
+import "@fontsource/fira-code/600.css";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,8 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="zh-CN" className="h-full scroll-smooth antialiased">
+      <body className="min-h-full bg-background text-foreground">
+        {children}
+        <Toaster richColors position="top-right" />
+      </body>
     </html>
   );
 }

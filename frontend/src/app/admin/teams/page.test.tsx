@@ -1,0 +1,87 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
+
+import AdminTeamsPage from "@/app/admin/teams/page";
+
+const listAdminTeams = vi.fn();
+const createAdminTeam = vi.fn();
+const updateAdminTeam = vi.fn();
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
+}));
+
+vi.mock("@/components/layout/admin-shell", () => ({
+  AdminShell: ({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title: string;
+  }) => (
+    <div>
+      <h1>{title}</h1>
+      {children}
+    </div>
+  ),
+}));
+
+vi.mock("@/lib/api/admin", () => ({
+  listAdminTeams: (...args: unknown[]) => listAdminTeams(...args),
+  createAdminTeam: (...args: unknown[]) => createAdminTeam(...args),
+  updateAdminTeam: (...args: unknown[]) => updateAdminTeam(...args),
+}));
+
+describe("AdminTeamsPage", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    listAdminTeams.mockResolvedValue({
+      teams: [
+        {
+          id: "team-a",
+          name: "海豚预备队",
+          sortOrder: 1,
+          isActive: true,
+        },
+      ],
+    });
+    createAdminTeam.mockResolvedValue({
+      id: "team-b",
+      name: "浪花竞速队",
+      sortOrder: 2,
+      isActive: true,
+    });
+    updateAdminTeam.mockResolvedValue({
+      id: "team-a",
+      name: "海豚预备一队",
+      sortOrder: 1,
+      isActive: true,
+    });
+  });
+
+  it("loads managed teams and creates a new team", async () => {
+    render(<AdminTeamsPage />);
+
+    expect(await screen.findByText("海豚预备队")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("队伍名称"), {
+      target: { value: "浪花竞速队" },
+    });
+    fireEvent.change(screen.getByLabelText("排序"), {
+      target: { value: "2" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存队伍" }));
+
+    await waitFor(() => {
+      expect(createAdminTeam).toHaveBeenCalledWith({
+        name: "浪花竞速队",
+        sortOrder: 2,
+        isActive: true,
+      });
+    });
+    expect(await screen.findByText("浪花竞速队")).toBeInTheDocument();
+  });
+});
