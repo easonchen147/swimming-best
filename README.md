@@ -198,11 +198,11 @@ python3 scripts/deploy.py
 当前生产部署的默认后端 origin 为：
 
 ```text
-http://1.12.247.149:8082/
+http://127.0.0.1:8000/
 ```
 
 部署脚本会在构建前端时把它归一化为
-`http://1.12.247.149:8082`，并将 Next.js standalone 的 `/api/*`
+`http://127.0.0.1:8000`，并将 Next.js standalone 的 `/api/*`
 rewrite 目标指向该后端；浏览器侧路径仍保持 `/api/*` 不变。
 
 ### 前端部署保证

@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 FRONTEND_DIR = REPO_ROOT / "frontend"
 BACKEND_DIR = REPO_ROOT / "backend"
 DEFAULT_TARGET_ROOT = Path("/data/product/swimming-best")
-DEFAULT_BACKEND_ORIGIN = "http://1.12.247.149:8082/"
+DEFAULT_BACKEND_ORIGIN = "http://127.0.0.1:8000/"
 PRESERVED_BACKEND_RUNTIME_ENTRIES = (
     "config.toml",
     "data",
