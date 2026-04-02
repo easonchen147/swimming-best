@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  comparePublicEvent,
   getPublicEventAnalytics,
   getPublicSwimmer,
   listPublicSwimmerEvents,
@@ -26,7 +25,6 @@ describe("public api client", () => {
     await getPublicSwimmer("alice");
     await listPublicSwimmerEvents("alice");
     await getPublicEventAnalytics("alice", "event-1");
-    await comparePublicEvent("event-1", ["swimmer-1", "swimmer-2"]);
 
     expect(apiGet).toHaveBeenNthCalledWith(1, "/api/public/swimmers");
     expect(apiGet).toHaveBeenNthCalledWith(2, "/api/public/swimmers");
@@ -36,10 +34,6 @@ describe("public api client", () => {
     expect(apiGet).toHaveBeenNthCalledWith(
       6,
       "/api/public/swimmers/alice/events/event-1/analytics",
-    );
-    expect(apiGet).toHaveBeenNthCalledWith(
-      7,
-      "/api/public/compare?eventId=event-1&swimmerId=swimmer-1&swimmerId=swimmer-2",
     );
   });
 });

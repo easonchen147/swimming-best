@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Share2, TimerReset } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { PerformanceChart } from "@/components/charts/performance-chart";
+import { ImprovementChart } from "@/components/charts/improvement-chart";
+import { GoalGauge } from "@/components/charts/goal-gauge";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
+import { SourceTypeBadge } from "@/components/shared/source-type-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getPublicEventAnalytics, getPublicSwimmer } from "@/lib/api/public";
@@ -77,71 +79,47 @@ export default function PublicEventDetailPage() {
       </section>
 
       <Card>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/8 text-primary">
-            <TimerReset className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="font-mono text-xs uppercase tracking-[0.22em] text-primary/55">
-              Event Analytics
-            </div>
-            <h1 className="text-2xl font-semibold text-primary">
-              {analytics.event.displayName}
-            </h1>
-          </div>
-        </div>
+        <h1 className="text-xl font-semibold text-primary">
+          {analytics.event.displayName}
+        </h1>
       </Card>
 
-      <PerformanceChart
+      <ImprovementChart
         pb={analytics.series.pb}
         raw={analytics.series.raw}
-        trend={analytics.series.trend}
       />
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <Card>
-          <h2 className="text-xl font-semibold text-primary">成绩时间线</h2>
-          <div className="mt-4 space-y-3">
-            {analytics.series.raw.map((point) => (
-              <div
-                className="flex items-center justify-between rounded-2xl border border-primary/10 bg-white px-4 py-3"
-                key={`${point.performedOn}-${point.timeMs}`}
-              >
+        <Card className="space-y-3">
+          <h2 className="text-lg font-semibold text-primary">成绩时间线</h2>
+          {analytics.series.raw.map((point) => (
+            <div
+              className="flex items-center justify-between rounded-xl border border-primary/8 bg-white px-4 py-2.5"
+              key={`${point.performedOn}-${point.timeMs}`}
+            >
+              <div className="flex items-center gap-2">
                 <span className="text-sm text-muted">{point.performedOn}</span>
-                <span className="font-semibold text-primary">{formatTimeMS(point.timeMs)}</span>
+                <SourceTypeBadge sourceType={point.sourceType} />
               </div>
-            ))}
-          </div>
+              <span className="font-semibold text-primary">{formatTimeMS(point.timeMs)}</span>
+            </div>
+          ))}
         </Card>
 
-        <Card>
-          <h2 className="text-xl font-semibold text-primary">目标与里程碑</h2>
-          <div className="mt-4 space-y-3">
-            {analytics.goals.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-primary/12 px-4 py-4 text-sm text-muted">
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-primary">目标与里程碑</h2>
+          {analytics.goals.length === 0 ? (
+            <Card>
+              <div className="py-4 text-center text-sm text-muted">
                 暂无公开目标。
               </div>
-            ) : (
-              analytics.goals.map((goal) => (
-                <div className="rounded-2xl border border-primary/10 bg-white px-4 py-4" key={goal.id}>
-                  <div className="font-semibold text-primary">{goal.title}</div>
-                  <div className="mt-2 text-sm text-muted">
-                    截止 {goal.targetDate} · 目标 {formatTimeMS(goal.targetTimeMs)}
-                  </div>
-                  <div className="mt-3 h-2 rounded-full bg-primary/8">
-                    <div
-                      className="h-2 rounded-full bg-accent"
-                      style={{ width: `${Math.max(6, goal.progress * 100)}%` }}
-                    />
-                  </div>
-                  <div className="mt-2 text-sm font-semibold text-primary">
-                    {formatProgress(goal.progress)}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Card>
+            </Card>
+          ) : (
+            analytics.goals.map((goal) => (
+              <GoalGauge goal={goal} key={goal.id} />
+            ))
+          )}
+        </div>
       </div>
     </PublicShell>
   );

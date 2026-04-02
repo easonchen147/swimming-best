@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { AdminShell } from "@/components/layout/admin-shell";
 import { Field, SelectField } from "@/components/shared/form-field";
+import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -115,10 +116,9 @@ export default function AdminRecordsPage() {
               options={events.map((item) => ({ label: item.displayName, value: item.id }))}
               value={quickForm.eventId}
             />
-            <Field label="成绩（毫秒）">
-              <Input
-                onChange={(event) => setQuickForm((current) => ({ ...current, timeMs: Number(event.target.value) }))}
-                type="number"
+            <Field label="成绩">
+              <TimeInput
+                onChange={(ms) => setQuickForm((current) => ({ ...current, timeMs: ms }))}
                 value={quickForm.timeMs}
               />
             </Field>
@@ -185,10 +185,9 @@ export default function AdminRecordsPage() {
               options={events.map((item) => ({ label: item.displayName, value: item.id }))}
               value={contextForm.eventId}
             />
-            <Field label="成绩（毫秒）">
-              <Input
-                onChange={(event) => setContextForm((current) => ({ ...current, timeMs: Number(event.target.value) }))}
-                type="number"
+            <Field label="成绩">
+              <TimeInput
+                onChange={(ms) => setContextForm((current) => ({ ...current, timeMs: ms }))}
                 value={contextForm.timeMs}
               />
             </Field>

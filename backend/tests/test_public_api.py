@@ -50,3 +50,79 @@ def test_public_api_exposes_visible_swimmers_analytics_compare_and_team_filters(
 
     hidden_response = client.get(f"/api/public/swimmers/{seeded_data['hidden_swimmer_slug']}")
     assert hidden_response.status_code == 404
+
+
+def test_goals_default_is_public(admin_client):
+    """Goals created without explicit isPublic should default to True."""
+    team = admin_client.post(
+        "/api/admin/teams",
+        json={"name": "测试队伍", "sortOrder": 1, "isActive": True},
+    ).get_json()
+    swimmer = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Test Swimmer",
+            "nickname": "测试",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "teamId": team["id"],
+        },
+    ).get_json()
+    event = admin_client.post(
+        "/api/admin/events",
+        json={
+            "poolLengthM": 25,
+            "distanceM": 50,
+            "stroke": "freestyle",
+            "effortType": "sprint",
+        },
+    ).get_json()
+
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer["id"],
+            "eventId": event["id"],
+            "timeMs": 40000,
+            "sourceType": "training",
+            "performedOn": "2026-04-01",
+        },
+    )
+
+    goal_response = admin_client.post(
+        "/api/admin/goals",
+        json={
+            "swimmerId": swimmer["id"],
+            "eventId": event["id"],
+            "horizon": "short",
+            "title": "Break 38s",
+            "targetTimeMs": 38000,
+            "targetDate": "2026-06-01",
+        },
+    )
+    assert goal_response.status_code == 201
+    goal = goal_response.get_json()
+    assert goal["isPublic"] is True
+
+    client = admin_client
+    analytics = client.get(
+        f"/api/public/swimmers/{swimmer['slug']}/events/{event['id']}/analytics"
+    ).get_json()
+    assert len(analytics["goals"]) == 1
+    assert analytics["goals"][0]["title"] == "Break 38s"
+
+
+def test_analytics_raw_points_include_source_type(client, seeded_data):
+    """Each raw performance point in analytics should include sourceType."""
+    analytics_response = client.get(
+        "/api/public/swimmers/"
+        f"{seeded_data['swimmer_a_slug']}/events/{seeded_data['event_id']}/analytics"
+    )
+    assert analytics_response.status_code == 200
+    analytics = analytics_response.get_json()
+
+    raw_points = analytics["series"]["raw"]
+    assert len(raw_points) >= 1
+    for point in raw_points:
+        assert "sourceType" in point
+        assert point["sourceType"] in {"training", "test", "competition", "single"}

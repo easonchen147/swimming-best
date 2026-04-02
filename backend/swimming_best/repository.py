@@ -452,7 +452,7 @@ class Repository:
             "targetDate": payload["targetDate"],
             "baselineTimeMs": int(payload.get("baselineTimeMs") or 0),
             "status": payload.get("status") or "active",
-            "isPublic": bool(payload.get("isPublic", False)),
+            "isPublic": bool(payload.get("isPublic", True)),
             "publicNote": payload.get("publicNote", "").strip(),
             "adminNote": payload.get("adminNote", "").strip(),
             "achievedAt": payload.get("achievedAt", "").strip(),
@@ -588,15 +588,17 @@ class Repository:
     ) -> list[dict[str, Any]]:
         rows = self.connection.execute(
             """
-            SELECT id, context_id, swimmer_id, event_id, time_ms, performed_on, result_status,
-                   public_note, admin_note, created_at, updated_at
-            FROM performances
-            WHERE swimmer_id = ? AND event_id = ?
-            ORDER BY performed_on ASC, created_at ASC
+            SELECT p.id, p.context_id, p.swimmer_id, p.event_id, p.time_ms, p.performed_on,
+                   p.result_status, p.public_note, p.admin_note, p.created_at, p.updated_at,
+                   rc.source_type
+            FROM performances p
+            JOIN record_contexts rc ON rc.id = p.context_id
+            WHERE p.swimmer_id = ? AND p.event_id = ?
+            ORDER BY p.performed_on ASC, p.created_at ASC
             """,
             (swimmer_id, event_id),
         ).fetchall()
-        return [self._row_to_performance(row) for row in rows]
+        return [self._row_to_performance_with_source(row) for row in rows]
 
     def list_performances_for_event_and_swimmers(
         self, event_id: str, swimmer_ids: list[str]
@@ -804,6 +806,11 @@ class Repository:
                 "sortOrder": row["sort_order"],
                 "isActive": bool(row["is_active"]),
             }
+        return performance
+
+    def _row_to_performance_with_source(self, row: sqlite3.Row) -> dict[str, Any]:
+        performance = self._row_to_performance(row)
+        performance["sourceType"] = row["source_type"]
         return performance
 
     def _row_to_goal(self, row: sqlite3.Row, include_nested: bool = False) -> dict[str, Any]:

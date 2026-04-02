@@ -41,6 +41,7 @@ export type PublicSwimmerEventSummary = {
 export type AnalyticsSeriesPoint = {
   performedOn: string;
   timeMs: number;
+  sourceType?: string;
 };
 
 export type GoalProgress = {
@@ -64,20 +65,6 @@ export type PublicEventAnalytics = {
     currentBestTimeMs: number;
   };
   goals: GoalProgress[];
-};
-
-export type ComparePayload = {
-  event: EventDefinition;
-  swimmers: Array<{
-    swimmerId: string;
-    displayName: string;
-    teamId: string;
-    team: TeamSummary;
-    series: PublicEventAnalytics["series"];
-    currentBestTimeMs: number;
-    improvementTimeMs: number;
-    improvementRatio: number;
-  }>;
 };
 
 export type AdminSwimmer = {

@@ -22,6 +22,8 @@ def build_series(performances: Iterable[dict]) -> dict:
             "performedOn": performance["performedOn"],
             "timeMs": performance["timeMs"],
         }
+        if "sourceType" in performance:
+            point["sourceType"] = performance["sourceType"]
         raw.append(point)
 
         if index == 0 or performance["timeMs"] < current_best:

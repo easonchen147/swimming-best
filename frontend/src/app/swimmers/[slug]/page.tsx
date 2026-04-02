@@ -1,16 +1,16 @@
 "use client";
 
 import { toPng } from "html-to-image";
-import { Target, TimerReset } from "lucide-react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { PerformanceChart } from "@/components/charts/performance-chart";
+import { ImprovementChart } from "@/components/charts/improvement-chart";
+import { GoalGauge } from "@/components/charts/goal-gauge";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
+import { SourceTypeBadge } from "@/components/shared/source-type-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -79,28 +79,30 @@ export default function SwimmerDetailPage() {
         </>
       ) : (
         <>
-          <section
-            className="grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]"
-            ref={shareRef}
-          >
+          <section ref={shareRef}>
             <Card className="flex flex-col gap-4">
-              <Badge>公开成长档案</Badge>
-              <div>
-                <h1 className="text-3xl font-semibold text-primary md:text-5xl">
-                  {swimmer.displayName}
-                </h1>
-                <p className="mt-3 text-base text-muted">
-                  {swimmer.team?.name || "持续记录每一次训练、测试和比赛表现。"}
-                </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Badge>成长档案</Badge>
+                  <h1 className="mt-2 text-2xl font-semibold text-primary md:text-4xl">
+                    {swimmer.displayName}
+                  </h1>
+                  <p className="mt-1 text-sm text-muted">
+                    {swimmer.team?.name || "持续记录每一次训练、测试和比赛表现。"}
+                  </p>
+                </div>
+                <Button onClick={exportCard} size="sm" variant="secondary">
+                  保存分享图
+                </Button>
               </div>
 
               <div className="flex flex-wrap gap-2">
                 {events.map((item) => (
                   <button
-                    className={`rounded-full border px-3 py-2 text-sm font-semibold transition ${
+                    className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
                       item.event.id === selectedEventId
-                        ? "border-primary bg-primary text-white"
-                        : "border-primary/12 bg-white text-primary hover:bg-primary/6"
+                        ? "bg-primary text-white"
+                        : "border-primary/10 text-primary hover:bg-primary/6"
                     }`}
                     key={item.event.id}
                     onClick={() => setSelectedEventId(item.event.id)}
@@ -110,37 +112,6 @@ export default function SwimmerDetailPage() {
                   </button>
                 ))}
               </div>
-
-              {selectedEventId ? (
-                <div className="flex flex-wrap gap-3">
-                  <Link href={`/swimmers/${slug}/events/${selectedEventId}`}>
-                    <Button size="sm" variant="secondary">
-                      打开项目详情
-                    </Button>
-                  </Link>
-                  <Link href={`/swimmers/${slug}/share/${selectedEventId}`}>
-                    <Button size="sm">打开分享页</Button>
-                  </Link>
-                </div>
-              ) : null}
-            </Card>
-
-            <Card className="flex flex-col gap-4">
-              <div className="font-mono text-xs uppercase tracking-[0.22em] text-primary/55">
-                分享卡片
-              </div>
-              <div className="rounded-[24px] border border-primary/10 bg-gradient-to-br from-primary to-secondary px-5 py-6 text-white">
-                <div className="text-sm text-white/70">当前选中项目</div>
-                <div className="mt-2 text-2xl font-semibold">
-                  {analytics?.event.displayName ?? "等待项目数据"}
-                </div>
-                <div className="mt-4 text-4xl font-semibold">
-                  {analytics ? formatTimeMS(analytics.series.currentBestTimeMs) : "--"}
-                </div>
-              </div>
-              <Button onClick={exportCard} variant="secondary">
-                保存分享图
-              </Button>
             </Card>
           </section>
 
@@ -172,82 +143,45 @@ export default function SwimmerDetailPage() {
                 />
               </section>
 
-              <PerformanceChart
+              <ImprovementChart
                 pb={analytics.series.pb}
                 raw={analytics.series.raw}
-                trend={analytics.series.trend}
               />
 
-              <section className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-                <Card className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/8 text-primary">
-                      <TimerReset className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="font-mono text-xs uppercase tracking-[0.22em] text-primary/55">
-                        Raw Timeline
-                      </div>
-                      <h2 className="text-xl font-semibold text-primary">成绩时间线</h2>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {analytics.series.raw.map((point) => (
-                      <div
-                        className="flex items-center justify-between rounded-2xl border border-primary/10 bg-white px-4 py-3"
-                        key={`${point.performedOn}-${point.timeMs}`}
-                      >
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+                <Card className="space-y-3">
+                  <h2 className="text-lg font-semibold text-primary">成绩时间线</h2>
+                  {analytics.series.raw.map((point) => (
+                    <div
+                      className="flex items-center justify-between rounded-xl border border-primary/8 bg-white px-4 py-2.5"
+                      key={`${point.performedOn}-${point.timeMs}`}
+                    >
+                      <div className="flex items-center gap-2">
                         <span className="text-sm text-muted">{point.performedOn}</span>
-                        <span className="font-semibold text-primary">
-                          {formatTimeMS(point.timeMs)}
-                        </span>
+                        <SourceTypeBadge sourceType={point.sourceType} />
                       </div>
-                    ))}
-                  </div>
+                      <span className="font-semibold text-primary">
+                        {formatTimeMS(point.timeMs)}
+                      </span>
+                    </div>
+                  ))}
                 </Card>
 
-                <Card className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent/12 text-accent">
-                      <Target className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="font-mono text-xs uppercase tracking-[0.22em] text-primary/55">
-                        Goals
-                      </div>
-                      <h2 className="text-xl font-semibold text-primary">目标与里程碑</h2>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {analytics.goals.length === 0 ? (
-                      <div className="rounded-2xl border border-dashed border-primary/12 px-4 py-4 text-sm text-muted">
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-primary">目标与里程碑</h2>
+                  {analytics.goals.length === 0 ? (
+                    <Card>
+                      <div className="py-4 text-center text-sm text-muted">
                         暂无公开目标，管理员创建后会在这里显示。
                       </div>
-                    ) : (
-                      analytics.goals.map((goal) => (
-                        <div
-                          className="rounded-2xl border border-primary/10 bg-white px-4 py-4"
-                          key={goal.id}
-                        >
-                          <div className="font-semibold text-primary">{goal.title}</div>
-                          <div className="mt-2 text-sm text-muted">
-                            截止 {goal.targetDate} · 目标 {formatTimeMS(goal.targetTimeMs)}
-                          </div>
-                          <div className="mt-3 h-2 rounded-full bg-primary/8">
-                            <div
-                              className="h-2 rounded-full bg-accent"
-                              style={{ width: `${Math.max(6, goal.progress * 100)}%` }}
-                            />
-                          </div>
-                          <div className="mt-2 text-sm font-semibold text-primary">
-                            {formatProgress(goal.progress)}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </Card>
-              </section>
+                    </Card>
+                  ) : (
+                    analytics.goals.map((goal) => (
+                      <GoalGauge goal={goal} key={goal.id} />
+                    ))
+                  )}
+                </div>
+              </div>
             </>
           ) : (
             <LoadingState label="项目分析" />
