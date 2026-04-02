@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: swimming-best-backend
+Version: 0.1.0
+Summary: Python backend for Swimming Best
+Requires-Python: <4.0,>=3.12
+Requires-Dist: flask<4.0,>=3.1
