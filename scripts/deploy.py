@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
 FRONTEND_DIR = REPO_ROOT / "frontend"
 BACKEND_DIR = REPO_ROOT / "backend"
 DEFAULT_TARGET_ROOT = Path("/data/product/swimming-best")
@@ -113,6 +114,25 @@ def deploy_backend_code(source_backend: Path, target_backend: Path) -> BackendDe
     )
 
 
+def deploy_run_scripts(
+    source_scripts: Path,
+    target_frontend: Path,
+    target_backend: Path,
+) -> None:
+    frontend_script = source_scripts / "run_frontend.sh"
+    backend_script = source_scripts / "run_backend.sh"
+
+    if frontend_script.exists():
+        dest = target_frontend / "run_frontend.sh"
+        shutil.copy2(frontend_script, dest)
+        dest.chmod(dest.stat().st_mode | 0o755)
+
+    if backend_script.exists():
+        dest = target_backend / "run_backend.sh"
+        shutil.copy2(backend_script, dest)
+        dest.chmod(dest.stat().st_mode | 0o755)
+
+
 def run_command(command: list[str], cwd: Path, env: dict[str, str] | None = None) -> None:
     subprocess.run(command, cwd=cwd, env=env, check=True)
 
@@ -165,9 +185,15 @@ def main() -> int:
 
     deploy_frontend_bundle(FRONTEND_DIR, frontend_target)
     backend_result = deploy_backend_code(BACKEND_DIR, backend_target)
+    deploy_run_scripts(SCRIPTS_DIR, frontend_target, backend_target)
 
     print(f"[deploy] frontend deployed to {frontend_target}")
     print(f"[deploy] backend deployed to {backend_target}")
+    print(
+        f"[deploy] run scripts deployed: "
+        f"{frontend_target / 'run_frontend.sh'}, "
+        f"{backend_target / 'run_backend.sh'}"
+    )
     if backend_result.config_initialized:
         print(
             f"[deploy] initialized {backend_target / 'config.toml'} from config.example.toml"

@@ -27,6 +27,8 @@ print_usage() {
   status          查看当前运行状态
   logs            查看日志，默认尾部 50 行
 
+  启动前会自动检查并初始化 uv/poetry 环境与依赖。
+
 环境变量：
   SWIMMING_BEST_CONFIG  指定配置文件，默认 ./config.toml
   BACKEND_RUNTIME_DIR   指定 runtime 目录，默认 ./runtime
@@ -103,6 +105,45 @@ EOF
   return 1
 }
 
+ensure_deps() {
+  cd "$APP_ROOT"
+
+  if command -v uv >/dev/null 2>&1; then
+    if [[ ! -d ".venv" ]]; then
+      echo "[backend] 未检测到 .venv，正在初始化 uv 环境..."
+      uv venv
+    fi
+
+    if [[ -f "uv.lock" ]]; then
+      echo "[backend] 正在同步依赖 (uv sync --no-dev)..."
+      uv sync --no-dev
+    else
+      echo "[backend] 未找到 uv.lock，正在安装依赖 (uv pip install)..."
+      uv pip install -e .
+    fi
+    echo "[backend] 依赖就绪"
+    return 0
+  fi
+
+  if command -v poetry >/dev/null 2>&1; then
+    if ! poetry env info --path >/dev/null 2>&1; then
+      echo "[backend] 未检测到 poetry 环境，正在安装依赖..."
+      poetry install --only main
+      echo "[backend] 依赖就绪"
+    fi
+    return 0
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    if ! python3 -c "import flask" 2>/dev/null; then
+      echo "[backend] 警告：flask 未安装，请手动执行 pip install -e ." >&2
+    fi
+    return 0
+  fi
+
+  return 0
+}
+
 require_config() {
   if [[ ! -f "$CONFIG_FILE" ]]; then
     cat >&2 <<EOF
@@ -124,6 +165,7 @@ start_foreground() {
 
   ensure_runtime_layout
   require_config
+  ensure_deps
   runner="$(resolve_runner)"
 
   echo "[backend] 前台启动：$runner"
@@ -141,6 +183,7 @@ start_background() {
 
   ensure_runtime_layout
   require_config
+  ensure_deps
   runner="$(resolve_runner)"
 
   echo "[backend] 后台启动中，日志输出到 $LOG_FILE"

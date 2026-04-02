@@ -17,16 +17,20 @@ print_usage() {
   cat <<'EOF'
 用法：
   ./run_frontend.sh start [--nohup]
+  ./run_frontend.sh start-bg
   ./run_frontend.sh stop
   ./run_frontend.sh restart [--nohup]
   ./run_frontend.sh status
+  ./run_frontend.sh logs [行数]
 
 说明：
   start           前台启动 Next standalone，日志直接输出到当前终端
   start --nohup   后台启动，日志写入 runtime/frontend.log
+  start-bg        等价于 start --nohup
   stop            停止后台进程
   restart         先 stop 再 start
   status          查看当前运行状态
+  logs            查看日志，默认尾部 50 行
 
 环境变量：
   HOSTNAME              监听地址，默认 0.0.0.0
@@ -223,6 +227,18 @@ show_status() {
   return 1
 }
 
+show_logs() {
+  local lines="${1:-50}"
+
+  ensure_runtime_layout
+  if [[ ! -f "$LOG_FILE" ]]; then
+    echo "[frontend] 日志文件不存在：$LOG_FILE"
+    return 1
+  fi
+
+  tail -n "$lines" "$LOG_FILE"
+}
+
 main() {
   local command="${1:-help}"
   shift || true
@@ -235,6 +251,9 @@ main() {
       else
         start_foreground "$@"
       fi
+      ;;
+    start-bg|nohup)
+      start_background "$@"
       ;;
     stop)
       stop_frontend "$@"
@@ -250,6 +269,9 @@ main() {
       ;;
     status)
       show_status
+      ;;
+    logs)
+      show_logs "${1:-50}"
       ;;
     help|-h|--help)
       print_usage

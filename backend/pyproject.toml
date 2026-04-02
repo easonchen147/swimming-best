@@ -16,9 +16,13 @@ ruff = "^0.11.13"
 uv = ">=0.7,<1.0"
 
 [[tool.poetry.source]]
-name = "mirrors"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+name = "tencent"
+url = "https://mirrors.cloud.tencent.com/pypi/simple/"
 priority = "primary"
+
+[[tool.uv.index]]
+name = "tencent"
+url = "https://mirrors.cloud.tencent.com/pypi/simple/"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
