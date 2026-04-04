@@ -16,16 +16,16 @@ SOURCE_TYPES = {"training", "test", "competition", "single"}
 def parse_csv(file_storage: Any) -> list[dict[str, str]]:
     raw_bytes = file_storage.read()
     try:
-      text = raw_bytes.decode("utf-8-sig")
+        text = raw_bytes.decode("utf-8-sig")
     except UnicodeDecodeError:
-      text = raw_bytes.decode("gbk")
+        text = raw_bytes.decode("gbk")
 
     reader = csv.DictReader(StringIO(text))
     rows: list[dict[str, str]] = []
     for row in reader:
-      normalized = {key: (value or "").strip() for key, value in row.items()}
-      if any(normalized.values()):
-        rows.append(normalized)
+        normalized = {key: (value or "").strip() for key, value in row.items()}
+        if any(normalized.values()):
+          rows.append(normalized)
     return rows
 
 
@@ -33,8 +33,8 @@ def generate_template() -> str:
     return "\n".join(
         [
             "swimmer_slug,event_display,performed_on,time_seconds,source_type,tags",
-            "alice,50m 自由泳 短池,2026-04-01,25.90,competition,达标赛;春季",
-            "bob,100m 蛙泳 长池,2026-04-01,78.45,training,",
+            "alice,50米 自由泳（短池）,2026-04-01,25.90,competition,达标赛;春季",
+            "bob,100米 蛙泳（长池）,2026-04-01,78.45,training,",
         ]
     )
 

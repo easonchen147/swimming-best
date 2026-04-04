@@ -93,8 +93,6 @@ export function createAdminEvent(input: {
   poolLengthM: number;
   distanceM: number;
   stroke: string;
-  effortType: string;
-  displayName?: string;
   sortOrder?: number;
   isActive?: boolean;
 }) {
@@ -224,18 +222,27 @@ export function deleteAdminStandardEntry(entryId: string) {
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
+  const rawText = response.status === 204 ? "" : await response.text();
+  const hasBody = rawText.trim().length > 0;
+
   if (!response.ok) {
     let errorMessage = `Request failed with status ${response.status}`;
-    try {
-      const data = (await response.json()) as { error?: string };
-      if (data?.error) {
-        errorMessage = data.error;
+    if (hasBody) {
+      try {
+        const data = JSON.parse(rawText) as { error?: string; message?: string };
+        errorMessage = data.error || data.message || errorMessage;
+      } catch {
+        errorMessage = rawText;
       }
-    } catch {}
+    }
     throw new Error(errorMessage);
   }
 
-  return (await response.json()) as T;
+  if (!hasBody) {
+    return undefined as T;
+  }
+
+  return JSON.parse(rawText) as T;
 }
 
 export type ImportPreviewResponse = {

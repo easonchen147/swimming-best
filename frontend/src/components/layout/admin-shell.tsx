@@ -27,11 +27,12 @@ const navItems = [
   { href: "/admin/teams", label: "队伍" },
   { href: "/admin/swimmers", label: "孩子", icon: Users },
   { href: "/admin/events", label: "项目" },
-  { href: "/admin/standards", label: "标准" },
   { href: "/admin/records", label: "成绩" },
   { href: "/admin/goals", label: "目标" },
   { href: "/admin/import", label: "导入" },
 ];
+
+const QUICK_RECORD_EVENT = "swimming-best:quick-record";
 
 export function AdminShell({
   children,
@@ -45,23 +46,37 @@ export function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [authChecked, setAuthChecked] = useState(process.env.NODE_ENV === "test");
+  const [authChecked, setAuthChecked] = useState(
+    process.env.NODE_ENV === "test"
+      || process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "1",
+  );
   const [quickRecordOpen, setQuickRecordOpen] = useState(false);
+
+  const openQuickRecord = useCallback(() => {
+    setQuickRecordOpen(true);
+  }, []);
 
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
-      setQuickRecordOpen(true);
+      openQuickRecord();
     }
-  }, []);
+  }, [openQuickRecord]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+    window.addEventListener(QUICK_RECORD_EVENT, openQuickRecord as EventListener);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(QUICK_RECORD_EVENT, openQuickRecord as EventListener);
+    };
+  }, [handleKeyDown, openQuickRecord]);
 
   useEffect(() => {
     if (process.env.NODE_ENV === "test") {
+      return;
+    }
+    if (process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "1") {
       return;
     }
 
@@ -114,22 +129,10 @@ export function AdminShell({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                className="hidden gap-2 rounded-full border-amber-500/20 bg-amber-500/5 text-amber-600 hover:bg-amber-500/10 md:flex"
-                onClick={() => setQuickRecordOpen(true)}
-                size="sm"
-                variant="secondary"
-              >
-                <Zap className="h-4 w-4" />
-                <span>快速录入</span>
-                <kbd className="ml-2 inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                  Ctrl
-                </kbd>
-                <kbd className="inline-flex h-5 select-none items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
-                  K
-                </kbd>
-              </Button>
-
+              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-surface px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted/70 md:flex">
+                <Zap className="h-3.5 w-3.5 text-amber-500" />
+                <span>Ctrl / Cmd + K</span>
+              </div>
               <Link href="/">
                 <Button className="rounded-full" size="sm" variant="ghost">
                   查看公开页
@@ -174,7 +177,7 @@ export function AdminShell({
           <Button
             aria-label="快速录入"
             className="h-14 w-14 rounded-full shadow-2xl shadow-primary/40"
-            onClick={() => setQuickRecordOpen(true)}
+            onClick={openQuickRecord}
             size="icon"
           >
             <Zap className="h-6 w-6" />
@@ -271,4 +274,8 @@ function Sidebar({
       ) : null}
     </div>
   );
+}
+
+export function triggerQuickRecord() {
+  window.dispatchEvent(new Event(QUICK_RECORD_EVENT));
 }

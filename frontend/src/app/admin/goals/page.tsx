@@ -2,21 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "motion/react";
-import { 
-  Target, 
-  Plus, 
-  Flag, 
-  Calendar, 
-  TrendingUp, 
+import { motion } from "motion/react";
+import {
+  Calendar,
+  Flag,
+  Plus,
+  Target,
+  TrendingUp,
   UserCircle2,
-  ArrowRight
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
 import { Field, SelectField } from "@/components/shared/form-field";
+import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,10 +32,10 @@ import {
   listAdminGoals,
   listAdminSwimmers,
 } from "@/lib/api/admin";
+import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import { formatTimeMS } from "@/lib/format";
 import { describeSwimmer } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
-import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { AdminGoal, AdminSwimmer, EventDefinition } from "@/lib/types";
 
 export default function AdminGoalsPage() {
@@ -37,7 +44,6 @@ export default function AdminGoalsPage() {
   const [goals, setGoals] = useState<AdminGoal[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
 
   const [form, setForm] = useState({
     swimmerId: "",
@@ -45,7 +51,9 @@ export default function AdminGoalsPage() {
     horizon: "short",
     title: "",
     targetTimeMs: 14500,
-    targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0],
     isPublic: true,
     publicNote: "",
     adminNote: "",
@@ -70,7 +78,6 @@ export default function AdminGoalsPage() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
-    setSuccess(false);
     try {
       await createGoal({
         ...form,
@@ -78,9 +85,7 @@ export default function AdminGoalsPage() {
       });
       const goalsResponse = await listAdminGoals();
       setGoals(goalsResponse.goals);
-      setSuccess(true);
-      toast.success("目标已成功创建");
-      setTimeout(() => setSuccess(false), 1500);
+      toast.success("目标已创建");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "创建目标失败");
     } finally {
@@ -89,14 +94,13 @@ export default function AdminGoalsPage() {
   }
 
   return (
-    <AdminShell 
-      description="为学员设定具体项目的阶段性目标。系统将根据基线成绩与目标差距自动计算进度。" 
+    <AdminShell
+      description="目标只和孩子、项目、截止日期以及目标成绩有关。所有目标成绩统一按秒输入和展示。"
       title="目标管理"
     >
-      <div className="grid gap-8 xl:grid-cols-[400px_minmax(0,1fr)] items-start">
-        {/* Form Card */}
+      <div className="grid items-start gap-8 xl:grid-cols-[400px_minmax(0,1fr)]">
         <motion.div variants={FADE_IN_UP}>
-          <Card className="sticky top-28 shadow-xl shadow-primary/5 border-border/40">
+          <Card className="sticky top-28 border-border/40 shadow-xl shadow-primary/5">
             <CardHeader className="pb-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -104,230 +108,216 @@ export default function AdminGoalsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-xl">创建新目标</CardTitle>
-                  <CardDescription>设定一个新的成绩突破里程碑</CardDescription>
+                  <CardDescription>为孩子设置明确的项目成绩里程碑。</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            
+
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-5">
                 <SelectField
-                  label="关联学员"
+                  label="孩子"
                   onChange={(value) => setForm((current) => ({ ...current, swimmerId: value }))}
-                  options={swimmers.map((swimmer) => ({ label: describeSwimmer(swimmer), value: swimmer.id }))}
+                  options={swimmers.map((swimmer) => ({
+                    label: describeSwimmer(swimmer),
+                    value: swimmer.id,
+                  }))}
                   value={form.swimmerId}
                 />
-                
+
                 <SelectField
-                  label="挑战项目"
+                  label="目标项目"
                   onChange={(value) => setForm((current) => ({ ...current, eventId: value }))}
                   options={events.map((item) => ({ label: item.displayName, value: item.id }))}
                   value={form.eventId}
                 />
 
                 <SelectField
-                  label="目标层级 (Horizon)"
+                  label="目标阶段"
                   onChange={(value) => setForm((current) => ({ ...current, horizon: value }))}
                   options={[
-                    { label: "短期目标 (Short Term)", value: "short" },
-                    { label: "中期目标 (Mid Term)", value: "mid" },
-                    { label: "长期目标 (Long Term)", value: "long" },
+                    { label: "短期", value: "short" },
+                    { label: "中期", value: "mid" },
+                    { label: "长期", value: "long" },
                   ]}
                   value={form.horizon}
                 />
 
                 <Field label="目标名称">
                   <Input
-                    placeholder="例如: 赛季末游进 30s"
                     onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+                    placeholder="例如：暑假前游进 35.50"
                     value={form.title}
-                    required
                   />
                 </Field>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                   <Field label="目标成绩 (毫秒)">
-                     <Input
-                       type="number"
-                       placeholder="15000"
-                       onChange={(event) => setForm((current) => ({ ...current, targetTimeMs: Number(event.target.value) }))}
-                       value={form.targetTimeMs}
-                       required
-                     />
-                   </Field>
-                   <Field label="截止日期">
-                     <Input
-                       type="date"
-                       className="h-11"
-                       onChange={(event) => setForm((current) => ({ ...current, targetDate: event.target.value }))}
-                       value={form.targetDate}
-                       required
-                     />
-                   </Field>
-                </div>
+                <Field label="目标成绩（秒）">
+                  <TimeInput
+                    onChange={(value) => setForm((current) => ({ ...current, targetTimeMs: value }))}
+                    value={form.targetTimeMs}
+                  />
+                </Field>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <Field label="截止日期">
+                  <Input
+                    className="h-11"
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, targetDate: event.target.value }))
+                    }
+                    type="date"
+                    value={form.targetDate}
+                  />
+                </Field>
+
+                <div className="grid gap-5 md:grid-cols-2">
                   <Field label="公开备注">
                     <Input
-                      placeholder="例如: 暑假集训里程碑"
                       onChange={(event) =>
                         setForm((current) => ({ ...current, publicNote: event.target.value }))
                       }
+                      placeholder="例如：暑假阶段重点目标"
                       value={form.publicNote}
                     />
                   </Field>
                   <Field label="内部备注">
                     <Input
-                      placeholder="例如: 重点观察转身速度"
                       onChange={(event) =>
                         setForm((current) => ({ ...current, adminNote: event.target.value }))
                       }
+                      placeholder="例如：重点看转身和节奏"
                       value={form.adminNote}
                     />
                   </Field>
                 </div>
 
-                <div className="flex items-center space-x-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
+                <label className="flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4">
                   <input
-                    id="goal-is-public"
                     checked={form.isPublic}
+                    className="h-5 w-5 cursor-pointer"
                     onChange={(event) =>
                       setForm((current) => ({ ...current, isPublic: event.target.checked }))
                     }
                     type="checkbox"
-                    className="h-5 w-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
                   />
-                  <label htmlFor="goal-is-public" className="flex flex-col cursor-pointer">
-                    <span className="text-sm font-bold text-foreground">公开展示该目标</span>
-                    <span className="text-xs text-muted/80">关闭后目标不会出现在公开分析页。</span>
-                  </label>
-                </div>
+                  <span className="text-sm font-medium text-foreground">
+                    公开显示该目标
+                  </span>
+                </label>
               </CardContent>
-              
+
               <CardFooter className="pt-2">
-                <Button 
-                  className="w-full gap-2 h-12 rounded-2xl" 
-                  type="submit"
-                  loading={submitting}
-                  success={success}
-                >
+                <Button className="h-12 w-full gap-2 rounded-2xl" loading={submitting} type="submit">
                   <Target className="h-4 w-4" />
-                  保存并激活目标
+                  保存目标
                 </Button>
               </CardFooter>
             </form>
           </Card>
         </motion.div>
 
-        {/* List Card */}
         <motion.div variants={FADE_IN_UP}>
-          <Card className="shadow-xl shadow-primary/5 min-h-[600px] border-border/40">
-            <CardHeader className="pb-6 border-b border-border/40">
+          <Card className="min-h-[600px] border-border/40 shadow-xl shadow-primary/5">
+            <CardHeader className="border-b border-border/40 pb-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
                   <Flag className="h-5 w-5" />
                 </div>
                 <div>
-                  <CardTitle>已激活目标</CardTitle>
-                  <CardDescription>当前正在追踪的 {goals.length} 个里程碑</CardDescription>
+                  <CardTitle>已创建目标</CardTitle>
+                  <CardDescription>当前共追踪 {goals.length} 个目标。</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            
+
             <CardContent className="p-6">
-               <motion.div 
-                 variants={STAGGER_CONTAINER}
-                 initial="initial"
-                 animate="animate"
-                 className="grid gap-6 md:grid-cols-1 lg:grid-cols-2"
-               >
-                 <AnimatePresence mode="popLayout">
-                   {goals.map((goal) => (
-                     <motion.div
-                       layout
-                       key={goal.id}
-                       variants={FADE_IN_UP}
-                       exit={{ opacity: 0, scale: 0.95 }}
-                       className="group"
-                     >
-                       <Card className="h-full border-border/40 transition-all hover:border-primary/20 hover:bg-primary/5 overflow-hidden">
-                         <CardContent className="p-0 flex flex-col h-full">
-                           <div className="p-6 flex flex-col gap-4 flex-1">
-                              <div className="flex items-start justify-between">
-                                 <div className="flex items-center gap-2">
-                                    <Badge className={cn(
-                                       "rounded-full px-2 py-0 h-5 text-[9px] font-bold uppercase tracking-wider border-transparent",
-                                       goal.horizon === 'short' ? 'bg-blue-500/10 text-blue-600' :
-                                       goal.horizon === 'mid' ? 'bg-amber-500/10 text-amber-600' :
-                                       'bg-purple-500/10 text-purple-600'
-                                    )}>
-                                       {goal.horizon} Term
-                                    </Badge>
-                                 </div>
-                                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted/60 uppercase tracking-widest">
-                                    <Calendar className="h-3 w-3" />
-                                    <span>{goal.targetDate}</span>
-                                 </div>
-                              </div>
-                              
-                              <div>
-                                 <h3 className="text-xl font-black tracking-tight text-foreground leading-tight group-hover:text-primary transition-colors">
-                                    {goal.title}
-                                 </h3>
-                                 <div className="mt-4 flex flex-wrap gap-4">
-                                    <div className="flex flex-col gap-0.5">
-                                       <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">Baseline</span>
-                                       <span className="text-sm font-black text-muted/80">{formatTimeMS(goal.baselineTimeMs)}</span>
-                                    </div>
-                                    <div className="flex items-center text-muted/20">
-                                       <ArrowRight className="h-4 w-4" />
-                                    </div>
-                                    <div className="flex flex-col gap-0.5">
-                                       <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">Target</span>
-                                       <span className="text-sm font-black text-primary">{formatTimeMS(goal.targetTimeMs)}</span>
-                                    </div>
-                                 </div>
-                              </div>
-                           </div>
+              {loading ? (
+                <div className="text-sm text-muted">加载中...</div>
+              ) : (
+                <motion.div
+                  animate="animate"
+                  className="grid gap-6 lg:grid-cols-2"
+                  initial="initial"
+                  variants={STAGGER_CONTAINER}
+                >
+                  {goals.map((goal) => (
+                    <motion.div key={goal.id} variants={FADE_IN_UP}>
+                      <Card className="h-full overflow-hidden border-border/40 transition-all hover:border-primary/20 hover:bg-primary/5">
+                        <CardContent className="flex h-full flex-col gap-4 p-6">
+                          <div className="flex items-start justify-between gap-3">
+                            <Badge
+                              className={cn(
+                                "rounded-full border-transparent px-2 py-0 text-[9px] font-bold uppercase tracking-wider",
+                                goal.horizon === "short"
+                                  ? "bg-blue-500/10 text-blue-600"
+                                  : goal.horizon === "mid"
+                                    ? "bg-amber-500/10 text-amber-600"
+                                    : "bg-purple-500/10 text-purple-600",
+                              )}
+                            >
+                              {goal.horizon}
+                            </Badge>
+                            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted/60">
+                              <Calendar className="h-3 w-3" />
+                              <span>{goal.targetDate}</span>
+                            </div>
+                          </div>
 
-                           {goal.swimmer && (
-                             <div className="px-6 py-4 bg-surface/50 border-t border-border/40 flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/5 text-primary">
-                                      <UserCircle2 className="h-4 w-4" />
-                                   </div>
-                                   <div>
-                                      <div className="text-[10px] font-bold text-muted/40 uppercase tracking-widest leading-none">Swimmer</div>
-                                      <div className="text-xs font-bold text-foreground">{describeSwimmer(goal.swimmer)}</div>
-                                   </div>
-                                </div>
-                                <div className="flex items-center gap-2 text-right">
-                                   <div>
-                                      <div className="text-[10px] font-bold text-muted/40 uppercase tracking-widest leading-none">Event</div>
-                                      <div className="text-xs font-bold text-foreground">{goal.event?.displayName}</div>
-                                   </div>
-                                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/5 text-primary">
-                                      <TrendingUp className="h-4 w-4" />
-                                   </div>
-                                </div>
-                             </div>
-                           )}
-                         </CardContent>
-                       </Card>
-                     </motion.div>
-                   ))}
-                 </AnimatePresence>
-               </motion.div>
+                          <div className="space-y-3">
+                            <h3 className="text-xl font-black tracking-tight text-foreground">
+                              {goal.title}
+                            </h3>
+                            <div className="flex items-center gap-4">
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
+                                  Baseline
+                                </span>
+                                <span className="text-sm font-black text-muted/80">
+                                  {formatTimeMS(goal.baselineTimeMs)}
+                                </span>
+                              </div>
+                              <TrendingUp className="h-4 w-4 text-muted/30" />
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
+                                  Target
+                                </span>
+                                <span className="text-sm font-black text-primary">
+                                  {formatTimeMS(goal.targetTimeMs)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-               {goals.length === 0 && !loading && (
-                 <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-[40px] bg-muted/5 text-muted/20 mb-6">
-                       <Flag className="h-10 w-10" />
-                    </div>
-                    <h3 className="text-xl font-bold text-foreground">当前没有任何激活的目标</h3>
-                    <p className="text-muted font-medium mt-2">快去左侧表单为孩子们设定第一个里程碑吧！</p>
-                 </div>
-               )}
+                          {goal.swimmer ? (
+                            <div className="mt-auto flex items-center justify-between border-t border-border/40 bg-surface/50 px-0 pt-4">
+                              <div className="flex items-center gap-2">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/5 text-primary">
+                                  <UserCircle2 className="h-4 w-4" />
+                                </div>
+                                <div>
+                                  <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
+                                    孩子
+                                  </div>
+                                  <div className="text-xs font-bold text-foreground">
+                                    {describeSwimmer(goal.swimmer)}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
+                                  项目
+                                </div>
+                                <div className="text-xs font-bold text-foreground">
+                                  {goal.event?.displayName}
+                                </div>
+                              </div>
+                            </div>
+                          ) : null}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
             </CardContent>
           </Card>
         </motion.div>

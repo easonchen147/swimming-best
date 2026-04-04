@@ -25,8 +25,6 @@ def test_admin_import_export_endpoints_cover_template_preview_confirm_and_export
             "poolLengthM": 25,
             "distanceM": 50,
             "stroke": "freestyle",
-            "effortType": "race",
-            "displayName": "50m 自由泳 短池",
         },
     ).get_json()
 
@@ -43,9 +41,9 @@ def test_admin_import_export_endpoints_cover_template_preview_confirm_and_export
                 BytesIO(
                     (
                         "swimmer_slug,event_display,performed_on,time_seconds,source_type,tags\n"
-                        f"{swimmer['slug']},50m 自由泳 短池,2026-04-01,"
+                        f"{swimmer['slug']},{event['displayName']},2026-04-01,"
                         "25.90,competition,达标赛;春季\n"
-                        "missing-swimmer,50m 自由泳 短池,2026-04-01,26.20,test,\n"
+                        f"missing-swimmer,{event['displayName']},2026-04-01,26.20,test,\n"
                     ).encode("utf-8")
                 ),
                 "performances.csv",
@@ -111,8 +109,6 @@ def test_team_export_marks_pb_using_valid_results_only(admin_client):
             "poolLengthM": 25,
             "distanceM": 50,
             "stroke": "freestyle",
-            "effortType": "race",
-            "displayName": "50m 自由泳 短池",
         },
     ).get_json()
 

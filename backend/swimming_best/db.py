@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from flask import Flask, current_app, g
 
+from swimming_best.event_catalog import list_builtin_events
+
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS teams (
   id TEXT PRIMARY KEY,
@@ -175,6 +177,7 @@ def init_db(connection: sqlite3.Connection) -> None:
     connection.executescript(SCHEMA_SQL)
     migrate_legacy_team_model(connection)
     migrate_swimmer_gender(connection)
+    seed_builtin_events(connection)
     connection.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_swimmers_team_id
@@ -375,4 +378,52 @@ def migrate_swimmer_gender(connection: sqlite3.Connection) -> None:
         WHERE gender IS NULL OR TRIM(gender) = ''
         """
     )
+    connection.commit()
+
+
+def seed_builtin_events(connection: sqlite3.Connection) -> None:
+    existing_rows = connection.execute(
+        """
+        SELECT id, pool_length_m, distance_m, stroke
+        FROM events
+        """
+    ).fetchall()
+    existing_by_key = {
+        (row["pool_length_m"], row["distance_m"], row["stroke"]): row["id"]
+        for row in existing_rows
+    }
+
+    for event in list_builtin_events():
+        key = (event["poolLengthM"], event["distanceM"], event["stroke"])
+        if key in existing_by_key:
+            connection.execute(
+                """
+                UPDATE events
+                SET display_name = ?, is_active = 1
+                WHERE id = ?
+                """,
+                (
+                    event["displayName"],
+                    existing_by_key[key],
+                ),
+            )
+            continue
+
+        connection.execute(
+            """
+            INSERT OR IGNORE INTO events (
+              id, pool_length_m, distance_m, stroke, effort_type, display_name,
+              sort_order, is_active, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            """,
+            (
+                event["id"],
+                event["poolLengthM"],
+                event["distanceM"],
+                event["stroke"],
+                event["effortType"],
+                event["displayName"],
+                event["sortOrder"],
+            ),
+        )
     connection.commit()

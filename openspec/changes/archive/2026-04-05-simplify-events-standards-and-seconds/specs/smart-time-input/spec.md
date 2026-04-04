@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Admin time input SHALL support seconds-first values with shorthand parsing
 The admin performance and goal forms SHALL accept time values in seconds with
@@ -9,8 +9,7 @@ requiring a separate milliseconds mode.
 #### Scenario: User enters time in seconds mode
 - **WHEN** the admin enters `35.11`
 - **THEN** the system preserves the value as `35.11` seconds in the user-facing
-  flow and submits the result through the existing compatibility-aware backend
-  path
+  flow and submits the result through the seconds-based contract
 
 #### Scenario: User enters shorthand time
 - **WHEN** the admin enters `10523`

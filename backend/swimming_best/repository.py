@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
+from swimming_best.event_catalog import build_event_display_name
+
 
 class RepositoryError(Exception):
     pass
@@ -265,9 +267,19 @@ class Repository:
         pool_length = int(payload.get("poolLengthM") or 0)
         distance = int(payload.get("distanceM") or 0)
         stroke = (payload.get("stroke") or "").strip()
-        effort_type = (payload.get("effortType") or "").strip()
-        if pool_length <= 0 or distance <= 0 or not stroke or not effort_type:
+        effort_type = "standard"
+        if pool_length not in {25, 50} or distance <= 0 or not stroke:
             raise ValidationError("invalid event")
+        duplicate = self.connection.execute(
+            """
+            SELECT id
+            FROM events
+            WHERE pool_length_m = ? AND distance_m = ? AND stroke = ?
+            """,
+            (pool_length, distance, stroke),
+        ).fetchone()
+        if duplicate is not None:
+            return self.get_event(duplicate["id"])
 
         event = {
             "id": str(uuid4()),
@@ -275,8 +287,7 @@ class Repository:
             "distanceM": distance,
             "stroke": stroke,
             "effortType": effort_type,
-            "displayName": (payload.get("displayName") or "").strip()
-            or f"{distance}m {stroke} {effort_type}",
+            "displayName": build_event_display_name(pool_length, distance, stroke),
             "sortOrder": int(payload.get("sortOrder") or 0),
             "isActive": bool(payload.get("isActive", True)),
             "createdAt": now,
@@ -1010,7 +1021,11 @@ class Repository:
             "distanceM": row["distance_m"],
             "stroke": row["stroke"],
             "effortType": row["effort_type"],
-            "displayName": row["display_name"],
+            "displayName": build_event_display_name(
+                row["pool_length_m"],
+                row["distance_m"],
+                row["stroke"],
+            ),
             "sortOrder": row["sort_order"],
             "isActive": bool(row["is_active"]),
             "createdAt": row["created_at"],

@@ -32,7 +32,7 @@ export type EventDefinition = {
   poolLengthM: number;
   distanceM: number;
   stroke: string;
-  effortType: string;
+  effortType?: string;
   displayName: string;
   sortOrder: number;
   isActive: boolean;

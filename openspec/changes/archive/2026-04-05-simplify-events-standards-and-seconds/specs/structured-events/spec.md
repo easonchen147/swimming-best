@@ -1,10 +1,4 @@
-# structured-events Specification
-
-## Purpose
-Define the stable event catalog used across admin entry, goals, analytics, and
-public display.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Events SHALL be defined with structured performance dimensions
 The system SHALL define swim events using pool length, event distance, and
@@ -20,6 +14,11 @@ male and female swimmers rather than duplicated by gender.
 - **THEN** the system ensures the built-in national-standard event combinations
   exist as selectable events with stable display-ready metadata
 
+#### Scenario: Event is matched for different swimmers
+- **WHEN** two swimmers of different genders select `50米 自由泳（长池）`
+- **THEN** the system uses the same event definition for both swimmers and only
+  varies the official benchmark lookup by swimmer gender
+
 #### Scenario: Administrator creates a valid custom event
 - **WHEN** an administrator submits a unique combination of pool length, event
   distance, and stroke using the supported pool-length options
@@ -31,11 +30,6 @@ male and female swimmers rather than duplicated by gender.
   and stroke match an existing built-in or custom event
 - **THEN** the system reuses the existing event definition instead of creating a
   duplicate
-
-#### Scenario: Event is matched for different swimmers
-- **WHEN** two swimmers of different genders select `50米 自由泳（长池）`
-- **THEN** the system uses the same event definition for both swimmers and only
-  varies the official benchmark lookup by swimmer gender
 
 ### Requirement: Events SHALL support admin display and public display
 The system SHALL provide Chinese display names for each structured event while

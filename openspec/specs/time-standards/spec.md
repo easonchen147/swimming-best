@@ -1,25 +1,28 @@
-# Custom Time Standards — 自定义时间标准体系
+# time-standards Specification
 
-## Summary
-支持管理员维护自定义 benchmark 标准组，并按项目与性别范围配置达标时间。
-这些标准用于训练线、报名线、分组线等业务场景，不替代官方男子/女子达级基线。
+## Purpose
+Describe the legacy custom benchmark subsystem and its reduced role after the
+product moves to the built-in national standard as the default benchmark
+source.
 
 ## Requirements
 
-### Requirement: The system SHALL manage custom benchmark groups
-The system SHALL allow administrators to create, update, list, and delete
-custom benchmark groups and benchmark entries by event and gender scope.
+### Requirement: Custom benchmark management SHALL not be part of the primary admin workflow
+The system SHALL not expose custom benchmark management as a default navigation
+entry or required operator workflow. Legacy custom benchmark data MAY remain in
+storage for compatibility, but the primary experience SHALL rely on the built-in
+official standard.
 
-#### Scenario: Administrator creates a benchmark entry
-- **WHEN** an administrator creates a benchmark group and adds an event entry
-- **THEN** the system stores the benchmark with its tier group, order, color,
-  event, gender scope, and qualifying time
+#### Scenario: Administrator opens the main admin navigation
+- **WHEN** an administrator browses the primary admin workflows
+- **THEN** custom standards management is not presented as a required or primary
+  navigation entry
 
-### Requirement: Analytics SHALL expose custom benchmark guidance
-The system SHALL expose custom benchmarks separately from the official baseline
-inside swimmer event analytics.
+### Requirement: Default analytics SHALL rely on the built-in official standard
+The system SHALL use the built-in official baseline as the default benchmark
+source in public and admin-facing progress views.
 
-#### Scenario: Event analytics includes benchmark lines
-- **WHEN** a swimmer event analytics payload is requested
-- **THEN** the system returns `customStandards`, `nextCustomStandard`, and
-  `benchmarkLines` for the matching swimmer gender scope
+#### Scenario: Event analytics are rendered
+- **WHEN** a swimmer event analytics payload or page is requested
+- **THEN** the default benchmark guidance comes from the built-in official
+  baseline rather than requiring manually maintained custom standards

@@ -1,4 +1,4 @@
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL expose a read-only official swimming grade baseline
 The system SHALL ship with a project-owned, versioned, read-only official
@@ -20,12 +20,7 @@ gender only affects which threshold row is selected.
   maps to a supported official baseline row
 - **THEN** the system returns the current achieved official grade, the next
   official grade if one exists, and ordered official benchmark thresholds that
-  include qualifying time, achieved state, and remaining gap milliseconds
-
-#### Scenario: Swimmer gender is missing
-- **WHEN** analytics are requested for a swimmer whose gender is unknown
-- **THEN** the system returns no official grade result, no official benchmark
-  thresholds, and marks the status as missing gender
+  include qualifying time, achieved state, and remaining gap guidance
 
 #### Scenario: Standard management is not required for the default workflow
 - **WHEN** an administrator manages swimmers, goals, records, or public views

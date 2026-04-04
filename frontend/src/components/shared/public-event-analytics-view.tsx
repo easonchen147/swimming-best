@@ -4,10 +4,9 @@ import { Calendar, Target } from "lucide-react";
 
 import { GoalGauge } from "@/components/charts/goal-gauge";
 import { ImprovementChart } from "@/components/charts/improvement-chart";
-import { CustomStandardsPanel } from "@/components/shared/custom-standards-panel";
+import { BenchmarkGapSummary } from "@/components/shared/benchmark-gap-summary";
 import { OfficialGradePanel } from "@/components/shared/official-grade-panel";
 import { SourceTypeBadge } from "@/components/shared/source-type-badge";
-import { BenchmarkGapSummary } from "@/components/shared/benchmark-gap-summary";
 import { Card } from "@/components/ui/card";
 import { formatTimeMS } from "@/lib/format";
 import type { PublicEventAnalytics } from "@/lib/types";
@@ -20,7 +19,6 @@ export function PublicEventAnalyticsView({
   return (
     <div className="flex flex-col gap-6">
       <ImprovementChart
-        benchmarkLines={analytics.benchmarkLines}
         goals={analytics.goals}
         officialBenchmarks={analytics.officialBenchmarks}
         pb={analytics.series.pb}
@@ -66,10 +64,6 @@ export function PublicEventAnalyticsView({
             officialGrade={analytics.officialGrade}
             status={analytics.officialGradeStatus}
           />
-          <CustomStandardsPanel
-            customStandards={analytics.customStandards}
-            nextCustomStandard={analytics.nextCustomStandard}
-          />
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
@@ -78,7 +72,7 @@ export function PublicEventAnalyticsView({
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-primary">目标里程碑</h2>
-                <p className="text-xs text-muted">管理员公开的短期、中期、长期目标都会显示在这里。</p>
+                <p className="text-xs text-muted">管理员公开的阶段目标会显示在这里。</p>
               </div>
             </div>
 

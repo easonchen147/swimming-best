@@ -12,7 +12,8 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run dev -- --hostname 127.0.0.1 --port 3000",
+    command:
+      "cmd /c \"set NEXT_PUBLIC_E2E_BYPASS_AUTH=1&& npm run dev -- --hostname 127.0.0.1 --port 3000\"",
     reuseExistingServer: true,
     timeout: 120_000,
     url: "http://127.0.0.1:3000",

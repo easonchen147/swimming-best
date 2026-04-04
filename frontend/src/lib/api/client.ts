@@ -1,20 +1,29 @@
 async function parseJSON<T>(response: Response): Promise<T> {
+  const rawText = response.status === 204 ? "" : await response.text();
+  const hasBody = rawText.trim().length > 0;
+
   if (!response.ok) {
     let errorMessage = `Request failed with status ${response.status}`;
-    try {
-      const data = (await response.json()) as { error?: string };
-      if (data?.error) {
-        errorMessage = data.error;
+    if (hasBody) {
+      try {
+        const data = JSON.parse(rawText) as { error?: string; message?: string };
+        errorMessage = data.error || data.message || errorMessage;
+      } catch {
+        errorMessage = rawText;
       }
-    } catch {}
+    }
     throw new Error(errorMessage);
   }
 
-  if (response.status === 204) {
+  if (!hasBody) {
     return undefined as T;
   }
 
-  return (await response.json()) as T;
+  try {
+    return JSON.parse(rawText) as T;
+  } catch {
+    throw new Error("invalid_json_response");
+  }
 }
 
 export async function apiGet<T>(path: string) {

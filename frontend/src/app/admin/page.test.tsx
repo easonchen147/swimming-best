@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 import AdminDashboardPage from "@/app/admin/page";
@@ -21,6 +21,7 @@ vi.mock("@/components/layout/admin-shell", () => ({
       {children}
     </div>
   ),
+  triggerQuickRecord: vi.fn(),
 }));
 
 vi.mock("@/lib/api/admin", () => ({
@@ -39,20 +40,16 @@ describe("AdminDashboardPage", () => {
     listAdminTeams.mockResolvedValue({ teams: [] });
   });
 
-  it("renders quick actions as working links", async () => {
+  it("renders quick actions with goal link and quick record trigger", async () => {
     render(<AdminDashboardPage />);
 
-    expect(await screen.findByRole("link", { name: /录入新成绩/i })).toHaveAttribute(
+    expect(await screen.findByRole("button", { name: /快速录入成绩/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /添加目标成绩/i })).toHaveAttribute(
       "href",
-      "/admin/records",
+      "/admin/goals",
     );
-    expect(screen.getByRole("link", { name: /批量导入表格/i })).toHaveAttribute(
-      "href",
-      "/admin/import",
-    );
-    expect(screen.getByRole("link", { name: /管理学员档案/i })).toHaveAttribute(
-      "href",
-      "/admin/swimmers",
-    );
+    expect(screen.getByRole("link", { name: /查看项目目录/i })).toHaveAttribute("href", "/admin/events");
+
+    fireEvent.click(screen.getByRole("button", { name: /快速录入成绩/i }));
   });
 });

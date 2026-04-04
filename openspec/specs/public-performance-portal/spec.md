@@ -33,12 +33,14 @@ The system SHALL provide public swimmer and event-detail analytics views that
 combine progression data, goal progress, and official grade guidance for the
 currently selected structured event without requiring login. Analytics charts
 SHALL be interactive and provide visual feedback for benchmark comparisons.
+Public event labels and benchmark copy SHALL use Chinese project names that
+distinguish short-course and long-course events.
 
 #### Scenario: Visitor opens a public swimmer analytics page
 - **WHEN** a visitor selects an event on a visible swimmer's public page
 - **THEN** the page renders the selected event's growth chart, benchmark gap
   summary with visual indicators, and supporting public goal or official grade
-  details
+  details using Chinese event names that clearly distinguish pool length
 
 #### Scenario: Visitor opens a public event detail page
 - **WHEN** a visitor opens the dedicated public event detail route for a visible
@@ -57,7 +59,9 @@ SHALL use interactive legends to toggle swimmer data visibility.
   and multiple visible swimmers
 - **THEN** the system renders comparison data for those swimmers and event
   through a dedicated compare UI that features interactive chart legends and
-  animated data transitions when swimmers are toggled
+  animated data transitions when swimmers are toggled, and event selections
+  clearly distinguish short-course and long-course versions of the same stroke
+  and distance
 
 #### Scenario: Visitor reaches compare from the public frontend
 - **WHEN** a visitor navigates to the public compare experience from the

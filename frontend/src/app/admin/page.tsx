@@ -5,16 +5,16 @@ import { motion } from "motion/react";
 import {
   Activity,
   ArrowRight,
-  History,
+  Flag,
   Layers,
   ShieldCheck,
   Target,
   TrendingUp,
-  Users,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { AdminShell } from "@/components/layout/admin-shell";
+import { AdminShell, triggerQuickRecord } from "@/components/layout/admin-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
 import { Button } from "@/components/ui/button";
@@ -54,26 +54,26 @@ export default function AdminDashboardPage() {
 
   const workflowItems = [
     {
-      title: "维护受管队伍",
-      desc: "先建立队伍实体，后续孩子、项目和导出视图都会用到这些归属信息。",
+      title: "维护队伍与孩子档案",
+      desc: "先把队伍和孩子基础信息建好，后面的成绩、目标和公开页都会依赖这些关系。",
       icon: ShieldCheck,
       step: "01",
     },
     {
-      title: "定义结构化项目",
-      desc: "把距离、泳姿和测试性质组合成标准项目，保证后续统计口径一致。",
+      title: "使用系统内置项目",
+      desc: "系统默认已经带入国家标准项目目录，直接选用；只有确实不够时再补自定义项目。",
       icon: Layers,
       step: "02",
     },
     {
-      title: "录入成绩数据",
-      desc: "通过快速录入或表格导入，把每次训练、测试、比赛结果沉淀下来。",
+      title: "录入成绩并追踪进步",
+      desc: "所有成绩统一按秒输入，训练、测试、比赛只作为成绩来源，不再参与项目定义。",
       icon: Activity,
       step: "03",
     },
     {
-      title: "设定成长目标",
-      desc: "为孩子建立短期和长期里程碑，公开页就能自动展示进度和差距。",
+      title: "建立阶段目标",
+      desc: "为孩子设置短期或长期目标，公开页会自动展示还差多少秒。",
       icon: Target,
       step: "04",
     },
@@ -81,7 +81,7 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminShell
-      description="这里是系统运行总览。你可以快速查看当前数据规模，并按推荐顺序进入常用管理流程。"
+      description="这里是系统总览。你可以快速检查项目、队伍和孩子规模，并直接从下方快捷操作进入常用流程。"
       title="管理后台首页"
     >
       <motion.div
@@ -105,13 +105,13 @@ export default function AdminDashboardPage() {
               <MetricCard caption="身份已校验" label="当前管理员" value={username} />
             </motion.div>
             <motion.div variants={FADE_IN_UP}>
-              <MetricCard caption="独立孩子档案" label="注册孩子档案" value={`${swimmerCount}`} />
+              <MetricCard caption="位在册孩子" label="孩子档案" value={`${swimmerCount}`} />
             </motion.div>
             <motion.div variants={FADE_IN_UP}>
-              <MetricCard caption="个结构化项目" label="已定义项目" value={`${eventCount}`} />
+              <MetricCard caption="个可用项目" label="项目目录" value={`${eventCount}`} />
             </motion.div>
             <motion.div variants={FADE_IN_UP}>
-              <MetricCard caption="个受管队伍实体" label="受管队伍" value={`${teamCount}`} />
+              <MetricCard caption="支队伍" label="受管队伍" value={`${teamCount}`} />
             </motion.div>
           </motion.div>
         )}
@@ -127,7 +127,7 @@ export default function AdminDashboardPage() {
                   <div>
                     <CardTitle className="text-xl">推荐管理流程</CardTitle>
                     <CardDescription>
-                      按这个顺序操作，能更稳地搭好结构化数据，再进入成绩分析和公开展示。
+                      先用系统内置的国家项目目录，再录成绩和目标，整个数据口径会更稳定。
                     </CardDescription>
                   </div>
                 </div>
@@ -177,42 +177,41 @@ export default function AdminDashboardPage() {
               <CardHeader className="relative z-10 pb-8">
                 <CardTitle className="text-2xl font-black">快速操作</CardTitle>
                 <CardDescription className="text-white/60">
-                  常用管理动作的一键入口。
+                  常用动作集中放在这里，不再占用顶部栏位。
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative z-10 flex flex-col gap-3">
-                <Link href="/admin/records">
+                <Button
+                  className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
+                  onClick={() => triggerQuickRecord()}
+                  variant="outline"
+                >
+                  <div className="flex items-center gap-3">
+                    <Zap className="h-5 w-5" />
+                    <span className="text-base font-bold">快速录入成绩</span>
+                  </div>
+                  <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
+                </Button>
+                <Link href="/admin/goals">
                   <Button
                     className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
                     variant="outline"
                   >
                     <div className="flex items-center gap-3">
-                      <Activity className="h-5 w-5" />
-                      <span className="text-base font-bold">录入新成绩</span>
+                      <Flag className="h-5 w-5" />
+                      <span className="text-base font-bold">添加目标成绩</span>
                     </div>
                     <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
                   </Button>
                 </Link>
-                <Link href="/admin/import">
+                <Link href="/admin/events">
                   <Button
                     className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
                     variant="outline"
                   >
                     <div className="flex items-center gap-3">
-                      <History className="h-5 w-5" />
-                      <span className="text-base font-bold">批量导入表格</span>
-                    </div>
-                    <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
-                  </Button>
-                </Link>
-                <Link href="/admin/swimmers">
-                  <Button
-                    className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
-                    variant="outline"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Users className="h-5 w-5" />
-                      <span className="text-base font-bold">管理学员档案</span>
+                      <Layers className="h-5 w-5" />
+                      <span className="text-base font-bold">查看项目目录</span>
                     </div>
                     <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
                   </Button>
@@ -223,7 +222,7 @@ export default function AdminDashboardPage() {
                   <div className="text-[10px] font-bold uppercase tracking-[0.4em]">
                     Swimming Best
                   </div>
-                  <div className="text-[9px] font-medium italic">Version 1.2.0 Modern</div>
+                  <div className="text-[9px] font-medium italic">National Event Catalog</div>
                 </div>
               </CardFooter>
             </Card>
