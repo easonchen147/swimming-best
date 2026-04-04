@@ -5,7 +5,7 @@ import { Variants } from "motion/react";
  * Balanced between speed and visibility.
  */
 export const STANDARD_TRANSITION = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 260,
   damping: 30,
 };

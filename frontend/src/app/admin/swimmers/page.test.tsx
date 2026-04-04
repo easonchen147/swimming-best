@@ -85,7 +85,7 @@ describe("AdminSwimmersPage", () => {
     fireEvent.change(screen.getByLabelText("性别"), {
       target: { value: "female" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "保存档案" }));
+    fireEvent.click(screen.getByRole("button", { name: "创建档案" }));
 
     await waitFor(() => {
       expect(createAdminSwimmer).toHaveBeenCalledWith({

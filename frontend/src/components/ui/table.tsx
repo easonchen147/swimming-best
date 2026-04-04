@@ -35,7 +35,7 @@ export function TableHeader({
 export function TableBody({
   className,
   ...props
-}: React.HTMLAttributes<HTMLTableSectionElement>) {
+}: HTMLMotionProps<"tbody">) {
   return (
     <motion.tbody
       variants={STAGGER_CONTAINER}

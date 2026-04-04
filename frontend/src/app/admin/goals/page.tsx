@@ -7,12 +7,9 @@ import {
   Target, 
   Plus, 
   Flag, 
-  Save, 
   Calendar, 
   TrendingUp, 
   UserCircle2,
-  Clock,
-  ChevronRight,
   ArrowRight
 } from "lucide-react";
 

@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
-export interface InputProps extends Omit<HTMLMotionProps<"input">, "ref"> {}
+export type InputProps = Omit<HTMLMotionProps<"input">, "ref">;
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, type, ...props }, ref) => (

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { TimerReset, Lock, User, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,11 @@ export default function AdminLoginPage() {
     }
   };
 
+  const cardVariants = {
+    ...FADE_IN_UP,
+    ...shakeVariants,
+  };
+
   return (
     <div className="grid min-h-screen place-items-center bg-background px-4 py-12 grid-sheen">
       <motion.div
@@ -68,9 +73,8 @@ export default function AdminLoginPage() {
         </motion.div>
 
         <motion.div
-          variants={FADE_IN_UP}
           animate={error ? "error" : "animate"}
-          variants={{ ...FADE_IN_UP, ...shakeVariants }}
+          variants={cardVariants}
         >
           <Card className="border-border/50 shadow-2xl shadow-primary/5">
             <CardHeader className="space-y-1 pb-6">

@@ -3,9 +3,8 @@
 import { Award, ShieldCheck, HelpCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { formatTimeMS } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import type {
   NextOfficialGrade,
   OfficialGrade,

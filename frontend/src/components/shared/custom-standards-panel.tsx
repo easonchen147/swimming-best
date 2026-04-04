@@ -1,10 +1,9 @@
 "use client";
 
 import { Target, ListChecks, HelpCircle } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StandardBadge } from "@/components/shared/standard-badge";
 import { StandardProgress } from "@/components/shared/standard-progress";
-import { cn } from "@/lib/utils";
 import type { CustomBenchmark, NextCustomBenchmark } from "@/lib/types";
 
 export function CustomStandardsPanel({

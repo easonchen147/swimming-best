@@ -70,10 +70,10 @@ describe("AdminTeamsPage", () => {
     fireEvent.change(screen.getByLabelText("队伍名称"), {
       target: { value: "浪花竞速队" },
     });
-    fireEvent.change(screen.getByLabelText("排序"), {
+    fireEvent.change(screen.getByLabelText("显示权重 (排序)"), {
       target: { value: "2" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "保存队伍" }));
+    fireEvent.click(screen.getByRole("button", { name: "创建队伍" }));
 
     await waitFor(() => {
       expect(createAdminTeam).toHaveBeenCalledWith({

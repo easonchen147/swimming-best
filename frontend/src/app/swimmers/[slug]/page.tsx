@@ -6,11 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { 
-  Trophy, 
   Calendar, 
   Share2, 
-  ArrowRight, 
-  Activity, 
   Target, 
   Users,
   ChevronRight,
@@ -36,7 +33,7 @@ import {
   listPublicSwimmerEvents,
 } from "@/lib/api/public";
 import { cn } from "@/lib/utils";
-import { FADE_IN_UP, STAGGER_CONTAINER, LAYOUT_TRANSITION } from "@/lib/animations";
+import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type {
   PublicEventAnalytics,
   PublicSwimmerDetail,
@@ -89,7 +86,7 @@ export default function SwimmerDetailPage() {
       link.href = dataUrl;
       link.click();
       toast.success("分享图已保存");
-    } catch (e) {
+    } catch {
       toast.error("保存失败，请重试");
     } finally {
       setExporting(false);

@@ -25,7 +25,7 @@ describe("OfficialGradePanel", () => {
       />,
     );
 
-    expect(screen.getByText("官方达级")).toBeInTheDocument();
+    expect(screen.getByText("官方达级标准")).toBeInTheDocument();
     expect(screen.getByText("二级运动员")).toBeInTheDocument();
     expect(screen.getByText(/一级运动员/)).toBeInTheDocument();
     expect(screen.getByText(/2.30s/)).toBeInTheDocument();
@@ -40,6 +40,8 @@ describe("OfficialGradePanel", () => {
       />,
     );
 
-    expect(screen.getByText("补充性别后可计算官方等级。")).toBeInTheDocument();
+    expect(
+      screen.getByText("补充学员性别信息后可自动计算官方达级状态。"),
+    ).toBeInTheDocument();
   });
 });

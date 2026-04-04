@@ -6,14 +6,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   ShieldCheck, 
   Plus, 
-  Settings2, 
   Save, 
-  Palette, 
-  ArrowRight, 
   Layout, 
-  ChevronRight,
-  Target,
-  Users
+  Target
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
@@ -257,7 +252,12 @@ export default function AdminStandardsPage() {
                     />
                     <SelectField
                       label="性别要求"
-                      onChange={(value) => setEntryForm((current) => ({ ...current, gender: value as any }))}
+                      onChange={(value) =>
+                        setEntryForm((current) => ({
+                          ...current,
+                          gender: value as StandardEntry["gender"],
+                        }))
+                      }
                       options={[
                         { label: "不限性别 (All)", value: "all" },
                         { label: "男子 (Male)", value: "male" },

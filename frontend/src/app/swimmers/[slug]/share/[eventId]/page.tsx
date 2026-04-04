@@ -2,7 +2,7 @@
 
 import { toPng } from "html-to-image";
 import Link from "next/link";
-import { ArrowLeft, Download, Waves, Share2, Award, TrendingUp, Target, TimerReset } from "lucide-react";
+import { ArrowLeft, Download, Waves, Award, TrendingUp, Target, TimerReset, Users } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -10,12 +10,9 @@ import { motion } from "motion/react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { getPublicEventAnalytics, getPublicSwimmer } from "@/lib/api/public";
 import { formatProgress, formatTimeMS } from "@/lib/format";
-import { cn } from "@/lib/utils";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { PublicEventAnalytics, PublicSwimmerDetail } from "@/lib/types";
 
@@ -55,7 +52,7 @@ export default function PublicSharePage() {
       link.href = dataUrl;
       link.click();
       toast.success("分享海报已生成并保存");
-    } catch (e) {
+    } catch {
       toast.error("保存失败，请稍后重试");
     } finally {
       setExporting(false);

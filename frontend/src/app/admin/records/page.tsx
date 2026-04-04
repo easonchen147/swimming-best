@@ -10,7 +10,6 @@ import {
   Plus, 
   Save, 
   Calendar, 
-  Activity, 
   Clock,
   UserCircle2,
   Trophy,
@@ -34,7 +33,6 @@ import {
 } from "@/lib/api/admin";
 import { formatTimeMS } from "@/lib/format";
 import { describeSwimmer } from "@/lib/swimmer-label";
-import { cn } from "@/lib/utils";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { AdminPerformance, AdminSwimmer, EventDefinition } from "@/lib/types";
 

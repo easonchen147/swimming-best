@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { Award, Calendar, Target } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatTimeMS, formatProgress } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -112,17 +113,5 @@ export function GoalGauge({ goal }: { goal: GoalProgress }) {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-function Badge({ children, variant, className }: any) {
-  return (
-    <div className={cn(
-      "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-      variant === "outline" ? "text-foreground border-border" : "bg-primary text-white border-transparent",
-      className
-    )}>
-      {children}
-    </div>
   );
 }

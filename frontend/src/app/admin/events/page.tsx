@@ -6,8 +6,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { 
   Trophy, 
   Plus, 
-  Settings2, 
-  ArrowRight, 
   Save, 
   Search,
   Activity,
@@ -21,7 +19,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { createAdminEvent, listAdminEvents } from "@/lib/api/admin";
-import { cn } from "@/lib/utils";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import { Badge } from "@/components/ui/badge";
 import type { EventDefinition } from "@/lib/types";

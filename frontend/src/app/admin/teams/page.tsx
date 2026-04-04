@@ -8,7 +8,6 @@ import {
   Plus, 
   Edit3, 
   Download, 
-  ArrowRight, 
   Save, 
   X, 
   Search,

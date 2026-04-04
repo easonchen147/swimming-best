@@ -59,18 +59,19 @@ describe("ImportWizard", () => {
     const file = new File(["csv"], "performances.csv", { type: "text/csv" });
     fireEvent.change(fileInput, { target: { files: [file] } });
 
-    fireEvent.click(screen.getByRole("button", { name: "解析预览" }));
+    fireEvent.click(screen.getByRole("button", { name: "开始解析预览" }));
 
-    expect(await screen.findByText(/总计 1 行/)).toBeInTheDocument();
-    expect(screen.getByText(/alice · 50m 自由泳 短池/)).toBeInTheDocument();
+    expect(await screen.findByText(/Ready to process 1 records/)).toBeInTheDocument();
+    expect(screen.getByText(/alice/)).toBeInTheDocument();
+    expect(screen.getByText(/50m 自由泳 短池/)).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "确认导入" }));
+    fireEvent.click(screen.getByRole("button", { name: "确认并导入数据库" }));
 
     await waitFor(() => {
       expect(confirmImportCsv).toHaveBeenCalledWith([
         expect.objectContaining({ swimmerSlug: "alice" }),
       ]);
     });
-    expect(await screen.findByText(/导入 1 条成绩/)).toBeInTheDocument();
+    expect(await screen.findByText(/导入成功/)).toBeInTheDocument();
   });
 });

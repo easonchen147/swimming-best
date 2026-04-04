@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { SKELETON_VARIANTS } from "@/lib/animations";
 
 export function LoadingState({ label }: { label: string }) {

@@ -71,7 +71,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               className="flex items-center gap-2"
             >
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>{typeof children === 'string' ? '处理中...' : children}</span>
+              <span>处理中...</span>
             </motion.div>
           ) : success ? (
             <motion.div

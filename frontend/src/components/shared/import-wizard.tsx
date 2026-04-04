@@ -10,9 +10,7 @@ import {
   AlertCircle, 
   Download, 
   ArrowRight, 
-  Loader2,
-  Table,
-  Database
+  Table
 } from "lucide-react";
 
 import {

@@ -9,9 +9,7 @@ import {
   Filter, 
   Download, 
   Edit3, 
-  UserCircle2, 
   Users, 
-  ChevronRight,
   Save,
   X
 } from "lucide-react";
@@ -40,8 +38,8 @@ import {
 } from "@/lib/api/admin";
 import { describeSwimmer, listTeams } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
-import { FADE_IN_UP, STAGGER_CONTAINER, LAYOUT_TRANSITION } from "@/lib/animations";
-import type { AdminSwimmer, TeamSummary } from "@/lib/types";
+import { FADE_IN_UP } from "@/lib/animations";
+import type { AdminSwimmer, Gender, TeamSummary } from "@/lib/types";
 
 export default function AdminSwimmersPage() {
   const [swimmers, setSwimmers] = useState<AdminSwimmer[]>([]);
@@ -134,9 +132,8 @@ export default function AdminSwimmersPage() {
       gender: swimmer.gender,
       teamId: swimmer.teamId,
     });
-    // Scroll to top of form on mobile
     if (window.innerWidth < 1024) {
-       window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
 
@@ -207,7 +204,12 @@ export default function AdminSwimmersPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="性别">
                     <Select
-                      onChange={(event) => setForm((current) => ({ ...current, gender: event.target.value as any }))}
+                      onChange={(event) =>
+                        setForm((current) => ({
+                          ...current,
+                          gender: event.target.value as Gender,
+                        }))
+                      }
                       value={form.gender}
                     >
                       <option value="unknown">未设置</option>

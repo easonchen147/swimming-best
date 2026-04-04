@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Users, Star, Trophy, Search, Filter } from "lucide-react";
+import { ArrowRight, ChevronRight, Users, Star, Trophy, Search, Filter } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublicSwimmers } from "@/lib/api/public";
 import { listTeams } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
-import { FADE_IN_UP, STAGGER_CONTAINER, LAYOUT_TRANSITION } from "@/lib/animations";
+import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { PublicSwimmerSummary } from "@/lib/types";
 
 export default function HomePage() {
