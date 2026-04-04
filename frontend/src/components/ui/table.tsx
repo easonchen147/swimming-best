@@ -1,21 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { motion, HTMLMotionProps } from "motion/react";
+import { HTMLMotionProps, motion } from "motion/react";
 
+import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import { cn } from "@/lib/utils";
-import { STAGGER_CONTAINER, FADE_IN_UP } from "@/lib/animations";
 
-export function Table({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLTableElement>) {
+export function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className="relative w-full overflow-auto">
-      <table
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
-      />
+    <div className="relative w-full overflow-auto rounded-2xl border border-border/60 bg-surface-strong/80">
+      <table className={cn("w-full caption-bottom text-sm", className)} {...props} />
     </div>
   );
 }
@@ -25,10 +19,7 @@ export function TableHeader({
   ...props
 }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
-    <thead
-      className={cn("[&_tr]:border-b border-border/40 bg-surface/30", className)}
-      {...props}
-    />
+    <thead className={cn("[&_tr]:border-b border-border/50 bg-surface/40", className)} {...props} />
   );
 }
 
@@ -38,39 +29,33 @@ export function TableBody({
 }: HTMLMotionProps<"tbody">) {
   return (
     <motion.tbody
-      variants={STAGGER_CONTAINER}
-      initial="initial"
       animate="animate"
       className={cn("[&_tr:last-child]:border-0", className)}
+      initial="initial"
+      variants={STAGGER_CONTAINER}
       {...props}
     />
   );
 }
 
-export function TableRow({
-  className,
-  ...props
-}: HTMLMotionProps<"tr">) {
+export function TableRow({ className, ...props }: HTMLMotionProps<"tr">) {
   return (
     <motion.tr
-      variants={FADE_IN_UP}
       className={cn(
-        "border-b border-border/40 transition-colors hover:bg-primary/5 data-[state=selected]:bg-surface",
+        "border-b border-border/50 transition-colors hover:bg-primary/4 data-[state=selected]:bg-surface",
         className,
       )}
+      variants={FADE_IN_UP}
       {...props}
     />
   );
 }
 
-export function TableHead({
-  className,
-  ...props
-}: React.ThHTMLAttributes<HTMLTableCellElement>) {
+export function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCellElement>) {
   return (
     <th
       className={cn(
-        "h-12 px-4 text-left align-middle font-semibold text-muted tracking-tight transition-colors",
+        "h-12 px-4 text-left align-middle text-xs font-semibold uppercase tracking-[0.14em] text-muted",
         className,
       )}
       {...props}
@@ -78,26 +63,13 @@ export function TableHead({
   );
 }
 
-export function TableCell({
-  className,
-  ...props
-}: React.TdHTMLAttributes<HTMLTableCellElement>) {
-  return (
-    <td
-      className={cn("p-4 align-middle [&:has([role=checkbox])]:pr-0", className)}
-      {...props}
-    />
-  );
+export function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
+  return <td className={cn("p-4 align-middle", className)} {...props} />;
 }
 
 export function TableCaption({
   className,
   ...props
 }: React.HTMLAttributes<HTMLTableCaptionElement>) {
-  return (
-    <caption
-      className={cn("mt-4 text-sm text-muted", className)}
-      {...props}
-    />
-  );
+  return <caption className={cn("mt-4 text-sm text-muted", className)} {...props} />;
 }

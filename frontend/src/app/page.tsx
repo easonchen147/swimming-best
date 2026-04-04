@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listPublicSwimmers } from "@/lib/api/public";
 import { listTeams } from "@/lib/swimmer-label";
-import { cn } from "@/lib/utils";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { PublicSwimmerSummary } from "@/lib/types";
 
@@ -130,31 +129,27 @@ export default function HomePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 border-b border-border/40 pb-6">
-           <Filter className="h-4 w-4 text-muted mr-2" />
-           <button
-              onClick={() => setTeamFilter("")}
-              className={cn(
-                "rounded-full px-5 py-2 text-xs font-bold transition-all active:scale-95",
-                teamFilter === "" 
-                  ? "bg-primary text-white shadow-xl shadow-primary/20" 
-                  : "bg-surface text-muted hover:bg-primary/5 hover:text-primary border border-border/40"
-              )}
+           <Filter className="mr-2 h-4 w-4 text-muted" />
+           <Button
+             className="rounded-full"
+             onClick={() => setTeamFilter("")}
+             size="sm"
+             type="button"
+             variant={teamFilter === "" ? "primary" : "outline"}
            >
-              全部队伍
-           </button>
+             全部队伍
+           </Button>
            {teams.map((team) => (
-              <button
-                key={team.id}
-                onClick={() => setTeamFilter(team.id)}
-                className={cn(
-                  "rounded-full px-5 py-2 text-xs font-bold transition-all active:scale-95",
-                  teamFilter === team.id 
-                    ? "bg-primary text-white shadow-xl shadow-primary/20" 
-                    : "bg-surface text-muted hover:bg-primary/5 hover:text-primary border border-border/40"
-                )}
-              >
-                {team.name}
-              </button>
+             <Button
+               className="rounded-full"
+               key={team.id}
+               onClick={() => setTeamFilter(team.id)}
+               size="sm"
+               type="button"
+               variant={teamFilter === team.id ? "primary" : "outline"}
+             >
+               {team.name}
+             </Button>
            ))}
         </div>
 

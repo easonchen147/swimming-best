@@ -10,13 +10,16 @@ share experiences for visible swimmers.
 The system SHALL provide public list and detail pages only for swimmers that
 are configured as publicly visible, and public payloads MUST use the swimmer's
 configured public display identity. The public roster SHALL be presented in an
-interactive card grid with hover effects and staggered entrance animations.
+interactive card grid with hover effects and staggered entrance animations. The
+public pages SHALL use the shared component layer rather than mixed raw
+page-level controls.
 
 #### Scenario: Public list is requested
 - **WHEN** a visitor loads the public swimmer listing
 - **THEN** the system renders a public roster of visible swimmers including
   display name, team, and profile link as an interactive card grid using a
-  staggered fade-in animation
+  staggered fade-in animation and the same shared component family used
+  elsewhere in the frontend
 
 #### Scenario: Public list is filtered by managed team
 - **WHEN** a visitor requests the public swimmer listing with a managed team
@@ -52,7 +55,9 @@ distinguish short-course and long-course events.
 The system SHALL provide public compare and share-oriented pages for PB, goal
 progress, and same-event comparison views, and the frontend SHALL expose a
 usable compare page that consumes the compare API directly. Comparison views
-SHALL use interactive legends to toggle swimmer data visibility.
+SHALL use interactive legends to toggle swimmer data visibility. These views
+SHALL also use the shared component layer consistently across filters, action
+buttons, and summary surfaces.
 
 #### Scenario: Visitor opens a public compare page
 - **WHEN** a visitor requests a public compare page for one structured event

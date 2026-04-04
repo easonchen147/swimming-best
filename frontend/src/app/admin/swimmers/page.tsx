@@ -325,30 +325,26 @@ export default function AdminSwimmersPage() {
               {/* Filters */}
               <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
                  <Filter className="h-4 w-4 text-muted shrink-0 mr-2" />
-                 <button
+                 <Button
+                    className="whitespace-nowrap rounded-full"
                     onClick={() => setTeamFilter("")}
-                    className={cn(
-                       "whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-all active:scale-95",
-                       teamFilter === "" 
-                        ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                        : "bg-surface text-muted hover:bg-primary/5 hover:text-primary border border-border/40"
-                    )}
+                    size="sm"
+                    type="button"
+                    variant={teamFilter === "" ? "primary" : "outline"}
                  >
                     全部队伍
-                 </button>
+                 </Button>
                  {visibleTeams.map((team) => (
-                    <button
+                    <Button
+                       className="whitespace-nowrap rounded-full"
                        key={team.id}
                        onClick={() => setTeamFilter(team.id)}
-                       className={cn(
-                          "whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-bold transition-all active:scale-95",
-                          teamFilter === team.id 
-                           ? "bg-primary text-white shadow-lg shadow-primary/20" 
-                           : "bg-surface text-muted hover:bg-primary/5 hover:text-primary border border-border/40"
-                       )}
+                       size="sm"
+                       type="button"
+                       variant={teamFilter === team.id ? "primary" : "outline"}
                     >
                        {team.name}
-                    </button>
+                    </Button>
                  ))}
               </div>
             </CardHeader>

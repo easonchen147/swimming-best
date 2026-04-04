@@ -7,6 +7,7 @@ import { CompareChart } from "@/components/charts/compare-chart";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Select } from "@/components/ui/select";
 import {
   comparePublicEvent,
   listPublicSwimmerEvents,
@@ -118,18 +120,16 @@ export default function ComparePage() {
                   {swimmers.map((swimmer) => {
                     const active = selectedSwimmerIds.includes(swimmer.id);
                     return (
-                      <button
-                        className={`rounded-full border px-4 py-2 text-sm font-bold transition-all ${
-                          active
-                            ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                            : "border-border bg-surface text-foreground hover:border-primary/20 hover:bg-primary/5"
-                        }`}
+                      <Button
+                        className="rounded-full"
                         key={swimmer.id}
                         onClick={() => toggleSwimmer(swimmer.id)}
+                        size="sm"
                         type="button"
+                        variant={active ? "primary" : "outline"}
                       >
                         {swimmer.displayName}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -142,8 +142,7 @@ export default function ComparePage() {
                 >
                   共同项目
                 </label>
-                <select
-                  className="h-11 w-full rounded-2xl border border-border bg-surface px-4 text-sm font-medium text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10"
+                <Select
                   id="compare-event"
                   onChange={(event) => setSelectedEventId(event.target.value)}
                   value={selectedEventId}
@@ -153,7 +152,7 @@ export default function ComparePage() {
                       {item.event.displayName}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
 
               {selectedEvent ? (

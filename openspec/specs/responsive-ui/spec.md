@@ -10,7 +10,8 @@ browsing and admin workflows.
 The system SHALL render all primary admin and public pages in layouts that
 remain usable on desktop browsers and mobile phone browsers. Layout
 transitions between viewports SHALL be fluid using responsive design
-principles and `motion` layout adjustments.
+principles and `motion` layout adjustments. The shared component layer SHALL
+remain responsive on both viewport classes.
 
 #### Scenario: Visitor opens a public page on a mobile device
 - **WHEN** a public swimmer, compare, event-detail, or share page is rendered
@@ -22,7 +23,8 @@ principles and `motion` layout adjustments.
 - **WHEN** an admin dashboard or management page is rendered on a desktop-sized
   viewport
 - **THEN** the page presents dense navigation, summary cards, forms, and data
-  views optimized for large screens
+  views optimized for large screens without breaking the shared component
+  states
 
 ### Requirement: Responsive interactions SHALL preserve core workflows
 The system SHALL keep core workflows functional across viewport sizes,

@@ -12,7 +12,9 @@ frontend interfaces, strictly adhering to `frontend-design` and
 `frontend-skill` standards. This includes consistent typography, a refined
 color palette with depth (shadows/glassmorphism), and a grid-based layout for
 all management and public views. All pages SHALL use a standard layout wrapper
-that provides smooth exit and entry transitions when navigating.
+that provides smooth exit and entry transitions when navigating. The shared
+component layer SHALL follow a shadcn/ui-style component language while
+preserving the product's existing color palette.
 
 #### Scenario: User navigates between different pages
 - **WHEN** a user moves from the admin dashboard to the swimmer roster
@@ -27,7 +29,8 @@ and loading. Feedback MUST be fluid and use subtle transitions to enhance the
 feeling of a premium interface. All state changes MUST use defined `motion`
 spring or tween transitions for a more organic feel. Shared select controls and
 shared picker triggers SHALL visually align with the application's modern
-surface styling.
+surface styling. Buttons, inputs, selects, cards, badges, tables, dialogs, and
+picker triggers SHALL read as one coherent shadcn/ui-style family.
 
 #### Scenario: User hovers over a primary action button
 - **WHEN** a user moves their cursor over a "Create Swimmer" button

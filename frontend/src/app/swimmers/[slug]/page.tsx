@@ -138,19 +138,19 @@ export default function SwimmerDetailPage() {
             </div>
             <div className="flex flex-wrap gap-2">
               {events.map((item) => (
-                <button
+                <Button
                   className={cn(
-                    "rounded-full border px-4 py-2 text-xs font-bold transition-all active:scale-95",
-                    item.event.id === selectedEventId
-                      ? "border-transparent bg-primary text-white shadow-lg shadow-primary/20"
-                      : "border-border/60 bg-background text-muted hover:border-primary/20 hover:bg-primary/5 hover:text-primary",
+                    "rounded-full",
+                    item.event.id === selectedEventId ? "shadow-lg shadow-primary/20" : "",
                   )}
                   key={item.event.id}
                   onClick={() => setSelectedEventId(item.event.id)}
+                  size="sm"
                   type="button"
+                  variant={item.event.id === selectedEventId ? "primary" : "outline"}
                 >
                   {item.event.displayName}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

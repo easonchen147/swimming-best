@@ -13,7 +13,8 @@ Quick record SHALL appear inside the dashboard's quick-action area instead of
 the top header, and goal creation SHALL also be surfaced as a quick action. The
 quick-actions area SHALL clearly communicate what the quick-record action does
 and which keyboard shortcut triggers it, while the header SHALL not duplicate
-that shortcut hint.
+that shortcut hint. Dashboard quick actions and surrounding surfaces SHALL use
+the shared shadcn/ui-style component layer consistently.
 
 #### Scenario: Administrator activates the quick-record action
 - **WHEN** an administrator selects the quick-record action from the dashboard

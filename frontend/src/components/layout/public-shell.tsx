@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Waves } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { PageTransition } from "./page-transition";
@@ -28,36 +29,24 @@ export function PublicShell({
           </Link>
 
           <nav className="hidden items-center gap-2 md:flex">
-            <Link
-              className="rounded-full px-4 py-2 text-sm font-bold text-muted transition-all hover:bg-primary/5 hover:text-primary"
-              href="/"
-            >
-              首页
-            </Link>
-            <Link
-              className="rounded-full px-4 py-2 text-sm font-bold text-muted transition-all hover:bg-primary/5 hover:text-primary"
-              href="/compare"
-            >
-              对比
-            </Link>
-            <Link className="ml-2" href="/admin">
-              <button className="cursor-pointer rounded-full bg-foreground px-5 py-2 text-sm font-bold text-background transition-all hover:bg-foreground/90 active:scale-95">
-                管理后台
-              </button>
-            </Link>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/">首页</Link>
+            </Button>
+            <Button asChild size="sm" variant="ghost">
+              <Link href="/compare">对比</Link>
+            </Button>
+            <Button asChild className="ml-2 rounded-full" size="sm" variant="primary">
+              <Link href="/admin">管理后台</Link>
+            </Button>
           </nav>
 
           <div className="flex items-center gap-2 md:hidden">
-            <Link href="/compare">
-              <button className="cursor-pointer rounded-full border border-border px-4 py-1.5 text-xs font-bold text-foreground">
-                对比
-              </button>
-            </Link>
-            <Link href="/admin">
-              <button className="cursor-pointer rounded-full bg-foreground px-4 py-1.5 text-xs font-bold text-background">
-                管理
-              </button>
-            </Link>
+            <Button asChild size="sm" variant="outline">
+              <Link href="/compare">对比</Link>
+            </Button>
+            <Button asChild size="sm" variant="primary">
+              <Link href="/admin">管理</Link>
+            </Button>
           </div>
         </div>
       </header>
