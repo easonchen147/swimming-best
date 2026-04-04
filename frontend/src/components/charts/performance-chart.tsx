@@ -10,8 +10,9 @@ import {
   YAxis,
 } from "recharts";
 
+import { AnimatedChart } from "@/components/charts/animated-chart";
+import { ChartTooltip } from "@/components/charts/chart-tooltip";
 import { Card } from "@/components/ui/card";
-import { formatTimeMS } from "@/lib/format";
 
 type ChartPoint = {
   performedOn: string;
@@ -37,65 +38,77 @@ export function PerformanceChart({
   })) satisfies ChartPoint[];
 
   return (
-    <Card className="min-w-0">
-      <div className="mb-4">
-        <div className="font-mono text-xs uppercase tracking-[0.22em] text-primary/55">
-          Progress Graph
+    <AnimatedChart>
+      <Card className="h-full min-w-0 p-6 md:p-8">
+        <div className="mb-6 flex flex-col gap-1">
+          <div className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-primary/40">
+            Performance Analytics
+          </div>
+          <h3 className="text-2xl font-black tracking-tight text-foreground">
+            成绩波动、PB 包络线与趋势
+          </h3>
         </div>
-        <h3 className="mt-2 text-xl font-semibold text-primary">
-          成绩波动、PB 包络线与趋势
-        </h3>
-      </div>
-      <div className="h-[280px] min-w-0 w-full md:h-[360px]">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
-          <LineChart data={data} margin={{ top: 12, right: 12, left: -20, bottom: 0 }}>
-            <CartesianGrid stroke="rgba(30,64,175,0.08)" strokeDasharray="4 4" />
-            <XAxis
-              dataKey="performedOn"
-              tick={{ fill: "#5c77a4", fontSize: 12 }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fill: "#5c77a4", fontSize: 12 }}
-              tickFormatter={(value) => `${(value / 1000).toFixed(1)}s`}
-              tickLine={false}
-              axisLine={false}
-            />
-            <Tooltip
-              formatter={(value) => formatTimeMS(Number(value ?? 0))}
-              contentStyle={{
-                borderRadius: 16,
-                border: "1px solid rgba(30,64,175,0.1)",
-                boxShadow: "0 16px 40px rgba(30,64,175,0.12)",
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="raw"
-              stroke="#3B82F6"
-              strokeWidth={2}
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="pb"
-              stroke="#F59E0B"
-              strokeWidth={3}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="trend"
-              stroke="#1E40AF"
-              strokeWidth={2}
-              strokeDasharray="8 6"
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </Card>
+        <div className="h-[280px] min-w-0 w-full md:h-[360px]">
+          <ResponsiveContainer height="100%" minHeight={280} minWidth={0} width="100%">
+            <LineChart data={data} margin={{ top: 12, right: 12, left: -20, bottom: 0 }}>
+              <CartesianGrid
+                stroke="rgba(15,23,42,0.06)"
+                strokeDasharray="4 4"
+                vertical={false}
+              />
+              <XAxis
+                axisLine={false}
+                dataKey="performedOn"
+                dy={10}
+                tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }}
+                tickLine={false}
+              />
+              <YAxis
+                axisLine={false}
+                tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }}
+                tickFormatter={(value) => `${(value / 1000).toFixed(1)}s`}
+                tickLine={false}
+              />
+              <Tooltip
+                content={<ChartTooltip title="Performance" />}
+                cursor={{ stroke: "rgba(79, 70, 229, 0.1)", strokeWidth: 2 }}
+              />
+              <Line
+                activeDot={{ r: 6, strokeWidth: 0 }}
+                animationDuration={1500}
+                animationEasing="ease-in-out"
+                dataKey="raw"
+                dot={{ r: 4, fill: "#4F46E5", stroke: "#fff", strokeWidth: 2 }}
+                name="单次成绩"
+                stroke="#4F46E5"
+                strokeWidth={3}
+                type="monotone"
+              />
+              <Line
+                animationDuration={2000}
+                animationEasing="ease-in-out"
+                dataKey="pb"
+                dot={false}
+                name="个人最好（PB）"
+                stroke="#F59E0B"
+                strokeWidth={4}
+                type="monotone"
+              />
+              <Line
+                animationDuration={2500}
+                animationEasing="ease-in-out"
+                dataKey="trend"
+                dot={false}
+                name="技术趋势"
+                stroke="#0EA5E9"
+                strokeDasharray="8 6"
+                strokeWidth={2}
+                type="monotone"
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    </AnimatedChart>
   );
 }

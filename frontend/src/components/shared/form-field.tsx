@@ -1,37 +1,73 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 export function Field({
   children,
   label,
   className,
+  error,
+  hint,
 }: {
   children: React.ReactNode;
   label: string;
   className?: string;
+  error?: string;
+  hint?: string;
 }) {
   const fallbackId = React.useId();
   let control = children;
   let htmlFor: string | undefined;
 
-  if (React.isValidElement<{ id?: string }>(children)) {
+  if (React.isValidElement<{ id?: string; className?: string }>(children)) {
     htmlFor = children.props.id ?? fallbackId;
-    control = React.cloneElement(children, { id: htmlFor });
+    control = React.cloneElement(children, {
+      id: htmlFor,
+      className: cn(
+        children.props.className,
+        error && "border-rose-500 focus:border-rose-500 focus:ring-rose-500/10",
+      ),
+    });
   }
 
   return (
-    <div className={`space-y-2 ${className ?? ""}`}>
-      <Label
-        className="ml-1 text-xs font-bold uppercase tracking-wider text-muted/80"
-        htmlFor={htmlFor}
-      >
-        {label}
-      </Label>
+    <div className={cn("space-y-1.5", className)}>
+      <div className="flex items-center justify-between px-1">
+        <Label
+          className={cn(
+            "text-[10px] font-black uppercase tracking-[0.2em] transition-colors",
+            error ? "text-rose-500" : "text-muted/60",
+          )}
+          htmlFor={htmlFor}
+        >
+          {label}
+        </Label>
+        {hint && !error ? (
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted/40">
+            {hint}
+          </span>
+        ) : null}
+      </div>
+
       {control}
+
+      <AnimatePresence mode="wait">
+        {error ? (
+          <motion.p
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            className="px-1 text-[10px] font-bold uppercase tracking-wider text-rose-500"
+            exit={{ opacity: 0, height: 0, y: -5 }}
+            initial={{ opacity: 0, height: 0, y: -5 }}
+          >
+            {error}
+          </motion.p>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -42,18 +78,27 @@ export function SelectField({
   value,
   onChange,
   className,
+  error,
+  hint,
 }: {
   label: string;
   options: Array<{ label: string; value: string }>;
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  error?: string;
+  hint?: string;
 }) {
   const id = React.useId();
 
   return (
-    <Field className={className} label={label}>
-      <Select id={id} onChange={(event) => onChange(event.target.value)} value={value}>
+    <Field className={className} error={error} hint={hint} label={label}>
+      <Select
+        className={cn(error && "border-rose-500 focus:border-rose-500")}
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

@@ -2,14 +2,14 @@
 
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { motion, HTMLMotionProps, AnimatePresence } from "motion/react";
+import { AnimatePresence, HTMLMotionProps, motion } from "motion/react";
 import { Check, Loader2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
 import { INTERACTIVE_VARIANTS } from "@/lib/animations";
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex cursor-pointer items-center justify-center rounded-2xl border text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50 overflow-hidden",
+  "relative inline-flex cursor-pointer items-center justify-center overflow-hidden rounded-2xl border text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -20,9 +20,9 @@ const buttonVariants = cva(
         ghost:
           "border-transparent bg-transparent text-primary hover:bg-primary/5",
         danger:
-          "border-transparent bg-rose-500 text-white hover:bg-rose-600 shadow-lg shadow-rose-500/20",
+          "border-transparent bg-rose-500 text-white shadow-lg shadow-rose-500/20 hover:bg-rose-600",
         outline:
-          "border-border bg-transparent text-foreground hover:bg-surface hover:border-primary/20",
+          "border-border bg-transparent text-foreground hover:border-primary/20 hover:bg-surface",
         success:
           "border-transparent bg-emerald-500 text-white shadow-lg shadow-emerald-500/20",
       },
@@ -54,43 +54,43 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         className={cn(buttonVariants({ variant: currentVariant, size }), className)}
+        disabled={loading || props.disabled}
         ref={ref}
         variants={INTERACTIVE_VARIANTS}
         whileHover={!loading && !success ? "hover" : undefined}
         whileTap={!loading && !success ? "tap" : undefined}
-        disabled={loading || props.disabled}
         {...props}
       >
         <AnimatePresence mode="wait">
           {loading ? (
             <motion.div
-              key="loading"
-              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
               className="flex items-center gap-2"
+              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 10 }}
+              key="loading"
             >
               <Loader2 className="h-4 w-4 animate-spin" />
               <span>处理中...</span>
             </motion.div>
           ) : success ? (
             <motion.div
-              key="success"
-              initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, rotate: 0, scale: 1 }}
               className="flex items-center gap-2"
+              exit={{ opacity: 0, scale: 0.5 }}
+              initial={{ opacity: 0, rotate: -20, scale: 0.5 }}
+              key="success"
             >
               <Check className="h-5 w-5" />
               <span>成功</span>
             </motion.div>
           ) : (
             <motion.div
-              key="content"
-              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
               className="flex items-center gap-2"
+              exit={{ opacity: 0 }}
+              initial={{ opacity: 0 }}
+              key="content"
             >
               {children}
             </motion.div>

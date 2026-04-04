@@ -3,11 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { CompareChart } from "@/components/charts/compare-chart";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { comparePublicEvent, listPublicSwimmerEvents, listPublicSwimmers } from "@/lib/api/public";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  comparePublicEvent,
+  listPublicSwimmerEvents,
+  listPublicSwimmers,
+} from "@/lib/api/public";
 import { formatTimeMS } from "@/lib/format";
 import type {
   ComparePayload,
@@ -32,11 +43,15 @@ export default function ComparePage() {
         return nextSwimmers[0]?.slug;
       })
       .then((slug) => {
-        if (!slug) return null;
+        if (!slug) {
+          return null;
+        }
         return listPublicSwimmerEvents(slug);
       })
       .then((response) => {
-        if (!response) return;
+        if (!response) {
+          return;
+        }
         setEvents(response.events);
         setSelectedEventId(response.events[0]?.event.id ?? "");
       })
@@ -65,6 +80,7 @@ export default function ComparePage() {
         const next = current.filter((item) => item !== swimmerId);
         return next.length >= 2 ? next : current;
       }
+
       return [...current, swimmerId].slice(-4);
     });
   }
@@ -77,7 +93,7 @@ export default function ComparePage() {
           同项目进步对比
         </h1>
         <p className="max-w-3xl text-sm font-medium text-muted">
-          选择同一个项目下的多个公开档案，对比当前最好成绩、进步幅度和趋势结果。
+          选择同一个项目下的多位公开档案，对比当前最佳成绩、进步幅度和走势曲线。
         </p>
       </section>
 
@@ -91,25 +107,25 @@ export default function ComparePage() {
           <Card className="h-fit">
             <CardHeader>
               <CardTitle>对比配置</CardTitle>
-              <CardDescription>至少选择两位学员和一个共同项目</CardDescription>
+              <CardDescription>至少选择两位孩子和一个共同项目。</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="space-y-2">
                 <div className="text-xs font-bold uppercase tracking-widest text-muted/60">
-                  学员选择
+                  孩子选择
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {swimmers.map((swimmer) => {
                     const active = selectedSwimmerIds.includes(swimmer.id);
                     return (
                       <button
-                        key={swimmer.id}
-                        onClick={() => toggleSwimmer(swimmer.id)}
-                        className={`rounded-full border px-4 py-2 text-sm font-bold transition ${
+                        className={`rounded-full border px-4 py-2 text-sm font-bold transition-all ${
                           active
-                            ? "border-primary bg-primary text-white"
+                            ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
                             : "border-border bg-surface text-foreground hover:border-primary/20 hover:bg-primary/5"
                         }`}
+                        key={swimmer.id}
+                        onClick={() => toggleSwimmer(swimmer.id)}
                         type="button"
                       >
                         {swimmer.displayName}
@@ -127,10 +143,10 @@ export default function ComparePage() {
                   共同项目
                 </label>
                 <select
+                  className="h-11 w-full rounded-2xl border border-border bg-surface px-4 text-sm font-medium text-foreground outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10"
                   id="compare-event"
-                  value={selectedEventId}
                   onChange={(event) => setSelectedEventId(event.target.value)}
-                  className="h-11 w-full rounded-2xl border border-border bg-surface px-4 text-sm font-medium text-foreground"
+                  value={selectedEventId}
                 >
                   {events.map((item) => (
                     <option key={item.event.id} value={item.event.id}>
@@ -142,7 +158,11 @@ export default function ComparePage() {
 
               {selectedEvent ? (
                 <div className="rounded-2xl border border-border/60 bg-surface/40 p-4 text-sm text-muted">
-                  当前项目：<span className="font-bold text-foreground">{selectedEvent.event.displayName}</span>
+                  当前项目：
+                  <span className="font-bold text-foreground">
+                    {" "}
+                    {selectedEvent.event.displayName}
+                  </span>
                 </div>
               ) : null}
             </CardContent>
@@ -153,53 +173,59 @@ export default function ComparePage() {
               <>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {payload.swimmers.map((swimmer) => (
-                    <Card key={swimmer.swimmerId}>
+                    <Card
+                      className="group overflow-hidden transition-all hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5"
+                      key={swimmer.swimmerId}
+                    >
                       <CardContent className="space-y-3 p-6">
-                        <div className="text-xs font-bold uppercase tracking-widest text-muted/60">
+                        <div className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-primary/40">
                           {swimmer.team.name}
                         </div>
-                        <h2 className="text-2xl font-black tracking-tight text-foreground">
+                        <h2 className="text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {swimmer.displayName}
                         </h2>
-                        <div className="text-3xl font-black text-primary">
+                        <div className="text-3xl font-black tracking-tighter text-primary">
                           {formatTimeMS(swimmer.currentBestTimeMs)}
                         </div>
-                        <div className="text-sm text-muted">
-                          进步 {swimmer.improvementTimeMs > 0 ? "-" : ""}
-                          {formatTimeMS(Math.abs(swimmer.improvementTimeMs))}
+                        <div className="flex items-center gap-2 text-xs font-bold text-muted/60">
+                          <span>进步幅度</span>
+                          <span className="text-foreground">
+                            {swimmer.improvementTimeMs > 0 ? "-" : ""}
+                            {formatTimeMS(Math.abs(swimmer.improvementTimeMs))}
+                          </span>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
 
-                <Card>
-                  <CardHeader>
+                <CompareChart swimmers={payload.swimmers} />
+
+                <Card className="overflow-hidden border-border/40">
+                  <CardHeader className="bg-surface/30">
                     <CardTitle>对比摘要</CardTitle>
-                    <CardDescription>
-                      当前项目：{payload.event.displayName}
-                    </CardDescription>
+                    <CardDescription>当前项目：{payload.event.displayName}</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 p-6">
                     {payload.swimmers.map((swimmer) => (
                       <div
+                        className="rounded-2xl border border-border/40 bg-surface/40 p-5 transition-all hover:border-primary/20 hover:bg-surface"
                         key={swimmer.swimmerId}
-                        className="rounded-2xl border border-border/50 bg-surface/40 p-4"
                       >
                         <div className="flex items-center justify-between gap-4">
                           <div>
-                            <div className="text-lg font-bold text-foreground">
+                            <div className="text-lg font-black text-foreground">
                               {swimmer.displayName}
                             </div>
-                            <div className="text-xs font-bold uppercase tracking-widest text-muted/60">
+                            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted/50">
                               {swimmer.team.name}
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-base font-bold text-primary">
+                            <div className="text-base font-black text-primary">
                               最佳 {formatTimeMS(swimmer.currentBestTimeMs)}
                             </div>
-                            <div className="text-sm text-muted">
+                            <div className="text-sm font-bold text-muted">
                               提升 {(swimmer.improvementRatio * 100).toFixed(1)}%
                             </div>
                           </div>
