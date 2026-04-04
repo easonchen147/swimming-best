@@ -11,9 +11,9 @@
     "backend:sync:uv": "cd backend && uv sync",
     "backend:run": "cd backend && poetry run python -m swimming_best",
     "backend:run:uv": "cd backend && uv run python -m swimming_best",
-    "backend:lint": "cd backend && poetry run ruff check .",
-    "backend:test": "cd backend && poetry run python -m pytest -q",
-    "backend:test:uv": "cd backend && uv run python -m pytest -q",
+    "backend:lint": "cd backend && uv run --with ruff ruff check swimming_best tests",
+    "backend:test": "cd backend && uv run --with pytest python -m pytest tests -q",
+    "backend:test:uv": "cd backend && uv run --with pytest python -m pytest tests -q",
     "deploy:product": "python3 scripts/deploy.py",
     "check": "npm run frontend:lint && npm run frontend:test && npm run frontend:build && npm run backend:lint && npm run backend:test"
   }

@@ -21,7 +21,7 @@ describe("ImprovementChart", () => {
   });
 
   it("shows empty state when no data", () => {
-    render(<ImprovementChart pb={[]} raw={[]} />);
+    render(<ImprovementChart raw={[]} />);
 
     expect(screen.getByText("暂无成绩数据")).toBeInTheDocument();
   });

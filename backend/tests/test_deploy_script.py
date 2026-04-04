@@ -76,7 +76,7 @@ def test_parse_args_defaults_to_production_backend_origin(monkeypatch):
 
     args = deploy.parse_args()
 
-    assert args.backend_origin == "http://1.12.247.149:8082/"
+    assert args.backend_origin == "http://127.0.0.1:8000/"
 
 
 def test_build_frontend_normalizes_backend_origin(monkeypatch):

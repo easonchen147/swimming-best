@@ -3,28 +3,37 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   addContextPerformances,
   createAdminEvent,
+  createAdminStandard,
+  createAdminStandardEntry,
   createAdminSwimmer,
   createAdminTeam,
   createContext,
   createGoal,
+  deleteAdminStandard,
+  deleteAdminStandardEntry,
   getAdminMe,
   listAdminEvents,
   listAdminGoals,
   listAdminPerformances,
+  listAdminStandardEntries,
+  listAdminStandards,
   listAdminSwimmers,
   listAdminTeams,
   loginAdmin,
   logoutAdmin,
   quickRecordPerformance,
+  updateAdminStandard,
+  updateAdminStandardEntry,
   updateAdminSwimmer,
   updateAdminTeam,
 } from "@/lib/api/admin";
-import { apiGet, apiPatch, apiPost } from "@/lib/api/client";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api/client";
 
 vi.mock("@/lib/api/client", () => ({
   apiGet: vi.fn(async () => ({})),
   apiPost: vi.fn(async () => ({})),
   apiPatch: vi.fn(async () => ({})),
+  apiDelete: vi.fn(async () => undefined),
 }));
 
 describe("admin api client", () => {
@@ -40,6 +49,8 @@ describe("admin api client", () => {
     await listAdminEvents();
     await listAdminGoals();
     await listAdminPerformances();
+    await listAdminStandards();
+    await listAdminStandardEntries("standard-1");
 
     expect(apiGet).toHaveBeenNthCalledWith(1, "/api/admin/me");
     expect(apiGet).toHaveBeenNthCalledWith(2, "/api/admin/teams");
@@ -48,6 +59,8 @@ describe("admin api client", () => {
     expect(apiGet).toHaveBeenNthCalledWith(5, "/api/admin/events");
     expect(apiGet).toHaveBeenNthCalledWith(6, "/api/admin/goals");
     expect(apiGet).toHaveBeenNthCalledWith(7, "/api/admin/performances");
+    expect(apiGet).toHaveBeenNthCalledWith(8, "/api/admin/standards");
+    expect(apiGet).toHaveBeenNthCalledWith(9, "/api/admin/standards/standard-1/entries");
   });
 
   it("routes admin writes through /api/admin", async () => {
@@ -60,6 +73,7 @@ describe("admin api client", () => {
       nickname: "小海豚",
       publicNameMode: "nickname",
       isPublic: true,
+      gender: "male",
       teamId: "team-1",
     });
     await updateAdminSwimmer("swimmer-1", {
@@ -67,6 +81,7 @@ describe("admin api client", () => {
       nickname: "小海豚",
       publicNameMode: "nickname",
       isPublic: true,
+      gender: "female",
       teamId: "team-2",
     });
     await createAdminEvent({
@@ -107,6 +122,27 @@ describe("admin api client", () => {
       targetDate: "2026-05-01",
       isPublic: true,
     });
+    await createAdminStandard({
+      tierGroup: "暑期集训线",
+      name: "A组达标",
+      tierOrder: 2,
+      colorHex: "#3b82f6",
+    });
+    await updateAdminStandard("standard-1", {
+      name: "A组冲线",
+      tierOrder: 3,
+    });
+    await createAdminStandardEntry("standard-1", {
+      eventId: "event-1",
+      gender: "male",
+      qualifyingTimeMs: 25000,
+    });
+    await updateAdminStandardEntry("entry-1", {
+      gender: "all",
+      qualifyingTimeMs: 25500,
+    });
+    await deleteAdminStandardEntry("entry-1");
+    await deleteAdminStandard("standard-1");
 
     expect(apiPost).toHaveBeenNthCalledWith(1, "/api/admin/login", {
       username: "coach",
@@ -128,6 +164,7 @@ describe("admin api client", () => {
       nickname: "小海豚",
       publicNameMode: "nickname",
       isPublic: true,
+      gender: "male",
       teamId: "team-1",
     });
     expect(apiPatch).toHaveBeenNthCalledWith(2, "/api/admin/swimmers/swimmer-1", {
@@ -135,6 +172,7 @@ describe("admin api client", () => {
       nickname: "小海豚",
       publicNameMode: "nickname",
       isPublic: true,
+      gender: "female",
       teamId: "team-2",
     });
     expect(apiPost).toHaveBeenNthCalledWith(5, "/api/admin/events", {
@@ -177,5 +215,26 @@ describe("admin api client", () => {
       targetDate: "2026-05-01",
       isPublic: true,
     });
+    expect(apiPost).toHaveBeenNthCalledWith(10, "/api/admin/standards", {
+      tierGroup: "暑期集训线",
+      name: "A组达标",
+      tierOrder: 2,
+      colorHex: "#3b82f6",
+    });
+    expect(apiPatch).toHaveBeenNthCalledWith(3, "/api/admin/standards/standard-1", {
+      name: "A组冲线",
+      tierOrder: 3,
+    });
+    expect(apiPost).toHaveBeenNthCalledWith(11, "/api/admin/standards/standard-1/entries", {
+      eventId: "event-1",
+      gender: "male",
+      qualifyingTimeMs: 25000,
+    });
+    expect(apiPatch).toHaveBeenNthCalledWith(4, "/api/admin/standards/entries/entry-1", {
+      gender: "all",
+      qualifyingTimeMs: 25500,
+    });
+    expect(apiDelete).toHaveBeenNthCalledWith(1, "/api/admin/standards/entries/entry-1");
+    expect(apiDelete).toHaveBeenNthCalledWith(2, "/api/admin/standards/standard-1");
   });
 });

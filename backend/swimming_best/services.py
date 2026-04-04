@@ -4,6 +4,7 @@ from collections import defaultdict
 from typing import Any
 
 from swimming_best.analytics import build_series, goal_progress
+from swimming_best.official_grade_baseline import evaluate_official_grade
 from swimming_best.repository import Repository
 
 
@@ -105,6 +106,34 @@ class AdminService:
     def list_recent_performances(self) -> list[dict[str, Any]]:
         return self.repository.list_recent_performances()
 
+    def list_standards(self) -> list[dict[str, Any]]:
+        return self.repository.list_standards()
+
+    def create_standard(self, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.repository.create_standard(payload)
+
+    def update_standard(self, standard_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.repository.update_standard(standard_id, payload)
+
+    def delete_standard(self, standard_id: str) -> None:
+        self.repository.delete_standard(standard_id)
+
+    def list_standard_entries(self, standard_id: str) -> list[dict[str, Any]]:
+        return self.repository.list_standard_entries(standard_id=standard_id)
+
+    def create_standard_entry(
+        self,
+        standard_id: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        return self.repository.create_standard_entry({**payload, "standardId": standard_id})
+
+    def update_standard_entry(self, entry_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self.repository.update_standard_entry(entry_id, payload)
+
+    def delete_standard_entry(self, entry_id: str) -> None:
+        self.repository.delete_standard_entry(entry_id)
+
 
 class PublicService:
     def __init__(self, repository: Repository):
@@ -132,6 +161,7 @@ class PublicService:
             "id": swimmer["id"],
             "slug": swimmer["slug"],
             "displayName": public_display_name(swimmer),
+            "gender": swimmer["gender"],
             "teamId": swimmer["teamId"],
             "team": swimmer["team"],
         }
@@ -154,6 +184,32 @@ class PublicService:
         event = self.repository.get_event(event_id)
         performances = self.repository.list_performances_for_swimmer_event(swimmer["id"], event_id)
         series = build_series(performances)
+        official_grade = evaluate_official_grade(
+            gender=swimmer["gender"],
+            event=event,
+            current_best_time_ms=series["currentBestTimeMs"],
+        )
+        custom_standards = []
+        benchmark_lines = []
+        next_custom_standard = None
+        if series["currentBestTimeMs"] > 0:
+            standards = self.repository.list_custom_standards_for_event(event_id, swimmer["gender"])
+            for standard in standards:
+                achieved = series["currentBestTimeMs"] <= standard["qualifyingTimeMs"]
+                custom_standards.append({**standard, "achieved": achieved})
+                benchmark_lines.append(
+                    {
+                        "name": standard["name"],
+                        "tierGroup": standard["tierGroup"],
+                        "colorHex": standard["colorHex"],
+                        "qualifyingTimeMs": standard["qualifyingTimeMs"],
+                    }
+                )
+            next_custom_standard = self.repository.get_next_custom_standard(
+                series["currentBestTimeMs"],
+                event_id,
+                swimmer["gender"],
+            )
         goals = self.repository.list_goals(public_only=True)
         goal_payload = []
         for goal in goals:
@@ -186,6 +242,12 @@ class PublicService:
             "event": event,
             "series": series,
             "goals": goal_payload,
+            "officialGrade": official_grade.official_grade,
+            "nextOfficialGrade": official_grade.next_official_grade,
+            "officialGradeStatus": official_grade.status,
+            "customStandards": custom_standards,
+            "nextCustomStandard": next_custom_standard,
+            "benchmarkLines": benchmark_lines,
         }
 
     def compare(self, event_id: str, swimmer_ids: list[str]) -> dict[str, Any]:

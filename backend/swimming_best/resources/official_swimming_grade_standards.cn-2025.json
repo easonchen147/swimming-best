@@ -1,0 +1,342 @@
+{
+  "specCode": "sport-2024-121",
+  "specName": "游泳运动员技术等级标准",
+  "effectiveDate": "2025-01-01",
+  "sourceImages": [
+    "docs/男子达标.jpeg",
+    "docs/女子达标.jpeg"
+  ],
+  "tiers": [
+    { "code": "level3", "label": "三级运动员", "order": 1 },
+    { "code": "level2", "label": "二级运动员", "order": 2 },
+    { "code": "level1", "label": "一级运动员", "order": 3 },
+    { "code": "master", "label": "运动健将", "order": 4 },
+    { "code": "international_master", "label": "国际级运动健将", "order": 5 }
+  ],
+  "events": [
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "21.96", "master": "23.28", "level1": "24.50", "level2": "27.50", "level3": "32.00" },
+        "25": { "international_master": "21.40", "master": "22.48", "level1": "23.60", "level2": "26.50", "level3": "30.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "48.34", "master": "51.50", "level1": "55.50", "level2": "1:05.00", "level3": "1:10.00" },
+        "25": { "international_master": "47.23", "master": "49.30", "level1": "53.10", "level2": "1:02.00", "level3": "1:07.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "1:46.26", "master": "1:51.55", "level1": "2:03.00", "level2": "2:23.00", "level3": "2:32.00" },
+        "25": { "international_master": "1:44.08", "master": "1:48.55", "level1": "1:59.80", "level2": "2:19.30", "level3": "2:28.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 400,
+      "timesByPool": {
+        "50": { "international_master": "3:46.78", "master": "3:58.60", "level1": "4:21.00", "level2": "5:06.00", "level3": "5:28.00" },
+        "25": { "international_master": "3:42.50", "master": "3:50.00", "level1": "4:11.80", "level2": "4:55.00", "level3": "5:17.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 800,
+      "timesByPool": {
+        "50": { "international_master": "7:51.65", "master": "8:24.00", "level1": "9:02.00", "level2": "10:32.00", "level3": "11:15.00" },
+        "25": { "international_master": "7:45.02", "master": "8:14.30", "level1": "8:51.70", "level2": "10:19.00", "level3": "11:02.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "freestyle",
+      "distanceM": 1500,
+      "timesByPool": {
+        "50": { "international_master": "15:00.99", "master": "16:00.30", "level1": "17:20.00", "level2": "20:15.00", "level3": "21:40.00" },
+        "25": { "international_master": "14:49.29", "master": "15:33.80", "level1": "16:50.90", "level2": "19:41.00", "level3": "21:05.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "backstroke",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "25.16", "master": "27.43", "level1": "30.50", "level2": "35.00", "level3": "37.00" },
+        "25": { "international_master": "23.38", "master": "25.80", "level1": "28.65", "level2": "33.00", "level3": "35.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "backstroke",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "53.74", "master": "58.45", "level1": "1:04.00", "level2": "1:14.00", "level3": "1:22.00" },
+        "25": { "international_master": "51.30", "master": "54.75", "level1": "59.95", "level2": "1:09.30", "level3": "1:17.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "backstroke",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "1:57.50", "master": "2:06.45", "level1": "2:18.00", "level2": "2:41.00", "level3": "3:00.00" },
+        "25": { "international_master": "1:52.66", "master": "1:59.45", "level1": "2:10.30", "level2": "2:31.00", "level3": "2:50.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "breaststroke",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "27.33", "master": "28.75", "level1": "32.50", "level2": "37.00", "level3": "42.00" },
+        "25": { "international_master": "26.57", "master": "27.75", "level1": "31.25", "level2": "35.50", "level3": "41.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "breaststroke",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "59.49", "master": "1:03.80", "level1": "1:11.00", "level2": "1:17.00", "level3": "1:25.00" },
+        "25": { "international_master": "57.63", "master": "1:02.00", "level1": "1:09.00", "level2": "1:15.00", "level3": "1:23.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "breaststroke",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "2:09.68", "master": "2:21.90", "level1": "2:35.00", "level2": "2:50.00", "level3": "3:07.00" },
+        "25": { "international_master": "2:06.23", "master": "2:15.90", "level1": "2:28.50", "level2": "2:43.00", "level3": "3:00.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "butterfly",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "23.53", "master": "24.89", "level1": "27.00", "level2": "31.00", "level3": "33.00" },
+        "25": { "international_master": "22.53", "master": "24.30", "level1": "26.35", "level2": "30.00", "level3": "32.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "butterfly",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "51.67", "master": "55.45", "level1": "1:00.00", "level2": "1:10.00", "level3": "1:13.00" },
+        "25": { "international_master": "50.57", "master": "53.60", "level1": "58.00", "level2": "1:09.00", "level3": "1:11.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "butterfly",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "1:55.78", "master": "2:02.70", "level1": "2:14.00", "level2": "2:38.00", "level3": "2:44.00" },
+        "25": { "international_master": "1:53.61", "master": "1:58.80", "level1": "2:09.80", "level2": "2:33.00", "level3": "2:39.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "medley",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": {},
+        "25": { "international_master": "52.98", "master": "55.26", "level1": "1:00.36", "level2": "1:08.00", "level3": "1:14.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "medley",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "1:57.94", "master": "2:08.20", "level1": "2:19.00", "level2": "2:40.00", "level3": "2:50.00" },
+        "25": { "international_master": "1:55.25", "master": "2:03.30", "level1": "2:13.65", "level2": "2:33.80", "level3": "2:43.00" }
+      }
+    },
+    {
+      "gender": "male",
+      "stroke": "medley",
+      "distanceM": 400,
+      "timesByPool": {
+        "50": { "international_master": "4:12.50", "master": "4:31.20", "level1": "4:58.30", "level2": "5:31.00", "level3": "6:00.00" },
+        "25": { "international_master": "4:09.19", "master": "4:22.60", "level1": "4:48.88", "level2": "5:20.00", "level3": "5:50.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "24.70", "master": "25.85", "level1": "27.20", "level2": "31.50", "level3": "36.00" },
+        "25": { "international_master": "24.44", "master": "25.00", "level1": "26.40", "level2": "30.50", "level3": "34.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "53.61", "master": "56.30", "level1": "1:02.50", "level2": "1:13.00", "level3": "1:18.00" },
+        "25": { "international_master": "52.85", "master": "54.70", "level1": "1:00.50", "level2": "1:11.00", "level3": "1:15.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "1:57.26", "master": "2:01.20", "level1": "2:15.00", "level2": "2:39.00", "level3": "2:50.00" },
+        "25": { "international_master": "1:55.60", "master": "1:58.50", "level1": "2:12.00", "level2": "2:35.00", "level3": "2:45.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 400,
+      "timesByPool": {
+        "50": { "international_master": "4:07.90", "master": "4:15.80", "level1": "4:44.00", "level2": "5:40.00", "level3": "5:52.00" },
+        "25": { "international_master": "4:06.95", "master": "4:11.40", "level1": "4:39.00", "level2": "5:35.00", "level3": "5:46.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 800,
+      "timesByPool": {
+        "50": { "international_master": "8:29.17", "master": "8:53.40", "level1": "9:42.00", "level2": "11:36.00", "level3": "12:05.00" },
+        "25": { "international_master": "8:26.71", "master": "8:45.20", "level1": "9:33.00", "level2": "11:20.00", "level3": "11:53.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "freestyle",
+      "distanceM": 1500,
+      "timesByPool": {
+        "50": { "international_master": "16:09.09", "master": "17:14.00", "level1": "18:35.00", "level2": "22:15.00", "level3": "22:55.00" },
+        "25": { "international_master": "16:15.27", "master": "17:00.50", "level1": "18:20.00", "level2": "21:45.00", "level3": "22:37.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "backstroke",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "28.22", "master": "30.55", "level1": "33.00", "level2": "38.50", "level3": "43.00" },
+        "25": { "international_master": "26.54", "master": "28.70", "level1": "31.00", "level2": "36.20", "level3": "40.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "backstroke",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "59.99", "master": "1:04.30", "level1": "1:09.00", "level2": "1:21.00", "level3": "1:31.00" },
+        "25": { "international_master": "58.08", "master": "1:01.55", "level1": "1:06.00", "level2": "1:17.50", "level3": "1:27.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "backstroke",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "2:10.39", "master": "2:18.30", "level1": "2:29.50", "level2": "2:53.00", "level3": "3:16.00" },
+        "25": { "international_master": "2:05.54", "master": "2:13.60", "level1": "2:24.50", "level2": "2:47.00", "level3": "3:09.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "breaststroke",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "31.02", "master": "31.70", "level1": "36.00", "level2": "41.00", "level3": "44.00" },
+        "25": { "international_master": "30.45", "master": "30.85", "level1": "34.70", "level2": "40.00", "level3": "42.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "breaststroke",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "1:06.79", "master": "1:10.75", "level1": "1:18.00", "level2": "1:27.00", "level3": "1:36.00" },
+        "25": { "international_master": "1:05.28", "master": "1:08.75", "level1": "1:15.80", "level2": "1:24.50", "level3": "1:33.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "breaststroke",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "2:23.91", "master": "2:36.60", "level1": "2:51.00", "level2": "3:13.00", "level3": "3:25.00" },
+        "25": { "international_master": "2:23.38", "master": "2:33.60", "level1": "2:47.00", "level2": "3:08.80", "level3": "3:21.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "butterfly",
+      "distanceM": 50,
+      "timesByPool": {
+        "50": { "international_master": "26.32", "master": "27.50", "level1": "30.50", "level2": "36.50", "level3": "38.00" },
+        "25": { "international_master": "25.82", "master": "27.40", "level1": "30.40", "level2": "36.40", "level3": "37.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "butterfly",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": { "international_master": "57.92", "master": "1:00.50", "level1": "1:08.00", "level2": "1:20.00", "level3": "1:23.00" },
+        "25": { "international_master": "57.40", "master": "59.00", "level1": "1:06.00", "level2": "1:18.00", "level3": "1:21.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "butterfly",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "2:08.85", "master": "2:14.20", "level1": "2:25.00", "level2": "2:54.50", "level3": "3:02.00" },
+        "25": { "international_master": "2:08.45", "master": "2:11.20", "level1": "2:22.00", "level2": "2:51.30", "level3": "2:59.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "medley",
+      "distanceM": 100,
+      "timesByPool": {
+        "50": {},
+        "25": { "international_master": "59.65", "master": "1:02.50", "level1": "1:07.40", "level2": "1:20.00", "level3": "1:25.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "medley",
+      "distanceM": 200,
+      "timesByPool": {
+        "50": { "international_master": "2:11.47", "master": "2:18.40", "level1": "2:30.00", "level2": "2:58.00", "level3": "3:08.00" },
+        "25": { "international_master": "2:10.16", "master": "2:13.70", "level1": "2:25.00", "level2": "2:52.00", "level3": "3:02.00" }
+      }
+    },
+    {
+      "gender": "female",
+      "stroke": "medley",
+      "distanceM": 400,
+      "timesByPool": {
+        "50": { "international_master": "4:38.53", "master": "4:56.80", "level1": "5:18.00", "level2": "6:21.00", "level3": "6:37.00" },
+        "25": { "international_master": "4:37.54", "master": "4:49.80", "level1": "5:10.00", "level2": "6:11.00", "level3": "6:27.00" }
+      }
+    }
+  ]
+}

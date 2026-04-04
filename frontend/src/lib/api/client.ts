@@ -51,3 +51,12 @@ export async function apiPatch<T>(path: string, body?: unknown) {
 
   return parseJSON<T>(response);
 }
+
+export async function apiDelete<T>(path: string) {
+  const response = await fetch(path, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return parseJSON<T>(response);
+}

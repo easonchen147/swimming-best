@@ -1,10 +1,13 @@
-import { apiGet, apiPatch, apiPost } from "@/lib/api/client";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api/client";
 import type {
   AdminGoal,
   AdminPerformance,
   AdminSwimmer,
   EventDefinition,
+  Gender,
+  StandardEntry,
   TeamSummary,
+  TimeStandard,
 } from "@/lib/types";
 
 export function loginAdmin(input: { username: string; password: string }) {
@@ -58,6 +61,7 @@ export function createAdminSwimmer(input: {
   nickname: string;
   publicNameMode: string;
   isPublic: boolean;
+  gender: Gender;
   teamId: string;
 }) {
   return apiPost<AdminSwimmer>("/api/admin/swimmers", input);
@@ -70,6 +74,7 @@ export function updateAdminSwimmer(
     nickname: string;
     publicNameMode: string;
     isPublic: boolean;
+    gender: Gender;
     teamId: string;
   },
 ) {
@@ -141,4 +146,139 @@ export function listAdminGoals() {
 
 export function listAdminPerformances() {
   return apiGet<{ performances: AdminPerformance[] }>("/api/admin/performances");
+}
+
+export function listAdminStandards() {
+  return apiGet<{ standards: TimeStandard[] }>("/api/admin/standards");
+}
+
+export function createAdminStandard(input: {
+  tierGroup: string;
+  name: string;
+  tierOrder: number;
+  colorHex: string;
+}) {
+  return apiPost<TimeStandard>("/api/admin/standards", input);
+}
+
+export function updateAdminStandard(
+  standardId: string,
+  input: Partial<{
+    tierGroup: string;
+    name: string;
+    tierOrder: number;
+    colorHex: string;
+  }>,
+) {
+  return apiPatch<TimeStandard>(`/api/admin/standards/${standardId}`, input);
+}
+
+export function deleteAdminStandard(standardId: string) {
+  return apiDelete<void>(`/api/admin/standards/${standardId}`);
+}
+
+export function listAdminStandardEntries(standardId: string) {
+  return apiGet<{ entries: StandardEntry[] }>(`/api/admin/standards/${standardId}/entries`);
+}
+
+export function createAdminStandardEntry(
+  standardId: string,
+  input: {
+    eventId: string;
+    gender: "male" | "female" | "all";
+    qualifyingTimeMs: number;
+  },
+) {
+  return apiPost<StandardEntry>(`/api/admin/standards/${standardId}/entries`, input);
+}
+
+export function updateAdminStandardEntry(
+  entryId: string,
+  input: Partial<{
+    eventId: string;
+    gender: "male" | "female" | "all";
+    qualifyingTimeMs: number;
+  }>,
+) {
+  return apiPatch<StandardEntry>(`/api/admin/standards/entries/${entryId}`, input);
+}
+
+export function deleteAdminStandardEntry(entryId: string) {
+  return apiDelete<void>(`/api/admin/standards/entries/${entryId}`);
+}
+
+async function parseResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let errorMessage = `Request failed with status ${response.status}`;
+    try {
+      const data = (await response.json()) as { error?: string };
+      if (data?.error) {
+        errorMessage = data.error;
+      }
+    } catch {}
+    throw new Error(errorMessage);
+  }
+
+  return (await response.json()) as T;
+}
+
+export type ImportPreviewResponse = {
+  validRows: Array<{
+    line: number;
+    swimmerId: string;
+    swimmerSlug: string;
+    eventId: string;
+    eventDisplay: string;
+    performedOn: string;
+    timeSeconds: number;
+    timeMs: number;
+    sourceType: string;
+    tags: string[];
+  }>;
+  errorRows: Array<{
+    line: number;
+    raw: Record<string, string>;
+    errors: string[];
+  }>;
+  summary: {
+    total: number;
+    valid: number;
+    errors: number;
+  };
+};
+
+export type ImportConfirmResponse = {
+  imported: number;
+  contextsCreated: number;
+  performancesCreated: number;
+  tagsCreated: number;
+};
+
+export async function previewImportCsv(file: File) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/admin/import/preview", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  return parseResponse<ImportPreviewResponse>(response);
+}
+
+export function confirmImportCsv(rows: ImportPreviewResponse["validRows"]) {
+  return apiPost<ImportConfirmResponse>("/api/admin/import/confirm", { rows });
+}
+
+export function getImportTemplateUrl() {
+  return "/api/admin/import/template";
+}
+
+export function getSwimmerExportUrl(swimmerId: string) {
+  return `/api/admin/export/swimmers/${swimmerId}/performances.csv`;
+}
+
+export function getTeamExportUrl(teamId: string) {
+  return `/api/admin/export/teams/${teamId}/performances.csv`;
 }

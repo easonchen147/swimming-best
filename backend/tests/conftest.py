@@ -1,12 +1,27 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from typing import Iterator
+from uuid import uuid4
 
 import pytest
 from werkzeug.security import generate_password_hash
 
 from swimming_best.app import create_app
+
+
+@pytest.fixture()
+def tmp_path() -> Iterator[Path]:
+    base = Path.cwd() / ".pytest-local"
+    base.mkdir(exist_ok=True)
+
+    path = base / str(uuid4())
+    path.mkdir()
+    try:
+        yield path
+    finally:
+        shutil.rmtree(path, ignore_errors=True)
 
 
 @pytest.fixture()

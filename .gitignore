@@ -1,5 +1,6 @@
 .codex/
 .claude/
+.gemini/
 .superpowers/
 .worktrees/
 worktrees/
@@ -7,7 +8,9 @@ worktrees/
 design-system/
 
 node_modules/
+.npm-cache/
 frontend/node_modules/
+frontend/.npm-cache/
 frontend/.next/
 frontend/dist/
 frontend/out/
@@ -22,7 +25,11 @@ frontend/*.tsbuildinfo
 backend/bin/
 backend/coverage.out
 backend/.venv/
+backend/.uv-cache*/
 backend/.pytest_cache/
+backend/.pytest-local/
+backend/pytest-ok/
+backend/pytesttmp*/
 backend/__pycache__/
 backend/.ruff_cache/
 backend/.mypy_cache/

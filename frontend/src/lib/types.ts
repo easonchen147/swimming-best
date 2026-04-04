@@ -5,6 +5,8 @@ export type TeamSummary = {
   isActive: boolean;
 };
 
+export type Gender = "male" | "female" | "unknown";
+
 export type PublicSwimmerSummary = {
   id: string;
   slug: string;
@@ -20,6 +22,7 @@ export type PublicSwimmerDetail = {
   displayName: string;
   teamId: string;
   team: TeamSummary;
+  gender: Gender;
 };
 
 export type EventDefinition = {
@@ -55,6 +58,55 @@ export type GoalProgress = {
   progress: number;
 };
 
+export type OfficialGrade = {
+  code: string;
+  label: string;
+  order: number;
+  qualifyingTimeMs: number;
+  qualifyingTime: string;
+};
+
+export type NextOfficialGrade = OfficialGrade & {
+  gapMs: number;
+};
+
+export type TimeStandard = {
+  id: string;
+  tierGroup: string;
+  name: string;
+  tierOrder: number;
+  colorHex: string;
+  createdAt?: string;
+};
+
+export type StandardEntry = {
+  id: string;
+  standardId: string;
+  eventId: string;
+  gender: "male" | "female" | "all";
+  qualifyingTimeMs: number;
+  tierGroup: string;
+  name: string;
+  tierOrder: number;
+  colorHex: string;
+  eventDisplayName: string;
+};
+
+export type CustomBenchmark = StandardEntry & {
+  achieved: boolean;
+};
+
+export type NextCustomBenchmark = StandardEntry & {
+  gapMs: number;
+};
+
+export type BenchmarkLine = {
+  name: string;
+  tierGroup: string;
+  colorHex: string;
+  qualifyingTimeMs: number;
+};
+
 export type PublicEventAnalytics = {
   swimmer: PublicSwimmerSummary;
   event: EventDefinition;
@@ -65,6 +117,12 @@ export type PublicEventAnalytics = {
     currentBestTimeMs: number;
   };
   goals: GoalProgress[];
+  officialGrade: OfficialGrade | null;
+  nextOfficialGrade: NextOfficialGrade | null;
+  officialGradeStatus: "ok" | "missing_gender" | "unavailable_for_event" | "no_valid_performance";
+  customStandards: CustomBenchmark[];
+  nextCustomStandard: NextCustomBenchmark | null;
+  benchmarkLines: BenchmarkLine[];
 };
 
 export type AdminSwimmer = {
@@ -74,6 +132,7 @@ export type AdminSwimmer = {
   nickname: string;
   publicNameMode: string;
   isPublic: boolean;
+  gender: Gender;
   teamId: string;
   team: TeamSummary;
 };

@@ -133,6 +133,7 @@ class Repository:
             "isPublic": is_public,
             "avatarUrl": payload.get("avatarUrl", "").strip(),
             "birthYear": int(payload.get("birthYear") or 0),
+            "gender": normalize_gender(payload.get("gender")),
             "teamId": team["id"],
             "team": team,
             "notes": payload.get("notes", "").strip(),
@@ -144,8 +145,8 @@ class Repository:
             """
             INSERT INTO swimmers (
               id, slug, real_name, nickname, public_name_mode, is_public,
-              avatar_url, birth_year, team_id, notes, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              avatar_url, birth_year, gender, team_id, notes, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 swimmer["id"],
@@ -156,6 +157,7 @@ class Repository:
                 int(swimmer["isPublic"]),
                 swimmer["avatarUrl"],
                 swimmer["birthYear"],
+                swimmer["gender"],
                 swimmer["teamId"],
                 swimmer["notes"],
                 swimmer["createdAt"],
@@ -187,6 +189,7 @@ class Repository:
             "isPublic": is_public,
             "avatarUrl": payload.get("avatarUrl", swimmer["avatarUrl"]).strip(),
             "birthYear": int(payload.get("birthYear", swimmer["birthYear"]) or 0),
+            "gender": normalize_gender(payload.get("gender", swimmer["gender"])),
             "teamId": team["id"],
             "team": team,
             "notes": payload.get("notes", swimmer["notes"]).strip(),
@@ -197,7 +200,7 @@ class Repository:
             """
             UPDATE swimmers
             SET real_name = ?, nickname = ?, public_name_mode = ?, is_public = ?, avatar_url = ?,
-                birth_year = ?, team_id = ?, notes = ?, updated_at = ?
+                birth_year = ?, gender = ?, team_id = ?, notes = ?, updated_at = ?
             WHERE id = ?
             """,
             (
@@ -207,6 +210,7 @@ class Repository:
                 int(updated["isPublic"]),
                 updated["avatarUrl"],
                 updated["birthYear"],
+                updated["gender"],
                 updated["teamId"],
                 updated["notes"],
                 updated["updatedAt"],
@@ -496,6 +500,7 @@ class Repository:
                g.public_note, g.admin_note, g.achieved_at, g.created_at, g.updated_at,
                s.id AS swimmer_ref_id, s.slug AS swimmer_slug, s.real_name, s.nickname,
                s.public_name_mode, s.is_public AS swimmer_is_public, s.avatar_url, s.birth_year,
+               s.gender,
                s.team_id, s.notes,
                t.name AS team_name, t.sort_order AS team_sort_order,
                t.is_active AS team_is_active, t.created_at AS team_created_at,
@@ -521,6 +526,7 @@ class Repository:
                    p.result_status, p.public_note, p.admin_note, p.created_at, p.updated_at,
                    s.id AS swimmer_ref_id, s.slug AS swimmer_slug, s.real_name, s.nickname,
                    s.public_name_mode, s.is_public AS swimmer_is_public, s.avatar_url, s.birth_year,
+                   s.gender,
                    s.team_id, s.notes,
                    t.name AS team_name, t.sort_order AS team_sort_order,
                    t.is_active AS team_is_active, t.created_at AS team_created_at,
@@ -543,6 +549,254 @@ class Repository:
                 performance["contextId"],
             )
         return performances
+
+    def create_standard(self, payload: dict[str, Any]) -> dict[str, Any]:
+        standard = {
+            "id": str(uuid4()),
+            "tierGroup": (payload.get("tierGroup") or "").strip(),
+            "name": (payload.get("name") or "").strip(),
+            "tierOrder": int(payload.get("tierOrder") or 0),
+            "colorHex": (payload.get("colorHex") or "#6b7280").strip() or "#6b7280",
+            "createdAt": utcnow(),
+        }
+        if not standard["tierGroup"] or not standard["name"]:
+            raise ValidationError("tier group and name are required")
+
+        self._execute(
+            """
+            INSERT INTO time_standards (id, tier_group, name, tier_order, color_hex, created_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                standard["id"],
+                standard["tierGroup"],
+                standard["name"],
+                standard["tierOrder"],
+                standard["colorHex"],
+                standard["createdAt"],
+            ),
+        )
+        self.connection.commit()
+        return self.get_standard(standard["id"])
+
+    def list_standards(self) -> list[dict[str, Any]]:
+        rows = self.connection.execute(
+            """
+            SELECT id, tier_group, name, tier_order, color_hex, created_at
+            FROM time_standards
+            ORDER BY tier_group ASC, tier_order ASC, created_at ASC
+            """
+        ).fetchall()
+        return [self._row_to_standard(row) for row in rows]
+
+    def get_standard(self, standard_id: str) -> dict[str, Any]:
+        row = self.connection.execute(
+            """
+            SELECT id, tier_group, name, tier_order, color_hex, created_at
+            FROM time_standards
+            WHERE id = ?
+            """,
+            (standard_id,),
+        ).fetchone()
+        if row is None:
+            raise NotFoundError("not_found")
+        return self._row_to_standard(row)
+
+    def update_standard(self, standard_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        standard = self.get_standard(standard_id)
+        updated = {
+            **standard,
+            "tierGroup": (payload.get("tierGroup", standard["tierGroup"]) or "").strip(),
+            "name": (payload.get("name", standard["name"]) or "").strip(),
+            "tierOrder": int(payload.get("tierOrder", standard["tierOrder"]) or 0),
+            "colorHex": (payload.get("colorHex", standard["colorHex"]) or "#6b7280").strip()
+            or "#6b7280",
+        }
+        if not updated["tierGroup"] or not updated["name"]:
+            raise ValidationError("tier group and name are required")
+
+        self._execute(
+            """
+            UPDATE time_standards
+            SET tier_group = ?, name = ?, tier_order = ?, color_hex = ?
+            WHERE id = ?
+            """,
+            (
+                updated["tierGroup"],
+                updated["name"],
+                updated["tierOrder"],
+                updated["colorHex"],
+                standard_id,
+            ),
+        )
+        self.connection.commit()
+        return self.get_standard(standard_id)
+
+    def delete_standard(self, standard_id: str) -> None:
+        self.get_standard(standard_id)
+        self.connection.execute("DELETE FROM time_standards WHERE id = ?", (standard_id,))
+        self.connection.commit()
+
+    def create_standard_entry(self, payload: dict[str, Any]) -> dict[str, Any]:
+        standard = self.get_standard(str(payload.get("standardId") or ""))
+        event = self._require_event(payload.get("eventId"))
+        entry = {
+            "id": str(uuid4()),
+            "standardId": standard["id"],
+            "eventId": event["id"],
+            "gender": normalize_standard_gender(payload.get("gender")),
+            "qualifyingTimeMs": int(payload.get("qualifyingTimeMs") or 0),
+            "createdAt": utcnow(),
+        }
+        if entry["qualifyingTimeMs"] <= 0:
+            raise ValidationError("qualifying time is required")
+
+        self._execute(
+            """
+            INSERT INTO time_standard_entries (
+              id, standard_id, event_id, gender, qualifying_time_ms, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                entry["id"],
+                entry["standardId"],
+                entry["eventId"],
+                entry["gender"],
+                entry["qualifyingTimeMs"],
+                entry["createdAt"],
+            ),
+        )
+        self.connection.commit()
+        return self.get_standard_entry(entry["id"])
+
+    def list_standard_entries(
+        self,
+        standard_id: str | None = None,
+        event_id: str | None = None,
+        gender: str | None = None,
+    ) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        params: list[Any] = []
+        if standard_id:
+            clauses.append("e.standard_id = ?")
+            params.append(standard_id)
+        if event_id:
+            clauses.append("e.event_id = ?")
+            params.append(event_id)
+        if gender:
+            clauses.append("e.gender = ?")
+            params.append(gender)
+
+        query = """
+        SELECT e.id, e.standard_id, e.event_id, e.gender, e.qualifying_time_ms, e.created_at,
+               s.tier_group, s.name, s.tier_order, s.color_hex,
+               ev.display_name
+        FROM time_standard_entries e
+        JOIN time_standards s ON s.id = e.standard_id
+        JOIN events ev ON ev.id = e.event_id
+        """
+        if clauses:
+            query += " WHERE " + " AND ".join(f"({clause})" for clause in clauses)
+        query += " ORDER BY s.tier_group ASC, s.tier_order ASC, ev.display_name ASC, e.gender ASC"
+        rows = self.connection.execute(query, params).fetchall()
+        return [self._row_to_standard_entry(row) for row in rows]
+
+    def get_standard_entry(self, entry_id: str) -> dict[str, Any]:
+        entries = self.list_standard_entries()
+        for entry in entries:
+            if entry["id"] == entry_id:
+                return entry
+        raise NotFoundError("not_found")
+
+    def update_standard_entry(self, entry_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        entry = self.get_standard_entry(entry_id)
+        standard_id = str(payload.get("standardId", entry["standardId"]) or "")
+        event_id = str(payload.get("eventId", entry["eventId"]) or "")
+        self.get_standard(standard_id)
+        self._require_event(event_id)
+        updated = {
+            **entry,
+            "standardId": standard_id,
+            "eventId": event_id,
+            "gender": normalize_standard_gender(payload.get("gender", entry["gender"])),
+            "qualifyingTimeMs": int(
+                payload.get("qualifyingTimeMs", entry["qualifyingTimeMs"]) or 0
+            ),
+        }
+        if updated["qualifyingTimeMs"] <= 0:
+            raise ValidationError("qualifying time is required")
+
+        self._execute(
+            """
+            UPDATE time_standard_entries
+            SET standard_id = ?, event_id = ?, gender = ?, qualifying_time_ms = ?
+            WHERE id = ?
+            """,
+            (
+                updated["standardId"],
+                updated["eventId"],
+                updated["gender"],
+                updated["qualifyingTimeMs"],
+                entry_id,
+            ),
+        )
+        self.connection.commit()
+        return self.get_standard_entry(entry_id)
+
+    def delete_standard_entry(self, entry_id: str) -> None:
+        self.get_standard_entry(entry_id)
+        self.connection.execute("DELETE FROM time_standard_entries WHERE id = ?", (entry_id,))
+        self.connection.commit()
+
+    def list_custom_standards_for_event(
+        self,
+        event_id: str,
+        swimmer_gender: str,
+    ) -> list[dict[str, Any]]:
+        genders = ["all"] if swimmer_gender == "unknown" else [swimmer_gender, "all"]
+        placeholders = ",".join("?" for _ in genders)
+        rows = self.connection.execute(
+            f"""
+            SELECT e.id, e.standard_id, e.event_id, e.gender, e.qualifying_time_ms, e.created_at,
+                   s.tier_group, s.name, s.tier_order, s.color_hex,
+                   ev.display_name
+            FROM time_standard_entries e
+            JOIN time_standards s ON s.id = e.standard_id
+            JOIN events ev ON ev.id = e.event_id
+            WHERE e.event_id = ? AND e.gender IN ({placeholders})
+            ORDER BY s.tier_group ASC, s.tier_order ASC, e.created_at ASC
+            """,
+            [event_id, *genders],
+        ).fetchall()
+
+        preferred: dict[str, dict[str, Any]] = {}
+        for row in rows:
+            entry = self._row_to_standard_entry(row)
+            existing = preferred.get(entry["standardId"])
+            if existing is None:
+                preferred[entry["standardId"]] = entry
+                continue
+            if existing["gender"] == "all" and entry["gender"] == swimmer_gender:
+                preferred[entry["standardId"]] = entry
+
+        return sorted(
+            preferred.values(),
+            key=lambda item: (item["tierGroup"], item["tierOrder"], item["name"]),
+        )
+
+    def get_next_custom_standard(
+        self,
+        time_ms: int,
+        event_id: str,
+        swimmer_gender: str,
+    ) -> dict[str, Any] | None:
+        for standard in self.list_custom_standards_for_event(event_id, swimmer_gender):
+            if time_ms > standard["qualifyingTimeMs"]:
+                return {
+                    **standard,
+                    "gapMs": time_ms - standard["qualifyingTimeMs"],
+                }
+        return None
 
     def best_time_ms(self, swimmer_id: str, event_id: str) -> int:
         row = self.connection.execute(
@@ -682,6 +936,15 @@ class Repository:
             raise ValidationError("team is inactive")
         return team
 
+    def _require_event(self, event_id: Any) -> dict[str, Any]:
+        normalized_event_id = str(event_id or "").strip()
+        if not normalized_event_id:
+            raise ValidationError("event is required")
+        try:
+            return self.get_event(normalized_event_id)
+        except NotFoundError as exc:
+            raise ValidationError("event not found") from exc
+
     def _list_swimmers(
         self,
         where_clauses: list[str] | None = None,
@@ -689,7 +952,7 @@ class Repository:
     ) -> list[dict[str, Any]]:
         query = """
         SELECT s.id, s.slug, s.real_name, s.nickname, s.public_name_mode, s.is_public,
-               s.avatar_url, s.birth_year, s.team_id, s.notes, s.created_at, s.updated_at,
+               s.avatar_url, s.birth_year, s.gender, s.team_id, s.notes, s.created_at, s.updated_at,
                t.name AS team_name, t.sort_order AS team_sort_order,
                t.is_active AS team_is_active, t.created_at AS team_created_at,
                t.updated_at AS team_updated_at
@@ -732,6 +995,7 @@ class Repository:
             "isPublic": bool(row["is_public"]),
             "avatarUrl": row["avatar_url"],
             "birthYear": row["birth_year"],
+            "gender": row["gender"],
             "teamId": row["team_id"],
             "team": self._team_from_swimmer_row(row),
             "notes": row["notes"],
@@ -751,6 +1015,31 @@ class Repository:
             "isActive": bool(row["is_active"]),
             "createdAt": row["created_at"],
             "updatedAt": row["updated_at"],
+        }
+
+    def _row_to_standard(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "tierGroup": row["tier_group"],
+            "name": row["name"],
+            "tierOrder": row["tier_order"],
+            "colorHex": row["color_hex"],
+            "createdAt": row["created_at"],
+        }
+
+    def _row_to_standard_entry(self, row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"],
+            "standardId": row["standard_id"],
+            "eventId": row["event_id"],
+            "gender": row["gender"],
+            "qualifyingTimeMs": row["qualifying_time_ms"],
+            "createdAt": row["created_at"],
+            "tierGroup": row["tier_group"],
+            "name": row["name"],
+            "tierOrder": row["tier_order"],
+            "colorHex": row["color_hex"],
+            "eventDisplayName": row["display_name"],
         }
 
     def _row_to_context(self, row: sqlite3.Row) -> dict[str, Any]:
@@ -792,6 +1081,7 @@ class Repository:
                 "isPublic": bool(row["swimmer_is_public"]),
                 "avatarUrl": row["avatar_url"],
                 "birthYear": row["birth_year"],
+                "gender": row["gender"],
                 "teamId": row["team_id"],
                 "team": self._team_from_swimmer_row(row),
                 "notes": row["notes"],
@@ -842,6 +1132,7 @@ class Repository:
                 "isPublic": bool(row["swimmer_is_public"]),
                 "avatarUrl": row["avatar_url"],
                 "birthYear": row["birth_year"],
+                "gender": row["gender"],
                 "teamId": row["team_id"],
                 "team": self._team_from_swimmer_row(row),
                 "notes": row["notes"],
@@ -886,3 +1177,17 @@ def normalized_tags(tags: list[str]) -> list[str]:
         seen.add(tag)
         unique_tags.append(tag)
     return unique_tags
+
+
+def normalize_gender(value: Any) -> str:
+    gender = str(value or "unknown").strip().lower()
+    if gender not in {"male", "female", "unknown"}:
+        raise ValidationError("invalid gender")
+    return gender
+
+
+def normalize_standard_gender(value: Any) -> str:
+    gender = str(value or "all").strip().lower()
+    if gender not in {"male", "female", "all"}:
+        raise ValidationError("invalid standard gender")
+    return gender

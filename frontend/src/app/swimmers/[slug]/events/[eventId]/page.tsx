@@ -9,8 +9,10 @@ import { toast } from "sonner";
 import { ImprovementChart } from "@/components/charts/improvement-chart";
 import { GoalGauge } from "@/components/charts/goal-gauge";
 import { PublicShell } from "@/components/layout/public-shell";
+import { CustomStandardsPanel } from "@/components/shared/custom-standards-panel";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
+import { OfficialGradePanel } from "@/components/shared/official-grade-panel";
 import { SourceTypeBadge } from "@/components/shared/source-type-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -82,10 +84,10 @@ export default function PublicEventDetailPage() {
         <h1 className="text-xl font-semibold text-primary">
           {analytics.event.displayName}
         </h1>
-      </Card>
+        </Card>
 
       <ImprovementChart
-        pb={analytics.series.pb}
+        benchmarkLines={analytics.benchmarkLines}
         raw={analytics.series.raw}
       />
 
@@ -107,6 +109,16 @@ export default function PublicEventDetailPage() {
         </Card>
 
         <div className="space-y-4">
+          <OfficialGradePanel
+            nextOfficialGrade={analytics.nextOfficialGrade}
+            officialGrade={analytics.officialGrade}
+            status={analytics.officialGradeStatus}
+          />
+          <CustomStandardsPanel
+            customStandards={analytics.customStandards}
+            nextCustomStandard={analytics.nextCustomStandard}
+          />
+
           <h2 className="text-lg font-semibold text-primary">目标与里程碑</h2>
           {analytics.goals.length === 0 ? (
             <Card>

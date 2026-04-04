@@ -14,6 +14,7 @@ import {
 
 import { Card } from "@/components/ui/card";
 import { formatTimeMS } from "@/lib/format";
+import type { BenchmarkLine } from "@/lib/types";
 
 type RawPoint = {
   performedOn: string;
@@ -21,17 +22,12 @@ type RawPoint = {
   sourceType?: string;
 };
 
-type PbPoint = {
-  performedOn: string;
-  timeMs: number;
-};
-
 export function ImprovementChart({
   raw,
-  pb,
+  benchmarkLines = [],
 }: {
   raw: RawPoint[];
-  pb: PbPoint[];
+  benchmarkLines?: BenchmarkLine[];
 }) {
   if (raw.length === 0) {
     return (
@@ -108,6 +104,15 @@ export function ImprovementChart({
             }}
           />
           <ReferenceLine y={0} stroke="rgba(15,23,42,0.15)" />
+          {benchmarkLines.map((line) => (
+            <ReferenceLine
+              key={`${line.tierGroup}-${line.name}-${line.qualifyingTimeMs}`}
+              label={{ value: line.name, fill: line.colorHex, fontSize: 10, position: "right" }}
+              stroke={line.colorHex}
+              strokeDasharray="4 4"
+              y={firstTime - line.qualifyingTimeMs}
+            />
+          ))}
           <Bar dataKey="deltaMs" radius={[4, 4, 0, 0]} maxBarSize={40}>
             {data.map((entry, index) => (
               <Cell

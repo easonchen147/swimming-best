@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS swimmers (
   is_public INTEGER NOT NULL,
   avatar_url TEXT NOT NULL DEFAULT '',
   birth_year INTEGER NOT NULL DEFAULT 0,
+  gender TEXT NOT NULL DEFAULT 'unknown',
   team_id TEXT NOT NULL,
   notes TEXT NOT NULL DEFAULT '',
   created_at TEXT NOT NULL,
@@ -103,6 +104,28 @@ CREATE TABLE IF NOT EXISTS tags (
   created_at TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS time_standards (
+  id TEXT PRIMARY KEY,
+  tier_group TEXT NOT NULL,
+  name TEXT NOT NULL,
+  tier_order INTEGER NOT NULL,
+  color_hex TEXT NOT NULL DEFAULT '#6b7280',
+  created_at TEXT NOT NULL,
+  UNIQUE (tier_group, name)
+);
+
+CREATE TABLE IF NOT EXISTS time_standard_entries (
+  id TEXT PRIMARY KEY,
+  standard_id TEXT NOT NULL,
+  event_id TEXT NOT NULL,
+  gender TEXT NOT NULL DEFAULT 'all',
+  qualifying_time_ms INTEGER NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (standard_id) REFERENCES time_standards(id) ON DELETE CASCADE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  UNIQUE (standard_id, event_id, gender)
+);
+
 CREATE TABLE IF NOT EXISTS context_tags (
   context_id TEXT NOT NULL,
   tag_id TEXT NOT NULL,
@@ -124,6 +147,9 @@ CREATE INDEX IF NOT EXISTS idx_performances_swimmer_event_date
 
 CREATE INDEX IF NOT EXISTS idx_goals_swimmer_event_date
   ON goals (swimmer_id, event_id, target_date);
+
+CREATE INDEX IF NOT EXISTS idx_time_standard_entries_lookup
+  ON time_standard_entries (event_id, gender, qualifying_time_ms);
 
 """
 
@@ -148,6 +174,7 @@ def get_db() -> sqlite3.Connection:
 def init_db(connection: sqlite3.Connection) -> None:
     connection.executescript(SCHEMA_SQL)
     migrate_legacy_team_model(connection)
+    migrate_swimmer_gender(connection)
     connection.execute(
         """
         CREATE INDEX IF NOT EXISTS idx_swimmers_team_id
@@ -205,6 +232,7 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
               is_public INTEGER NOT NULL,
               avatar_url TEXT NOT NULL DEFAULT '',
               birth_year INTEGER NOT NULL DEFAULT 0,
+              gender TEXT NOT NULL DEFAULT 'unknown',
               team_id TEXT NOT NULL,
               notes TEXT NOT NULL DEFAULT '',
               created_at TEXT NOT NULL,
@@ -219,8 +247,8 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
                 """
                 INSERT INTO swimmers_managed (
                   id, slug, real_name, nickname, public_name_mode, is_public,
-                  avatar_url, birth_year, team_id, notes, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  avatar_url, birth_year, gender, team_id, notes, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     row["id"],
@@ -231,6 +259,7 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
                     row["is_public"],
                     row["avatar_url"],
                     row["birth_year"],
+                    "unknown",
                     team_assignments[row["id"]],
                     row["notes"],
                     row["created_at"],
@@ -326,3 +355,24 @@ def validate_managed_team_integrity(connection: sqlite3.Connection) -> None:
     ).fetchone()["count"]
     if orphaned_teams:
         raise RuntimeError("managed team migration left swimmers with orphaned team references")
+
+
+def migrate_swimmer_gender(connection: sqlite3.Connection) -> None:
+    swimmer_columns = {row["name"] for row in connection.execute("PRAGMA table_info(swimmers)")}
+    if "gender" in swimmer_columns:
+        return
+
+    connection.execute(
+        """
+        ALTER TABLE swimmers
+        ADD COLUMN gender TEXT NOT NULL DEFAULT 'unknown'
+        """
+    )
+    connection.execute(
+        """
+        UPDATE swimmers
+        SET gender = 'unknown'
+        WHERE gender IS NULL OR TRIM(gender) = ''
+        """
+    )
+    connection.commit()

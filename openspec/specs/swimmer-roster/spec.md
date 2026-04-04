@@ -5,40 +5,32 @@ TBD - created by archiving change build-swimming-performance-system. Update Purp
 ## Requirements
 ### Requirement: The system SHALL manage multiple swimmer profiles
 The system SHALL allow administrators to create, update, list, and review
-swimmer profiles for multiple children within one installation. Each swimmer
-profile MUST reference one managed team entity, and the system MUST persist that
-association as structured data rather than a free-text team/group field.
+swimmer profiles for multiple children. The swimmer management interface SHALL
+be completely modernized with a high-quality "dashboard" aesthetic. Profile
+cards, team selectors, and editing forms MUST feature fluid animations,
+refined typography, and a cohesive, modern layout. The system MUST continue
+to associate each profile with a structured managed team entity and gender.
 
 #### Scenario: Administrator creates a swimmer with a managed team assignment
-- **WHEN** an administrator submits a valid swimmer profile with a selected team
-  identifier from the managed team directory
-- **THEN** the system stores the swimmer, persists the selected team association,
-  and exposes the swimmer with structured team data in subsequent admin reads
+- **WHEN** an administrator submits a valid swimmer profile with a team identifier
+- **THEN** the system stores the profile and provides immediate, fluid visual
+  confirmation (e.g., a "success" checkmark animation) before smoothly returning
+  to the roster list
 
 #### Scenario: Administrator updates a swimmer team assignment
-- **WHEN** an administrator edits an existing swimmer profile and selects a
-  different managed team
-- **THEN** the system persists the updated team association and later admin
-  workflows expose the swimmer under the newly assigned team
-
-#### Scenario: Administrator submits an unknown team assignment
-- **WHEN** an administrator submits a swimmer create or update request with a
-  team identifier that does not exist in the managed team directory
-- **THEN** the system rejects the request and does not persist the swimmer change
+- **WHEN** an administrator edits a swimmer and selects a different team
+- **THEN** the system reflects the update using a smooth transition (e.g., cross-fade)
+  and confirms the change with high-quality interaction feedback
 
 ### Requirement: Swimmer profiles SHALL control public identity and visibility
-Each swimmer profile SHALL support public visibility controls and identity
-display modes of real name, nickname, or admin-only hidden. Public-safe payloads
-MUST use the configured display identity and MUST expose the swimmer's assigned
-managed team when roster, detail, compare, or share workflows use team data to
-distinguish children safely.
-
-#### Scenario: Public page requests a hidden swimmer
-- **WHEN** a swimmer is configured as not publicly visible
-- **THEN** public listing and detail endpoints exclude that swimmer
+Each swimmer profile SHALL support visibility controls and identity display modes.
+The interface for these controls SHALL be modernized with polished toggles,
+refined tooltips, and fluid state changes. Public-safe displays of the roster
+and profiles MUST adhere to the new, aesthetically-superior design system.
 
 #### Scenario: Public page requests a nickname-mode swimmer with a managed team
-- **WHEN** a swimmer is public, configured for nickname display, and assigned to
-  a managed team
-- **THEN** public payloads expose the nickname as the swimmer display name and
-  include the structured team data used to distinguish that swimmer
+- **WHEN** a swimmer is public, nickname-mode, and assigned a team
+- **THEN** public payloads render using the modern design system, featuring
+  polished typography, card-level depth, and fluid entrance animations while
+  correctly displaying the nickname and team
+
