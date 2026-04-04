@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
+import { DatePickerInput } from "@/components/shared/date-picker";
 import { Field, SelectField } from "@/components/shared/form-field";
 import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
@@ -216,12 +217,11 @@ export default function AdminRecordsPage() {
                 </div>
 
                 <Field label="发生日期">
-                  <Input
-                    className="h-11"
-                    onChange={(event) =>
-                      setQuickForm((current) => ({ ...current, performedOn: event.target.value }))
+                  <DatePickerInput
+                    ariaLabel="发生日期"
+                    onChange={(value) =>
+                      setQuickForm((current) => ({ ...current, performedOn: value }))
                     }
-                    type="date"
                     value={quickForm.performedOn}
                   />
                 </Field>
@@ -298,12 +298,11 @@ export default function AdminRecordsPage() {
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label="场景日期">
-                    <Input
-                      className="h-11"
-                      onChange={(event) =>
-                        setContextForm((current) => ({ ...current, performedOn: event.target.value }))
+                    <DatePickerInput
+                      ariaLabel="场景日期"
+                      onChange={(value) =>
+                        setContextForm((current) => ({ ...current, performedOn: value }))
                       }
-                      type="date"
                       value={contextForm.performedOn}
                     />
                   </Field>

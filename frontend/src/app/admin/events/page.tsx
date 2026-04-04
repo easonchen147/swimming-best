@@ -98,7 +98,12 @@ export default function AdminEventsPage() {
 
     try {
       const created = await createAdminEvent(form);
-      setEvents((current) => dedupeEvents([...current, created]));
+      const nextEvents = dedupeEvents([...events, created]);
+      if (nextEvents.length === events.length) {
+        toast.error("该项目已经存在");
+        return;
+      }
+      setEvents(nextEvents);
       setForm({
         poolLengthM: 25,
         distanceM: 50,

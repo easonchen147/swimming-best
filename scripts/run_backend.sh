@@ -28,18 +28,19 @@ print_usage() {
   logs            查看日志，默认尾部 50 行
 
 默认启动方式：
-  脚本默认通过 Waitress 启动 WSGI 服务，不会出现 Flask development server 的警告。
+  Linux 环境默认通过 Gunicorn 启动。
+  Windows 环境默认回退到 Waitress。
 
 环境变量：
-  SWIMMING_BEST_CONFIG         指定配置文件，默认 ./backend/config.toml
-  BACKEND_RUNTIME_DIR          指定 runtime 目录，默认 ./runtime
-  BACKEND_PID_FILE             指定 pid 文件路径
-  BACKEND_LOG_FILE             指定日志文件路径
-  BACKEND_RUNNER               自定义启动命令，例如：
-                               BACKEND_RUNNER='uv run python -m swimming_best'
-  SWIMMING_BEST_USE_FLASK_DEV  设为 1 时，显式改用 Flask 自带开发服务器
-  SWIMMING_BEST_WAITRESS_THREADS
-                               Waitress 线程数，默认 8
+  SWIMMING_BEST_CONFIG           指定配置文件，默认 ./backend/config.toml
+  BACKEND_RUNTIME_DIR            指定 runtime 目录，默认 ./runtime
+  BACKEND_PID_FILE               指定 pid 文件路径
+  BACKEND_LOG_FILE               指定日志文件路径
+  BACKEND_RUNNER                 自定义启动命令，例如：
+                                 BACKEND_RUNNER='uv run python -m swimming_best'
+  SWIMMING_BEST_USE_FLASK_DEV    设为 1 时，显式改用 Flask 自带开发服务器
+  SWIMMING_BEST_GUNICORN_WORKERS Gunicorn worker 数，默认 2
+  SWIMMING_BEST_GUNICORN_THREADS Gunicorn 线程数，默认 4
 EOF
 }
 
@@ -138,13 +139,6 @@ ensure_deps() {
     return 0
   fi
 
-  if command -v python3 >/dev/null 2>&1; then
-    if ! python3 -c "import flask, waitress" 2>/dev/null; then
-      echo "[backend] 警告：Flask 或 Waitress 未安装，请手动执行 pip install -e ." >&2
-    fi
-    return 0
-  fi
-
   return 0
 }
 
@@ -162,8 +156,10 @@ EOF
 announce_server_mode() {
   if [[ "${SWIMMING_BEST_USE_FLASK_DEV:-0}" == "1" ]]; then
     echo "[backend] 当前显式使用 Flask 开发服务器"
+  elif [[ "$(uname -s)" == "Linux" ]]; then
+    echo "[backend] 当前使用 Gunicorn"
   else
-    echo "[backend] 当前使用 Waitress WSGI 服务"
+    echo "[backend] 当前使用 Waitress"
   fi
 }
 

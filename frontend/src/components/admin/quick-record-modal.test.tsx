@@ -44,11 +44,10 @@ describe("QuickRecordModal", () => {
       events: [
         {
           id: "event-1",
-          displayName: "50m 自由泳",
+          displayName: "50米 自由泳（短池）",
           poolLengthM: 25,
           distanceM: 50,
           stroke: "freestyle",
-          effortType: "sprint",
           sortOrder: 1,
           isActive: true,
         },
@@ -58,9 +57,7 @@ describe("QuickRecordModal", () => {
   });
 
   it("loads selectors and submits a quick record", async () => {
-    render(
-      <QuickRecordModal onOpenChange={vi.fn()} open />,
-    );
+    render(<QuickRecordModal onOpenChange={vi.fn()} open />);
 
     expect(await screen.findByText("快速成绩录入")).toBeInTheDocument();
 

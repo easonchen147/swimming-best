@@ -28,9 +28,7 @@ describe("AdminShell", () => {
       </AdminShell>,
     );
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: "后台概览" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "后台概览" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "打开导航" }));
 
@@ -38,15 +36,15 @@ describe("AdminShell", () => {
     expect(screen.getAllByText("队伍").length).toBeGreaterThan(0);
   });
 
-  it("opens quick record modal from shortcut button and keyboard", () => {
+  it("removes header shortcut hint and keeps public-page button plus keyboard quick record", () => {
     render(
       <AdminShell description="后台说明" title="后台概览">
         <div>body</div>
       </AdminShell>,
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: /快速录入/i })[0]);
-    expect(screen.getByText("quick-record-modal:true")).toBeInTheDocument();
+    expect(screen.queryByText(/Ctrl \/ Cmd \+ K/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
     expect(quickRecordModal).toHaveBeenCalled();

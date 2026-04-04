@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import {
-  Activity,
+  ArrowDown,
   ArrowRight,
   Flag,
   Layers,
@@ -34,6 +34,33 @@ import {
 } from "@/lib/api/admin";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 
+const workflowItems = [
+  {
+    title: "维护队伍与孩子档案",
+    desc: "先建立队伍和孩子档案，后面的成绩、目标和公开页都会依赖这些关系。",
+    icon: ShieldCheck,
+    step: "01",
+  },
+  {
+    title: "使用系统内置项目",
+    desc: "项目目录默认来自国家标准，长池/短池天然分开，尽量直接选用。",
+    icon: Layers,
+    step: "02",
+  },
+  {
+    title: "录入成绩并追踪进步",
+    desc: "所有成绩统一按秒录入，训练、测试、比赛只表示成绩来源。",
+    icon: TrendingUp,
+    step: "03",
+  },
+  {
+    title: "建立阶段目标",
+    desc: "设置短期或长期目标，公开页会自动展示还差多少秒。",
+    icon: Target,
+    step: "04",
+  },
+];
+
 export default function AdminDashboardPage() {
   const [username, setUsername] = useState("");
   const [swimmerCount, setSwimmerCount] = useState(0);
@@ -52,36 +79,9 @@ export default function AdminDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const workflowItems = [
-    {
-      title: "维护队伍与孩子档案",
-      desc: "先把队伍和孩子基础信息建好，后面的成绩、目标和公开页都会依赖这些关系。",
-      icon: ShieldCheck,
-      step: "01",
-    },
-    {
-      title: "使用系统内置项目",
-      desc: "系统默认已经带入国家标准项目目录，直接选用；只有确实不够时再补自定义项目。",
-      icon: Layers,
-      step: "02",
-    },
-    {
-      title: "录入成绩并追踪进步",
-      desc: "所有成绩统一按秒输入，训练、测试、比赛只作为成绩来源，不再参与项目定义。",
-      icon: Activity,
-      step: "03",
-    },
-    {
-      title: "建立阶段目标",
-      desc: "为孩子设置短期或长期目标，公开页会自动展示还差多少秒。",
-      icon: Target,
-      step: "04",
-    },
-  ];
-
   return (
     <AdminShell
-      description="这里是系统总览。你可以快速检查项目、队伍和孩子规模，并直接从下方快捷操作进入常用流程。"
+      description="这里是系统总览。你可以快速检查项目、队伍和孩子规模，并从下方快捷操作与管理流程继续推进。"
       title="管理后台首页"
     >
       <motion.div
@@ -116,8 +116,8 @@ export default function AdminDashboardPage() {
           </motion.div>
         )}
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <motion.div className="lg:col-span-2" variants={FADE_IN_UP}>
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+          <motion.div variants={FADE_IN_UP}>
             <Card className="h-full border-border/40 shadow-xl shadow-primary/5">
               <CardHeader className="border-b border-border/40 bg-surface/30 pb-8">
                 <div className="flex items-center gap-3">
@@ -125,72 +125,74 @@ export default function AdminDashboardPage() {
                     <TrendingUp className="h-5 w-5" />
                   </div>
                   <div>
-                    <CardTitle className="text-xl">推荐管理流程</CardTitle>
+                    <CardTitle className="text-xl">推进管理流程</CardTitle>
                     <CardDescription>
-                      先用系统内置的国家项目目录，再录成绩和目标，整个数据口径会更稳定。
+                      用一条流程线把常见管理动作串起来，避免遗漏关键步骤。
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="p-8">
-                <motion.div
-                  animate="animate"
-                  className="grid gap-8 md:grid-cols-2"
-                  initial="initial"
-                  variants={STAGGER_CONTAINER}
-                >
-                  {workflowItems.map((item) => (
-                    <motion.div
-                      className="group relative flex items-start gap-6 transition-all"
-                      key={item.step}
-                      variants={FADE_IN_UP}
-                    >
-                      <div className="flex shrink-0 flex-col items-center gap-2">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-[20px] border border-border/60 bg-surface text-muted transition-all group-hover:-translate-y-1 group-hover:border-primary group-hover:bg-primary group-hover:text-white group-hover:shadow-lg group-hover:shadow-primary/20">
-                          <item.icon className="h-7 w-7" />
-                        </div>
-                        <span className="font-mono text-[10px] font-bold text-muted/30 transition-colors group-hover:text-primary">
+                <div className="relative pl-8">
+                  <div className="absolute bottom-8 left-4 top-4 w-px bg-gradient-to-b from-primary/40 via-primary/20 to-transparent" />
+                  <div className="flex flex-col gap-8">
+                    {workflowItems.map((item, index) => (
+                      <div className="relative flex gap-5" key={item.step}>
+                        <div className="absolute left-[-8px] top-3 flex h-6 w-6 items-center justify-center rounded-full border border-primary/20 bg-white text-[9px] font-black text-primary shadow-md">
                           {item.step}
-                        </span>
+                        </div>
+                        <div className="ml-8 flex flex-1 flex-col rounded-[28px] border border-border/60 bg-white/80 p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-2">
+                              <h4 className="text-lg font-black tracking-tight text-foreground">
+                                {item.title}
+                              </h4>
+                              <p className="text-sm leading-relaxed text-muted/80">
+                                {item.desc}
+                              </p>
+                            </div>
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/8 text-primary">
+                              <item.icon className="h-6 w-6" />
+                            </div>
+                          </div>
+                          {index < workflowItems.length - 1 ? (
+                            <div className="mt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-primary/45">
+                              <span>Next Step</span>
+                              <ArrowDown className="h-3.5 w-3.5" />
+                            </div>
+                          ) : null}
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-1 pt-1">
-                        <h4 className="text-lg font-black tracking-tight text-foreground transition-colors group-hover:text-primary">
-                          {item.title}
-                        </h4>
-                        <p className="text-sm font-medium leading-relaxed text-muted/80">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                    ))}
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
 
           <motion.div variants={FADE_IN_UP}>
-            <Card className="h-full overflow-hidden border-none bg-primary text-white shadow-2xl shadow-primary/20">
+            <Card className="h-full overflow-hidden border-none bg-[linear-gradient(160deg,#171717_0%,#2d2d2d_100%)] text-white shadow-2xl shadow-black/20">
               <div className="absolute inset-0 z-0">
                 <div className="grid-sheen absolute inset-0 opacity-10" />
-                <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-secondary opacity-30 blur-[60px]" />
+                <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-primary/35 blur-[60px]" />
               </div>
               <CardHeader className="relative z-10 pb-8">
                 <CardTitle className="text-2xl font-black">快速操作</CardTitle>
-                <CardDescription className="text-white/60">
-                  常用动作集中放在这里，不再占用顶部栏位。
+                <CardDescription className="text-white/65">
+                  直接从这里完成最常用的动作，不再依赖顶部提示。
                 </CardDescription>
               </CardHeader>
               <CardContent className="relative z-10 flex flex-col gap-3">
                 <Button
-                  className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
+                  className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
                   onClick={() => triggerQuickRecord()}
                   variant="outline"
                 >
                   <div className="flex items-center gap-3">
-                    <Zap className="h-5 w-5" />
+                    <Zap className="h-5 w-5 text-amber-300" />
                     <div className="flex flex-col items-start">
-                      <span className="text-base font-bold">快速录入成绩</span>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+                      <span className="text-base font-black">快速录入成绩</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
                         Ctrl / Cmd + K
                       </span>
                     </div>
@@ -199,35 +201,47 @@ export default function AdminDashboardPage() {
                 </Button>
                 <Link href="/admin/goals">
                   <Button
-                    className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
+                    className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
                     variant="outline"
                   >
                     <div className="flex items-center gap-3">
-                      <Flag className="h-5 w-5" />
-                      <span className="text-base font-bold">添加目标成绩</span>
+                      <Flag className="h-5 w-5 text-emerald-300" />
+                      <div className="flex flex-col items-start">
+                        <span className="text-base font-black">添加目标成绩</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                          Goal Setup
+                        </span>
+                      </div>
                     </div>
                     <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
                   </Button>
                 </Link>
                 <Link href="/admin/events">
                   <Button
-                    className="group h-14 w-full justify-between rounded-2xl border-white/20 bg-white/10 px-6 text-white hover:border-white/40 hover:bg-white/20"
+                    className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
                     variant="outline"
                   >
                     <div className="flex items-center gap-3">
-                      <Layers className="h-5 w-5" />
-                      <span className="text-base font-bold">查看项目目录</span>
+                      <Layers className="h-5 w-5 text-sky-300" />
+                      <div className="flex flex-col items-start">
+                        <span className="text-base font-black">查看项目目录</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                          Event Catalog
+                        </span>
+                      </div>
                     </div>
                     <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
                   </Button>
                 </Link>
               </CardContent>
               <CardFooter className="relative z-10 pb-8 pt-12">
-                <div className="flex w-full flex-col items-center gap-2 opacity-40">
+                <div className="flex w-full flex-col items-center gap-2 opacity-45">
                   <div className="text-[10px] font-bold uppercase tracking-[0.4em]">
                     Swimming Best
                   </div>
-                  <div className="text-[9px] font-medium italic">National Event Catalog</div>
+                  <div className="text-[9px] font-medium italic">
+                    Unified Admin Shortcuts
+                  </div>
                 </div>
               </CardFooter>
             </Card>

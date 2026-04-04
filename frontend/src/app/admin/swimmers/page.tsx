@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
+import { YearPickerInput } from "@/components/shared/date-picker";
 import { Field } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -59,9 +60,6 @@ export default function AdminSwimmersPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-  const currentYear = new Date().getFullYear();
-  const birthYearOptions = Array.from({ length: 26 }, (_, index) => String(currentYear - index));
-
   useEffect(() => {
     Promise.all([listAdminSwimmers(), listAdminTeams()]).then(([swimmerResponse, teamResponse]) => {
       setSwimmers(swimmerResponse.swimmers);
@@ -198,19 +196,13 @@ export default function AdminSwimmersPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="出生年份">
-                    <Select
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, birthYear: event.target.value }))
+                    <YearPickerInput
+                      ariaLabel="出生年份"
+                      onChange={(value) =>
+                        setForm((current) => ({ ...current, birthYear: value }))
                       }
                       value={form.birthYear}
-                    >
-                      <option value="">请选择年份</option>
-                      {birthYearOptions.map((year) => (
-                        <option key={year} value={year}>
-                          {year}
-                        </option>
-                      ))}
-                    </Select>
+                    />
                   </Field>
                   <Field label="备注">
                     <Input

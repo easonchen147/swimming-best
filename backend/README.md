@@ -54,16 +54,19 @@ cd backend
 uv run python -m swimming_best
 ```
 
-上面这两个命令现在默认通过 `waitress` 启动 WSGI 服务，因此不会再打印 Flask development server 的那条警告。
+当前默认运行策略是：
 
-如果你明确就是要用 Flask 自带开发服务器，可以显式加环境变量：
+- Linux 环境默认使用 `gunicorn`
+- Windows 环境默认回退到 `waitress`
+
+如果你明确要切回 Flask 自带开发服务器，可以显式加环境变量：
 
 ```bash
 cd backend
 SWIMMING_BEST_USE_FLASK_DEV=1 uv run python -m swimming_best
 ```
 
-仓库根目录也提供了脚本：
+仓库根目录还提供了 Linux 风格启动脚本：
 
 ```bash
 ./scripts/run_backend.sh start
@@ -105,4 +108,4 @@ uv run ruff check swimming_best tests
 
 ## 说明
 
-仓库当前保留了腾讯源配置，方便国内环境同步依赖。如果某台机器需要切换到其他镜像，优先通过本地配置或环境变量覆盖，不要直接删掉仓库里的国内源设置。
+仓库当前保留了腾讯源配置，方便国内环境同步依赖。如果某台机器需要切换到其他镜像，优先通过本地配置或环境变量覆盖，不要直接删除仓库里的国内源设置。

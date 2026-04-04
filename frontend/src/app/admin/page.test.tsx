@@ -7,6 +7,7 @@ const getAdminMe = vi.fn();
 const listAdminSwimmers = vi.fn();
 const listAdminEvents = vi.fn();
 const listAdminTeams = vi.fn();
+const triggerQuickRecord = vi.fn();
 
 vi.mock("@/components/layout/admin-shell", () => ({
   AdminShell: ({
@@ -21,7 +22,7 @@ vi.mock("@/components/layout/admin-shell", () => ({
       {children}
     </div>
   ),
-  triggerQuickRecord: vi.fn(),
+  triggerQuickRecord: () => triggerQuickRecord(),
 }));
 
 vi.mock("@/lib/api/admin", () => ({
@@ -40,17 +41,19 @@ describe("AdminDashboardPage", () => {
     listAdminTeams.mockResolvedValue({ teams: [] });
   });
 
-  it("renders quick actions with goal link and quick record trigger", async () => {
+  it("renders flowchart guidance and quick actions", async () => {
     render(<AdminDashboardPage />);
 
     expect(await screen.findByRole("button", { name: /快速录入成绩/i })).toBeInTheDocument();
     expect(screen.getByText(/Ctrl \/ Cmd \+ K/i)).toBeInTheDocument();
+    expect(screen.getByText("推进管理流程")).toBeInTheDocument();
+    expect(screen.getAllByText("Next Step").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: /添加目标成绩/i })).toHaveAttribute(
       "href",
       "/admin/goals",
     );
-    expect(screen.getByRole("link", { name: /查看项目目录/i })).toHaveAttribute("href", "/admin/events");
 
     fireEvent.click(screen.getByRole("button", { name: /快速录入成绩/i }));
+    expect(triggerQuickRecord).toHaveBeenCalled();
   });
 });

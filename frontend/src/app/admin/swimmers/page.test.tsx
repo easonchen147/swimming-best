@@ -71,23 +71,20 @@ describe("AdminSwimmersPage", () => {
     });
   });
 
-  it("submits swimmer gender to the admin api", async () => {
+  it("submits swimmer gender and selected birth year to the admin api", async () => {
     render(<AdminSwimmersPage />);
 
     const inputs = await screen.findAllByRole("textbox");
+    fireEvent.change(inputs[0], { target: { value: "Alice Wang" } });
+    fireEvent.change(inputs[1], { target: { value: "小海豚" } });
 
-    fireEvent.change(inputs[0], {
-      target: { value: "Alice Wang" },
-    });
-    fireEvent.change(inputs[1], {
-      target: { value: "小海豚" },
-    });
     fireEvent.change(screen.getByLabelText("性别"), {
       target: { value: "female" },
     });
-    fireEvent.change(screen.getByLabelText("出生年份"), {
-      target: { value: "2016" },
-    });
+
+    fireEvent.click(screen.getByRole("button", { name: "出生年份" }));
+    fireEvent.click(screen.getByRole("button", { name: "2016" }));
+
     fireEvent.click(screen.getByRole("button", { name: "创建档案" }));
 
     await waitFor(() => {

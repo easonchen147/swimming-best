@@ -48,7 +48,7 @@ export function AdminShell({
   const [open, setOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(
     process.env.NODE_ENV === "test"
-      || process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "1",
+    || process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "1",
   );
   const [quickRecordOpen, setQuickRecordOpen] = useState(false);
 
@@ -128,17 +128,11 @@ export function AdminShell({
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="hidden items-center gap-2 rounded-full border border-border/60 bg-surface px-4 py-2 text-xs font-bold uppercase tracking-widest text-muted/70 md:flex">
-                <Zap className="h-3.5 w-3.5 text-amber-500" />
-                <span>Ctrl / Cmd + K</span>
-              </div>
-              <Link href="/">
-                <Button className="rounded-full" size="sm" variant="ghost">
-                  查看公开页
-                </Button>
-              </Link>
-            </div>
+            <Link href="/">
+              <button className="cursor-pointer rounded-full bg-foreground px-5 py-2 text-sm font-bold text-background transition-all hover:bg-foreground/90 active:scale-95">
+                查看公开页
+              </button>
+            </Link>
           </div>
 
           <AnimatePresence>

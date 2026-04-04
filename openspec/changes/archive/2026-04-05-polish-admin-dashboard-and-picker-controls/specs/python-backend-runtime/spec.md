@@ -1,10 +1,4 @@
-# python-backend-runtime Specification
-
-## Purpose
-Define how the Python backend is started, documented, and verified after the
-Go backend migration is complete.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Backend APIs SHALL be served by a Python Flask service backed by SQLite
 The system SHALL provide the protected admin APIs, public read-only APIs, and
@@ -18,11 +12,6 @@ over Waitress as the production-facing WSGI server.
 - **THEN** the service starts successfully and serves `/healthz`, `/api/admin/*`,
   and `/api/public/*` without relying on Flask's development server
 
-#### Scenario: Existing product workflows remain reachable after migration
-- **WHEN** the frontend or tests call the documented admin and public API routes
-- **THEN** the Python backend handles those routes and preserves the system's
-  login protection and core product workflows
-
 ### Requirement: Repository runtime references SHALL use Python tooling after migration
 Once the Python backend replacement is complete, the repository SHALL use
 Python tooling for backend setup, execution, and verification, and SHALL no
@@ -34,9 +23,3 @@ runtime path SHALL reference Gunicorn.
   startup script
 - **THEN** the production-facing backend instructions reference Python, Poetry,
   uv, Gunicorn, and pytest rather than Go tooling or Waitress-first guidance
-
-#### Scenario: Repository is inspected for backend implementation assets
-- **WHEN** the migration is complete and the repository is searched for backend
-  runtime assets
-- **THEN** no Go backend source files, modules, tests, build files, or backend
-  command references remain

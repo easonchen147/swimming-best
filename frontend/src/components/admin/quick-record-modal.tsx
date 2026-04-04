@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { DatePickerInput } from "@/components/shared/date-picker";
 import { Field, SelectField } from "@/components/shared/form-field";
 import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
@@ -68,7 +69,7 @@ export function QuickRecordModal({
         ...form,
         timeMs: Number(form.timeMs),
         tags: form.tags
-          .split(/[;,；，]/)
+          .split(/[;,，；]/)
           .map((tag) => tag.trim())
           .filter(Boolean),
       });
@@ -174,12 +175,11 @@ export function QuickRecordModal({
                       />
 
                       <Field label="发生日期">
-                        <Input
-                          className="h-11 rounded-2xl"
-                          onChange={(event) =>
-                            setForm((current) => ({ ...current, performedOn: event.target.value }))
+                        <DatePickerInput
+                          ariaLabel="发生日期"
+                          onChange={(value) =>
+                            setForm((current) => ({ ...current, performedOn: value }))
                           }
-                          type="date"
                           value={form.performedOn}
                         />
                       </Field>

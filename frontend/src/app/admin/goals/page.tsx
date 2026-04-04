@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
+import { DatePickerInput } from "@/components/shared/date-picker";
 import { Field, SelectField } from "@/components/shared/form-field";
 import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
@@ -95,7 +96,7 @@ export default function AdminGoalsPage() {
 
   return (
     <AdminShell
-      description="目标只和孩子、项目、截止日期以及目标成绩有关。所有目标成绩统一按秒输入和展示。"
+      description="目标只和孩子、项目、截止日期以及目标成绩有关。日期和年份控件都与当前设计系统保持统一。"
       title="目标管理"
     >
       <div className="grid items-start gap-8 xl:grid-cols-[400px_minmax(0,1fr)]">
@@ -159,12 +160,9 @@ export default function AdminGoalsPage() {
                 </Field>
 
                 <Field label="截止日期">
-                  <Input
-                    className="h-11"
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, targetDate: event.target.value }))
-                    }
-                    type="date"
+                  <DatePickerInput
+                    ariaLabel="截止日期"
+                    onChange={(value) => setForm((current) => ({ ...current, targetDate: value }))}
                     value={form.targetDate}
                   />
                 </Field>
@@ -172,18 +170,14 @@ export default function AdminGoalsPage() {
                 <div className="grid gap-5 md:grid-cols-2">
                   <Field label="公开备注">
                     <Input
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, publicNote: event.target.value }))
-                      }
+                      onChange={(event) => setForm((current) => ({ ...current, publicNote: event.target.value }))}
                       placeholder="例如：暑假阶段重点目标"
                       value={form.publicNote}
                     />
                   </Field>
                   <Field label="内部备注">
                     <Input
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, adminNote: event.target.value }))
-                      }
+                      onChange={(event) => setForm((current) => ({ ...current, adminNote: event.target.value }))}
                       placeholder="例如：重点看转身和节奏"
                       value={form.adminNote}
                     />
@@ -199,9 +193,7 @@ export default function AdminGoalsPage() {
                     }
                     type="checkbox"
                   />
-                  <span className="text-sm font-medium text-foreground">
-                    公开显示该目标
-                  </span>
+                  <span className="text-sm font-medium text-foreground">公开显示该目标</span>
                 </label>
               </CardContent>
 

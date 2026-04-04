@@ -5,7 +5,8 @@ description = "Python backend for Swimming Best"
 requires-python = ">=3.12,<4.0"
 dependencies = [
   "flask>=3.1,<4.0",
-  "waitress>=3.0,<4.0",
+  "waitress>=3.0,<4.0; sys_platform == 'win32'",
+  "gunicorn>=23.0,<24.0; sys_platform != 'win32'",
 ]
 
 [tool.poetry]
