@@ -1,21 +1,16 @@
 # performance-recording Specification
 
 ## Purpose
-TBD - created by archiving change build-swimming-performance-system. Update Purpose after archive.
+Define how performances are recorded, grouped into contexts, and annotated with source/status metadata.
+
 ## Requirements
+
 ### Requirement: The system SHALL support quick single-result entry
-The system SHALL allow administrators to record a single swimmer result without
-first creating a visible session entry flow. The stored data MUST still preserve
-a source type and recording context under the hood, and admin-facing result
-flows MUST expose enough swimmer identity detail, including the swimmer's
-managed team, to distinguish similarly named children.
+The system SHALL allow administrators to record a single swimmer result without first creating a visible session entry flow. The stored data MUST still preserve a source type and recording context under the hood, and admin-facing result flows MUST expose enough swimmer identity detail, including the swimmer's managed team, to distinguish similarly named children.
 
 #### Scenario: Administrator records one quick result for a swimmer on a managed team
-- **WHEN** an administrator submits a swimmer, event, result time, source type,
-  date, and optional note through quick entry
-- **THEN** the system stores a new result tied to an internal context and returns
-  the stored record with swimmer identity and managed team data that remain
-  unambiguous in admin workflows
+- **WHEN** an administrator submits a swimmer, event, result time, source type, date, and optional note through quick entry
+- **THEN** the system stores a new result tied to an internal context and returns the stored record with swimmer identity and managed team data that remain unambiguous in admin workflows
 
 ### Requirement: The system SHALL support context-based batch entry
 The system SHALL allow administrators to create a training, test, or competition context and attach multiple performance records to that context.
@@ -25,8 +20,13 @@ The system SHALL allow administrators to create a training, test, or competition
 - **THEN** the system stores the context and all attached results
 
 ### Requirement: The system SHALL preserve result status, notes, and tags
-Each performance record SHALL support result status, public/admin notes, and optional tags or inherited context tags so that records can be filtered and explained later.
+Each performance record SHALL support result status, public/admin notes, and optional tags or inherited context tags so that records can be filtered and explained later, and operator-facing context metadata SHALL be writable from the admin recording flows.
 
 #### Scenario: Invalid status result is recorded
 - **WHEN** an administrator stores a result with a non-valid status
 - **THEN** the system persists the record and excludes it from PB analytics
+
+#### Scenario: Administrator records context details
+- **WHEN** an administrator creates a context with supported metadata such as location or notes
+- **THEN** the stored context preserves that metadata and exposes it through the admin API
+

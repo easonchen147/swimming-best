@@ -1,52 +1,37 @@
 # public-performance-portal Specification
 
 ## Purpose
-TBD - created by archiving change build-swimming-performance-system. Update Purpose after archive.
+Define the public-facing roster, swimmer detail, event detail, compare, and share experiences for visible swimmers.
+
 ## Requirements
+
 ### Requirement: Public pages SHALL expose only allowed swimmer data
-The system SHALL provide public list and detail pages only for swimmers that are
-configured as publicly visible, and public payloads MUST use the swimmer's
-configured public display identity. The public home page SHALL display all
-visible swimmers in a modern, card-based responsive layout or an enhanced
-data table with fluid, interactive team filtering. This layout SHALL replace the
-legacy table with a highly aesthetic presentation consistent with
-`frontend-design` standards, featuring refined typography, card-level depth
-(shadows/glass), and staggered entrance animations.
+The system SHALL provide public list and detail pages only for swimmers that are configured as publicly visible, and public payloads MUST use the swimmer's configured public display identity.
 
 #### Scenario: Public list is requested
 - **WHEN** a visitor loads the public swimmer listing
-- **THEN** the system renders a modern, visually rich presentation of visible
-  swimmers using cards or an enhanced table, including display name, team, and profile
-  link with fluid hover effects and orchestrated entry animations
+- **THEN** the system renders a public roster of visible swimmers including display name, team, and profile link
 
 #### Scenario: Public list is filtered by managed team
-- **WHEN** a visitor requests the public swimmer listing with a managed team
-  identifier filter
-- **THEN** the system returns only visible swimmers assigned to that team,
-  using a smooth cross-fade or re-sorting animation (e.g., via `layoutId`) to
-  update the view
+- **WHEN** a visitor requests the public swimmer listing with a managed team identifier filter
+- **THEN** the system returns only visible swimmers assigned to that team
 
 #### Scenario: Public swimmer detail is requested
 - **WHEN** a visitor requests a public swimmer page for a visible swimmer
-- **THEN** the system renders an aesthetically superior detail page featuring
-  hero headers, refined event summaries, goal charts with smooth entry animations,
-  and clear visual hierarchies
+- **THEN** the system renders the swimmer summary, event summaries, and public analytics-safe details
 
-### Requirement: Public pages SHALL support share and event detail views
-The system SHALL provide share-oriented pages and per-event detail views for
-visible swimmers so visitors can inspect PB, goal progress, and timelines with
-a high-quality, "magazine-style" aesthetic. These views MUST feature refined
-charts, smooth loading transitions, and a polished mobile-first interaction
-model.
+### Requirement: Public pages SHALL support compare and share views
+The system SHALL provide public compare and share-oriented pages for PB, goal progress, and same-event comparison views, and the frontend SHALL expose a usable compare page that consumes the compare API directly.
 
-#### Scenario: Visitor opens a public event detail page
-- **WHEN** a visitor requests a visible swimmer's event detail page
-- **THEN** the system renders the view with animated charts, high-quality
-  typography, and a cohesive design that emphasizes clarity and visual polish
+#### Scenario: Visitor opens a public compare page
+- **WHEN** a visitor requests a public compare page for one structured event and multiple visible swimmers
+- **THEN** the system renders comparison data for those swimmers and event through a dedicated compare UI
+
+#### Scenario: Visitor reaches compare from the public frontend
+- **WHEN** a visitor navigates to the public compare experience from the frontend
+- **THEN** the page lets the visitor select visible swimmers and a shared event without requiring login
 
 #### Scenario: Visitor opens a PB share view
 - **WHEN** a visitor opens a share view for a visible swimmer's PB summary
-- **THEN** the system renders a highly-stylized, "shareable-card" presentation
-  designed for visual impact, excluding admin-only controls and utilizing
-  sophisticated layout and typography
+- **THEN** the system renders a share-friendly public presentation without admin-only controls
 
