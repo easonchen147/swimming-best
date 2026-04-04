@@ -1,25 +1,4 @@
-# progress-goals Specification
-
-## Purpose
-Define PB analytics, raw progress data, and swimmer goal tracking.
-
-## Requirements
-
-### Requirement: The system SHALL detect PB and expose progress analytics
-For each swimmer and structured event, the system SHALL compute PB status,
-best-so-far history, and trend-ready series from valid results. The analytics
-response SHALL include `sourceType` for each raw performance data point.
-
-#### Scenario: New valid result beats the previous best
-- **WHEN** a newly recorded valid result is faster than the swimmer's previous
-  best result for the same structured event
-- **THEN** the system marks the result as a PB improvement and updates the
-  best-so-far state
-
-#### Scenario: Result series is requested
-- **WHEN** analytics are requested for a swimmer and event
-- **THEN** the system returns raw valid results, PB envelope data, and
-  trend-ready series data
+## MODIFIED Requirements
 
 ### Requirement: The system SHALL track milestone goals by swimmer and event
 The system SHALL let administrators create short-, mid-, and long-horizon goals

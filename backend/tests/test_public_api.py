@@ -104,12 +104,28 @@ def test_goals_default_is_public(admin_client):
     goal = goal_response.get_json()
     assert goal["isPublic"] is True
 
+    private_goal_response = admin_client.post(
+        "/api/admin/goals",
+        json={
+            "swimmerId": swimmer["id"],
+            "eventId": event["id"],
+            "horizon": "mid",
+            "title": "Hidden 37s",
+            "targetTimeMs": 37000,
+            "targetDate": "2026-08-01",
+            "isPublic": False,
+        },
+    )
+    assert private_goal_response.status_code == 201
+
     client = admin_client
     analytics = client.get(
         f"/api/public/swimmers/{swimmer['slug']}/events/{event['id']}/analytics"
     ).get_json()
     assert len(analytics["goals"]) == 1
     assert analytics["goals"][0]["title"] == "Break 38s"
+    assert analytics["goals"][0]["gapMs"] == 2000
+    assert analytics["goals"][0]["isAchieved"] is False
 
 
 def test_analytics_raw_points_include_source_type(client, seeded_data):

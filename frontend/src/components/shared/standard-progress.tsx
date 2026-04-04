@@ -7,7 +7,7 @@ export function StandardProgress({
   nextStandard: NextCustomBenchmark | null;
 }) {
   if (!nextStandard) {
-    return <div className="text-sm text-muted">已达到当前自定义标准最高线。</div>;
+    return <div className="text-sm text-muted">已达到当前自定义标准的最高线。</div>;
   }
 
   return (

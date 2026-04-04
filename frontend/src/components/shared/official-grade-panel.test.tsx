@@ -18,14 +18,14 @@ describe("OfficialGradePanel", () => {
           code: "level2",
           label: "二级运动员",
           order: 2,
-          qualifyingTime: "26.50",
-          qualifyingTimeMs: 26500,
+          qualifyingTime: "25.90",
+          qualifyingTimeMs: 25900,
         }}
         status="ok"
       />,
     );
 
-    expect(screen.getByText("官方达级标准")).toBeInTheDocument();
+    expect(screen.getByText("国家达级标准")).toBeInTheDocument();
     expect(screen.getByText("二级运动员")).toBeInTheDocument();
     expect(screen.getByText(/一级运动员/)).toBeInTheDocument();
     expect(screen.getByText(/2.30s/)).toBeInTheDocument();
@@ -41,7 +41,9 @@ describe("OfficialGradePanel", () => {
     );
 
     expect(
-      screen.getByText("补充学员性别信息后可自动计算官方达级状态。"),
+      screen.getByText(
+        "补充学员性别信息后，系统才能自动匹配对应的国家达级标准。",
+      ),
     ).toBeInTheDocument();
   });
 });

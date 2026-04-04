@@ -58,6 +58,8 @@ export type GoalProgress = {
   baselineTimeMs: number;
   currentBestTimeMs: number;
   progress: number;
+  gapMs: number;
+  isAchieved: boolean;
 };
 
 export type OfficialGrade = {
@@ -69,6 +71,11 @@ export type OfficialGrade = {
 };
 
 export type NextOfficialGrade = OfficialGrade & {
+  gapMs: number;
+};
+
+export type OfficialBenchmark = OfficialGrade & {
+  achieved: boolean;
   gapMs: number;
 };
 
@@ -119,6 +126,7 @@ export type PublicEventAnalytics = {
     currentBestTimeMs: number;
   };
   goals: GoalProgress[];
+  officialBenchmarks: OfficialBenchmark[];
   officialGrade: OfficialGrade | null;
   nextOfficialGrade: NextOfficialGrade | null;
   officialGradeStatus: "ok" | "missing_gender" | "unavailable_for_event" | "no_valid_performance";

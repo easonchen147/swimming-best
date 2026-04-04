@@ -12,7 +12,7 @@ const sourceTypeConfig: Record<string, { label: string; className: string }> = {
     className: "border-slate-200 bg-slate-50 text-slate-500",
   },
   single: {
-    label: "临时",
+    label: "单次录入",
     className: "border-slate-100 bg-white text-slate-400",
   },
 };

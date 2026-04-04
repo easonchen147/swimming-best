@@ -1,10 +1,14 @@
-# progress-visualization Specification
+## REMOVED Requirements
 
-## Purpose
-Define how progress and compare charts are rendered so performance insights
-remain understandable and stable across layouts.
+### Requirement: Performance improvement SHALL be visualized with bar-based deltas
+**Reason**: The public analytics experience now needs an event-specific growth
+curve that compares actual performance times against goals and official grade
+thresholds in one view, which is not well expressed as first-result delta bars.
+**Migration**: Replace the delta-bar-only visualization with a benchmark-aware
+time-based growth chart that plots raw results, PB progression, and reference
+lines on the same axis.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Performance progression SHALL be visualized as a benchmark-aware growth curve
 The system SHALL render swimmer event analytics as a time-based growth curve
@@ -37,6 +41,8 @@ official grade thresholds in the same analytics view as the growth curve.
   thresholds
 - **THEN** the page shows a readable gap summary that states whether each target
   is achieved or how many milliseconds remain
+
+## MODIFIED Requirements
 
 ### Requirement: Progress and compare charts SHALL render with stable container dimensions
 The system SHALL render progress and compare charts inside containers that

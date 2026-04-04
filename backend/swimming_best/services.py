@@ -4,7 +4,10 @@ from collections import defaultdict
 from typing import Any
 
 from swimming_best.analytics import build_series, goal_progress
-from swimming_best.official_grade_baseline import evaluate_official_grade
+from swimming_best.official_grade_baseline import (
+    evaluate_official_grade,
+    list_standards_for_event,
+)
 from swimming_best.repository import Repository
 
 
@@ -184,18 +187,24 @@ class PublicService:
         event = self.repository.get_event(event_id)
         performances = self.repository.list_performances_for_swimmer_event(swimmer["id"], event_id)
         series = build_series(performances)
+        current_best_time_ms = series["currentBestTimeMs"]
         official_grade = evaluate_official_grade(
             gender=swimmer["gender"],
             event=event,
-            current_best_time_ms=series["currentBestTimeMs"],
+            current_best_time_ms=current_best_time_ms,
+        )
+        official_benchmarks = build_official_benchmarks(
+            gender=swimmer["gender"],
+            event=event,
+            current_best_time_ms=current_best_time_ms,
         )
         custom_standards = []
         benchmark_lines = []
         next_custom_standard = None
-        if series["currentBestTimeMs"] > 0:
+        if current_best_time_ms > 0:
             standards = self.repository.list_custom_standards_for_event(event_id, swimmer["gender"])
             for standard in standards:
-                achieved = series["currentBestTimeMs"] <= standard["qualifyingTimeMs"]
+                achieved = current_best_time_ms <= standard["qualifyingTimeMs"]
                 custom_standards.append({**standard, "achieved": achieved})
                 benchmark_lines.append(
                     {
@@ -206,7 +215,7 @@ class PublicService:
                     }
                 )
             next_custom_standard = self.repository.get_next_custom_standard(
-                series["currentBestTimeMs"],
+                current_best_time_ms,
                 event_id,
                 swimmer["gender"],
             )
@@ -215,6 +224,11 @@ class PublicService:
         for goal in goals:
             if goal["swimmerId"] != swimmer["id"] or goal["eventId"] != event_id:
                 continue
+            gap_ms = (
+                max(current_best_time_ms - goal["targetTimeMs"], 0)
+                if current_best_time_ms > 0 and goal["targetTimeMs"] > 0
+                else 0
+            )
             goal_payload.append(
                 {
                     "id": goal["id"],
@@ -223,14 +237,20 @@ class PublicService:
                     "targetTimeMs": goal["targetTimeMs"],
                     "targetDate": goal["targetDate"],
                     "baselineTimeMs": goal["baselineTimeMs"],
-                    "currentBestTimeMs": series["currentBestTimeMs"],
+                    "currentBestTimeMs": current_best_time_ms,
                     "progress": goal_progress(
                         goal["baselineTimeMs"],
-                        series["currentBestTimeMs"],
+                        current_best_time_ms,
                         goal["targetTimeMs"],
                     ),
+                    "gapMs": gap_ms,
+                    "isAchieved": current_best_time_ms > 0
+                    and current_best_time_ms <= goal["targetTimeMs"],
                 }
             )
+        goal_payload.sort(
+            key=lambda item: (item["targetDate"], item["targetTimeMs"], item["title"])
+        )
         return {
             "swimmer": {
                 "id": swimmer["id"],
@@ -242,6 +262,7 @@ class PublicService:
             "event": event,
             "series": series,
             "goals": goal_payload,
+            "officialBenchmarks": official_benchmarks,
             "officialGrade": official_grade.official_grade,
             "nextOfficialGrade": official_grade.next_official_grade,
             "officialGradeStatus": official_grade.status,
@@ -301,3 +322,28 @@ def public_display_name(swimmer: dict[str, Any]) -> str:
     if swimmer["publicNameMode"] == "real_name":
         return swimmer["realName"]
     return swimmer["nickname"] or swimmer["realName"]
+
+
+def build_official_benchmarks(
+    *,
+    gender: str,
+    event: dict[str, Any],
+    current_best_time_ms: int,
+) -> list[dict[str, Any]]:
+    if gender == "unknown" or current_best_time_ms <= 0:
+        return []
+
+    standards = list_standards_for_event(
+        gender=gender,
+        pool_length_m=int(event["poolLengthM"]),
+        distance_m=int(event["distanceM"]),
+        stroke=str(event["stroke"]),
+    )
+    return [
+        {
+            **standard,
+            "achieved": current_best_time_ms <= standard["qualifyingTimeMs"],
+            "gapMs": max(current_best_time_ms - standard["qualifyingTimeMs"], 0),
+        }
+        for standard in standards
+    ]

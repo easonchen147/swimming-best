@@ -38,15 +38,17 @@ def test_init_db_backfills_unknown_gender_for_legacy_swimmers(tmp_path: Path):
         INSERT INTO teams (
           id, name, sort_order, is_active, created_at, updated_at
         ) VALUES (
-          'team-1', '海豚预备队', 1, 1, '2026-04-01T00:00:00+00:00', '2026-04-01T00:00:00+00:00'
+          'team-1', 'Alpha Dolphins', 1, 1,
+          '2026-04-01T00:00:00+00:00', '2026-04-01T00:00:00+00:00'
         );
 
         INSERT INTO swimmers (
           id, slug, real_name, nickname, public_name_mode, is_public, avatar_url,
           birth_year, team_id, notes, created_at, updated_at
         ) VALUES (
-          'swimmer-1', 'alice', 'Alice Wang', '小海豚', 'nickname', 1, '',
-          2016, 'team-1', '', '2026-04-01T00:00:00+00:00', '2026-04-01T00:00:00+00:00'
+          'swimmer-1', 'alice', 'Alice Wang', 'Little Dolphin', 'nickname', 1, '',
+          2016, 'team-1', '', '2026-04-01T00:00:00+00:00',
+          '2026-04-01T00:00:00+00:00'
         );
         """
     )
@@ -67,14 +69,14 @@ def test_init_db_backfills_unknown_gender_for_legacy_swimmers(tmp_path: Path):
 def test_admin_swimmer_api_persists_gender(admin_client):
     team = admin_client.post(
         "/api/admin/teams",
-        json={"name": "性别测试队", "sortOrder": 1, "isActive": True},
+        json={"name": "Gender Test Team", "sortOrder": 1, "isActive": True},
     ).get_json()
 
     create_response = admin_client.post(
         "/api/admin/swimmers",
         json={
             "realName": "Alice Wang",
-            "nickname": "小海豚",
+            "nickname": "Little Dolphin",
             "publicNameMode": "nickname",
             "isPublic": True,
             "teamId": team["id"],
@@ -103,13 +105,13 @@ def test_admin_swimmer_api_persists_gender(admin_client):
 def test_public_analytics_returns_official_grade_for_supported_event(admin_client):
     team = admin_client.post(
         "/api/admin/teams",
-        json={"name": "官方等级队", "sortOrder": 1, "isActive": True},
+        json={"name": "Official Grade Team", "sortOrder": 1, "isActive": True},
     ).get_json()
     swimmer = admin_client.post(
         "/api/admin/swimmers",
         json={
             "realName": "Alice Wang",
-            "nickname": "小海豚",
+            "nickname": "Little Dolphin",
             "publicNameMode": "nickname",
             "isPublic": True,
             "teamId": team["id"],
@@ -123,7 +125,7 @@ def test_public_analytics_returns_official_grade_for_supported_event(admin_clien
             "distanceM": 50,
             "stroke": "freestyle",
             "effortType": "race",
-            "displayName": "50m 自由泳 短池",
+            "displayName": "50m Freestyle Short Course",
         },
     ).get_json()
     admin_client.post(
@@ -148,17 +150,29 @@ def test_public_analytics_returns_official_grade_for_supported_event(admin_clien
     assert analytics["nextOfficialGrade"]["label"] == "一级运动员"
     assert analytics["nextOfficialGrade"]["gapMs"] == 2300
 
+    official_benchmarks = analytics["officialBenchmarks"]
+    assert len(official_benchmarks) >= 2
+    assert official_benchmarks[0]["achieved"] is True
+    assert official_benchmarks[1]["label"] == analytics["officialGrade"]["label"]
+    assert official_benchmarks[1]["achieved"] is True
+    next_grade_benchmark = next(
+        item
+        for item in official_benchmarks
+        if item["label"] == analytics["nextOfficialGrade"]["label"]
+    )
+    assert next_grade_benchmark["gapMs"] == 2300
+
 
 def test_public_analytics_reports_missing_gender_and_unavailable_event(admin_client):
     team = admin_client.post(
         "/api/admin/teams",
-        json={"name": "状态测试队", "sortOrder": 1, "isActive": True},
+        json={"name": "Status Test Team", "sortOrder": 1, "isActive": True},
     ).get_json()
     swimmer = admin_client.post(
         "/api/admin/swimmers",
         json={
             "realName": "Bella Chen",
-            "nickname": "小浪花",
+            "nickname": "Wave Kid",
             "publicNameMode": "nickname",
             "isPublic": True,
             "teamId": team["id"],
@@ -171,7 +185,7 @@ def test_public_analytics_reports_missing_gender_and_unavailable_event(admin_cli
             "distanceM": 50,
             "stroke": "freestyle",
             "effortType": "race",
-            "displayName": "50m 自由泳 短池",
+            "displayName": "50m Freestyle Short Course",
         },
     ).get_json()
     unsupported_event = admin_client.post(
@@ -181,7 +195,7 @@ def test_public_analytics_reports_missing_gender_and_unavailable_event(admin_cli
             "distanceM": 100,
             "stroke": "medley",
             "effortType": "race",
-            "displayName": "100m 混合泳 长池",
+            "displayName": "100m Medley Long Course",
         },
     ).get_json()
     admin_client.post(
@@ -213,6 +227,7 @@ def test_public_analytics_reports_missing_gender_and_unavailable_event(admin_cli
     assert missing_gender["officialGradeStatus"] == "missing_gender"
     assert missing_gender["officialGrade"] is None
     assert missing_gender["nextOfficialGrade"] is None
+    assert missing_gender["officialBenchmarks"] == []
 
     admin_client.patch(
         f"/api/admin/swimmers/{swimmer['id']}",
@@ -234,3 +249,4 @@ def test_public_analytics_reports_missing_gender_and_unavailable_event(admin_cli
     assert unavailable["officialGradeStatus"] == "unavailable_for_event"
     assert unavailable["officialGrade"] is None
     assert unavailable["nextOfficialGrade"] is None
+    assert unavailable["officialBenchmarks"] == []

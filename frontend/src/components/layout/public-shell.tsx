@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Waves } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+
 import { PageTransition } from "./page-transition";
 
 export function PublicShell({
@@ -26,7 +27,7 @@ export function PublicShell({
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden items-center gap-2 md:flex">
             <Link
               className="rounded-full px-4 py-2 text-sm font-bold text-muted transition-all hover:bg-primary/5 hover:text-primary"
               href="/"
@@ -39,47 +40,48 @@ export function PublicShell({
             >
               对比
             </Link>
-            <Link
-              className="ml-2"
-              href="/admin"
-            >
+            <Link className="ml-2" href="/admin">
               <button className="cursor-pointer rounded-full bg-foreground px-5 py-2 text-sm font-bold text-background transition-all hover:bg-foreground/90 active:scale-95">
                 管理后台
               </button>
             </Link>
           </nav>
-          
-          <div className="md:hidden flex items-center gap-2">
-             <Link href="/compare">
-               <button className="cursor-pointer rounded-full border border-border px-4 py-1.5 text-xs font-bold text-foreground">
-                 对比
-               </button>
-             </Link>
-             <Link href="/admin">
-               <button className="cursor-pointer rounded-full bg-foreground px-4 py-1.5 text-xs font-bold text-background">
-                 管理
-               </button>
-             </Link>
+
+          <div className="flex items-center gap-2 md:hidden">
+            <Link href="/compare">
+              <button className="cursor-pointer rounded-full border border-border px-4 py-1.5 text-xs font-bold text-foreground">
+                对比
+              </button>
+            </Link>
+            <Link href="/admin">
+              <button className="cursor-pointer rounded-full bg-foreground px-4 py-1.5 text-xs font-bold text-background">
+                管理
+              </button>
+            </Link>
           </div>
         </div>
       </header>
 
-      <main className={cn("mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-8 md:py-12", className)}>
-        <PageTransition>
-          {children}
-        </PageTransition>
+      <main
+        className={cn(
+          "mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-8 md:py-12",
+          className,
+        )}
+      >
+        <PageTransition>{children}</PageTransition>
       </main>
 
       <footer className="border-t border-border bg-surface/40 backdrop-blur-sm">
         <div className="mx-auto max-w-7xl px-4 py-8 text-center md:px-6">
           <div className="flex flex-col items-center gap-4">
-             <div className="flex items-center gap-2">
-                <Waves className="h-4 w-4 text-primary" />
-                <span className="text-sm font-bold text-foreground">Swimming Best</span>
-             </div>
-             <p className="text-xs text-muted/60">
-               © {new Date().getFullYear()} Swimming Best · 儿童游泳成绩管理系统 · 让每一份进步都被看见
-             </p>
+            <div className="flex items-center gap-2">
+              <Waves className="h-4 w-4 text-primary" />
+              <span className="text-sm font-bold text-foreground">Swimming Best</span>
+            </div>
+            <p className="text-xs text-muted/60">
+              © {new Date().getFullYear()} Swimming Best · 少儿游泳成绩管理系统 ·
+              让每一份进步都被看见
+            </p>
           </div>
         </div>
       </footer>

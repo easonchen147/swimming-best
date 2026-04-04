@@ -6,14 +6,10 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { ImprovementChart } from "@/components/charts/improvement-chart";
-import { GoalGauge } from "@/components/charts/goal-gauge";
 import { PublicShell } from "@/components/layout/public-shell";
-import { CustomStandardsPanel } from "@/components/shared/custom-standards-panel";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
-import { OfficialGradePanel } from "@/components/shared/official-grade-panel";
-import { SourceTypeBadge } from "@/components/shared/source-type-badge";
+import { PublicEventAnalyticsView } from "@/components/shared/public-event-analytics-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { getPublicEventAnalytics, getPublicSwimmer } from "@/lib/api/public";
@@ -45,6 +41,8 @@ export default function PublicEventDetailPage() {
     );
   }
 
+  const primaryGoal = analytics.goals[0];
+
   return (
     <PublicShell className="gap-6">
       <div className="flex flex-wrap gap-3">
@@ -64,75 +62,34 @@ export default function PublicEventDetailPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         <MetricCard
+          caption={swimmer.team?.name || "公开成长档案"}
           label="孩子"
           value={swimmer.displayName}
-          caption={swimmer.team?.name || "公开成长档案"}
         />
         <MetricCard
+          caption={analytics.event.displayName}
           label="当前 PB"
           value={formatTimeMS(analytics.series.currentBestTimeMs)}
-          caption={analytics.event.displayName}
         />
         <MetricCard
+          caption={primaryGoal?.title || "目标创建后这里会显示进度"}
           label="目标推进"
-          value={analytics.goals[0] ? formatProgress(analytics.goals[0].progress) : "未设定"}
-          caption={analytics.goals[0]?.title || "目标创建后这里会显示进度"}
+          value={primaryGoal ? formatProgress(primaryGoal.progress) : "未设定"}
         />
       </section>
 
-      <Card>
-        <h1 className="text-xl font-semibold text-primary">
-          {analytics.event.displayName}
-        </h1>
-        </Card>
-
-      <ImprovementChart
-        benchmarkLines={analytics.benchmarkLines}
-        raw={analytics.series.raw}
-      />
-
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <Card className="space-y-3">
-          <h2 className="text-lg font-semibold text-primary">成绩时间线</h2>
-          {analytics.series.raw.map((point) => (
-            <div
-              className="flex items-center justify-between rounded-xl border border-primary/8 bg-white px-4 py-2.5"
-              key={`${point.performedOn}-${point.timeMs}`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted">{point.performedOn}</span>
-                <SourceTypeBadge sourceType={point.sourceType} />
-              </div>
-              <span className="font-semibold text-primary">{formatTimeMS(point.timeMs)}</span>
-            </div>
-          ))}
-        </Card>
-
-        <div className="space-y-4">
-          <OfficialGradePanel
-            nextOfficialGrade={analytics.nextOfficialGrade}
-            officialGrade={analytics.officialGrade}
-            status={analytics.officialGradeStatus}
-          />
-          <CustomStandardsPanel
-            customStandards={analytics.customStandards}
-            nextCustomStandard={analytics.nextCustomStandard}
-          />
-
-          <h2 className="text-lg font-semibold text-primary">目标与里程碑</h2>
-          {analytics.goals.length === 0 ? (
-            <Card>
-              <div className="py-4 text-center text-sm text-muted">
-                暂无公开目标。
-              </div>
-            </Card>
-          ) : (
-            analytics.goals.map((goal) => (
-              <GoalGauge goal={goal} key={goal.id} />
-            ))
-          )}
+      <Card className="border-border/40 p-5 shadow-xl shadow-primary/5 md:p-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black tracking-tight text-primary">
+            {analytics.event.displayName}
+          </h1>
+          <p className="text-sm text-muted">
+            这是 {swimmer.displayName} 在该项目下的完整成长视图，包含成绩曲线、达级对标和目标差距。
+          </p>
         </div>
-      </div>
+      </Card>
+
+      <PublicEventAnalyticsView analytics={analytics} />
     </PublicShell>
   );
 }
