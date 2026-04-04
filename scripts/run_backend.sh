@@ -2,21 +2,21 @@
 
 set -euo pipefail
 
-APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 RUNTIME_DIR="${BACKEND_RUNTIME_DIR:-$APP_ROOT/runtime}"
 PID_FILE="${BACKEND_PID_FILE:-$RUNTIME_DIR/backend.pid}"
 LOG_FILE="${BACKEND_LOG_FILE:-$RUNTIME_DIR/backend.log}"
-CONFIG_FILE="${SWIMMING_BEST_CONFIG:-$APP_ROOT/config.toml}"
+CONFIG_FILE="${SWIMMING_BEST_CONFIG:-$APP_ROOT/backend/config.toml}"
 
 print_usage() {
   cat <<'EOF'
 用法：
-  ./run_backend.sh start [--nohup]
-  ./run_backend.sh start-bg
-  ./run_backend.sh stop
-  ./run_backend.sh restart [--nohup]
-  ./run_backend.sh status
-  ./run_backend.sh logs [行数]
+  ./scripts/run_backend.sh start [--nohup]
+  ./scripts/run_backend.sh start-bg
+  ./scripts/run_backend.sh stop
+  ./scripts/run_backend.sh restart [--nohup]
+  ./scripts/run_backend.sh status
+  ./scripts/run_backend.sh logs [行数]
 
 说明：
   start           前台启动，日志直接输出到当前终端
@@ -27,15 +27,19 @@ print_usage() {
   status          查看当前运行状态
   logs            查看日志，默认尾部 50 行
 
-  启动前会自动检查并初始化 uv/poetry 环境与依赖。
+默认启动方式：
+  脚本默认通过 Waitress 启动 WSGI 服务，不会出现 Flask development server 的警告。
 
 环境变量：
-  SWIMMING_BEST_CONFIG  指定配置文件，默认 ./config.toml
-  BACKEND_RUNTIME_DIR   指定 runtime 目录，默认 ./runtime
-  BACKEND_PID_FILE      指定 pid 文件路径
-  BACKEND_LOG_FILE      指定日志文件路径
-  BACKEND_RUNNER        自定义启动命令，例如：
-                        BACKEND_RUNNER='uv run python -m swimming_best'
+  SWIMMING_BEST_CONFIG         指定配置文件，默认 ./backend/config.toml
+  BACKEND_RUNTIME_DIR          指定 runtime 目录，默认 ./runtime
+  BACKEND_PID_FILE             指定 pid 文件路径
+  BACKEND_LOG_FILE             指定日志文件路径
+  BACKEND_RUNNER               自定义启动命令，例如：
+                               BACKEND_RUNNER='uv run python -m swimming_best'
+  SWIMMING_BEST_USE_FLASK_DEV  设为 1 时，显式改用 Flask 自带开发服务器
+  SWIMMING_BEST_WAITRESS_THREADS
+                               Waitress 线程数，默认 8
 EOF
 }
 
@@ -96,17 +100,17 @@ resolve_runner() {
   fi
 
   cat >&2 <<'EOF'
-[backend] 未找到可用 Python 启动器。
-[backend] 请先在当前目录安装运行依赖，例如：
-[backend]   uv sync --no-dev
+[backend] 未找到可用的 Python 启动器。
+[backend] 请先在项目中安装依赖，例如：
+[backend]   cd backend && uv sync
 [backend] 或
-[backend]   poetry install --only main
+[backend]   cd backend && poetry sync --with dev
 EOF
   return 1
 }
 
 ensure_deps() {
-  cd "$APP_ROOT"
+  cd "$APP_ROOT/backend"
 
   if command -v uv >/dev/null 2>&1; then
     if [[ ! -d ".venv" ]]; then
@@ -118,7 +122,7 @@ ensure_deps() {
       echo "[backend] 正在同步依赖 (uv sync --no-dev)..."
       uv sync --no-dev
     else
-      echo "[backend] 未找到 uv.lock，正在安装依赖 (uv pip install)..."
+      echo "[backend] 未找到 uv.lock，正在安装依赖 (uv pip install -e .)..."
       uv pip install -e .
     fi
     echo "[backend] 依赖就绪"
@@ -135,8 +139,8 @@ ensure_deps() {
   fi
 
   if command -v python3 >/dev/null 2>&1; then
-    if ! python3 -c "import flask" 2>/dev/null; then
-      echo "[backend] 警告：flask 未安装，请手动执行 pip install -e ." >&2
+    if ! python3 -c "import flask, waitress" 2>/dev/null; then
+      echo "[backend] 警告：Flask 或 Waitress 未安装，请手动执行 pip install -e ." >&2
     fi
     return 0
   fi
@@ -149,9 +153,17 @@ require_config() {
     cat >&2 <<EOF
 [backend] 未找到运行配置：$CONFIG_FILE
 [backend] 首次部署可复制 config.example.toml：
-[backend]   cp config.example.toml config.toml
+[backend]   cp backend/config.example.toml backend/config.toml
 EOF
     return 1
+  fi
+}
+
+announce_server_mode() {
+  if [[ "${SWIMMING_BEST_USE_FLASK_DEV:-0}" == "1" ]]; then
+    echo "[backend] 当前显式使用 Flask 开发服务器"
+  else
+    echo "[backend] 当前使用 Waitress WSGI 服务"
   fi
 }
 
@@ -168,8 +180,9 @@ start_foreground() {
   ensure_deps
   runner="$(resolve_runner)"
 
+  announce_server_mode
   echo "[backend] 前台启动：$runner"
-  cd "$APP_ROOT"
+  cd "$APP_ROOT/backend"
   exec env SWIMMING_BEST_CONFIG="$CONFIG_FILE" bash -lc "$runner"
 }
 
@@ -186,9 +199,10 @@ start_background() {
   ensure_deps
   runner="$(resolve_runner)"
 
+  announce_server_mode
   echo "[backend] 后台启动中，日志输出到 $LOG_FILE"
   (
-    cd "$APP_ROOT"
+    cd "$APP_ROOT/backend"
     exec nohup env SWIMMING_BEST_CONFIG="$CONFIG_FILE" bash -lc "$runner" >>"$LOG_FILE" 2>&1
   ) &
   pid=$!
@@ -197,8 +211,8 @@ start_background() {
   sleep 1
   if kill -0 "$pid" 2>/dev/null; then
     echo "[backend] 启动成功，PID=$pid"
-    echo "[backend] 查看状态：./run_backend.sh status"
-    echo "[backend] 查看日志：./run_backend.sh logs"
+    echo "[backend] 查看状态：./scripts/run_backend.sh status"
+    echo "[backend] 查看日志：./scripts/run_backend.sh logs"
     return 0
   fi
 

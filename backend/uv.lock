@@ -216,6 +216,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "flask" },
+    { name = "waitress" },
 ]
 
 [package.dev-dependencies]
@@ -231,7 +232,10 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "flask", specifier = ">=3.1,<4.0" }]
+requires-dist = [
+    { name = "flask", specifier = ">=3.1,<4.0" },
+    { name = "waitress", specifier = ">=3.0,<4.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [
@@ -240,6 +244,15 @@ dev = [
 ]
 lint = [{ name = "ruff", specifier = ">=0.11.13,<0.12.0" }]
 test = [{ name = "pytest", specifier = ">=8.3.5,<9.0.0" }]
+
+[[package]]
+name = "waitress"
+version = "3.0.2"
+source = { registry = "https://mirrors.cloud.tencent.com/pypi/simple/" }
+sdist = { url = "https://mirrors.cloud.tencent.com/pypi/packages/bf/cb/04ddb054f45faa306a230769e868c28b8065ea196891f09004ebace5b184/waitress-3.0.2.tar.gz", hash = "sha256:682aaaf2af0c44ada4abfb70ded36393f0e307f4ab9456a215ce0020baefc31f" }
+wheels = [
+    { url = "https://mirrors.cloud.tencent.com/pypi/packages/8d/57/a27182528c90ef38d82b636a11f606b0cbb0e17588ed205435f8affe3368/waitress-3.0.2-py3-none-any.whl", hash = "sha256:c56d67fd6e87c2ee598b76abdd4e96cfad1f24cacdea5078d382b1f9d7b5ed2e" },
+]
 
 [[package]]
 name = "werkzeug"
