@@ -46,6 +46,9 @@ export default function AdminGoalsPage() {
     title: "",
     targetTimeMs: 14500,
     targetDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    isPublic: true,
+    publicNote: "",
+    adminNote: "",
   });
 
   useEffect(() => {
@@ -161,6 +164,43 @@ export default function AdminGoalsPage() {
                        required
                      />
                    </Field>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <Field label="公开备注">
+                    <Input
+                      placeholder="例如: 暑假集训里程碑"
+                      onChange={(event) =>
+                        setForm((current) => ({ ...current, publicNote: event.target.value }))
+                      }
+                      value={form.publicNote}
+                    />
+                  </Field>
+                  <Field label="内部备注">
+                    <Input
+                      placeholder="例如: 重点观察转身速度"
+                      onChange={(event) =>
+                        setForm((current) => ({ ...current, adminNote: event.target.value }))
+                      }
+                      value={form.adminNote}
+                    />
+                  </Field>
+                </div>
+
+                <div className="flex items-center space-x-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
+                  <input
+                    id="goal-is-public"
+                    checked={form.isPublic}
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, isPublic: event.target.checked }))
+                    }
+                    type="checkbox"
+                    className="h-5 w-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
+                  />
+                  <label htmlFor="goal-is-public" className="flex flex-col cursor-pointer">
+                    <span className="text-sm font-bold text-foreground">公开展示该目标</span>
+                    <span className="text-xs text-muted/80">关闭后目标不会出现在公开分析页。</span>
+                  </label>
                 </div>
               </CardContent>
               

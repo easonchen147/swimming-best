@@ -242,6 +242,8 @@ def export_team_csv(team_id: str, repo: Repository) -> str:
 
     best_times: dict[tuple[str, str], int] = defaultdict(int)
     for row in rows:
+        if row["result_status"] != "valid":
+            continue
         key = (row["swimmer_id"], row["event_id"])
         current = best_times.get(key)
         if current in (None, 0) or row["time_ms"] < current:
@@ -263,7 +265,12 @@ def export_team_csv(team_id: str, repo: Repository) -> str:
                 f"{Decimal(row['time_ms']) / Decimal(1000):.3f}",
                 row["source_type"],
                 row["result_status"],
-                "是" if row["time_ms"] == best_times[key] else "",
+                (
+                    "是"
+                    if row["result_status"] == "valid"
+                    and row["time_ms"] == best_times[key]
+                    else ""
+                ),
             ]
         )
     return output.getvalue()

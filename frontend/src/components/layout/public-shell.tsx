@@ -34,6 +34,12 @@ export function PublicShell({
               首页
             </Link>
             <Link
+              className="rounded-full px-4 py-2 text-sm font-bold text-muted transition-all hover:bg-primary/5 hover:text-primary"
+              href="/compare"
+            >
+              对比
+            </Link>
+            <Link
               className="ml-2"
               href="/admin"
             >
@@ -43,7 +49,12 @@ export function PublicShell({
             </Link>
           </nav>
           
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center gap-2">
+             <Link href="/compare">
+               <button className="cursor-pointer rounded-full border border-border px-4 py-1.5 text-xs font-bold text-foreground">
+                 对比
+               </button>
+             </Link>
              <Link href="/admin">
                <button className="cursor-pointer rounded-full bg-foreground px-4 py-1.5 text-xs font-bold text-background">
                  管理

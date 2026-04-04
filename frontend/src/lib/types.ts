@@ -23,6 +23,8 @@ export type PublicSwimmerDetail = {
   teamId: string;
   team: TeamSummary;
   gender: Gender;
+  birthYear?: number;
+  notes?: string;
 };
 
 export type EventDefinition = {
@@ -125,6 +127,22 @@ export type PublicEventAnalytics = {
   benchmarkLines: BenchmarkLine[];
 };
 
+export type CompareSwimmer = {
+  swimmerId: string;
+  displayName: string;
+  teamId: string;
+  team: TeamSummary;
+  series: PublicEventAnalytics["series"];
+  currentBestTimeMs: number;
+  improvementTimeMs: number;
+  improvementRatio: number;
+};
+
+export type ComparePayload = {
+  event: EventDefinition;
+  swimmers: CompareSwimmer[];
+};
+
 export type AdminSwimmer = {
   id: string;
   slug: string;
@@ -133,6 +151,9 @@ export type AdminSwimmer = {
   publicNameMode: string;
   isPublic: boolean;
   gender: Gender;
+  birthYear?: number;
+  avatarUrl?: string;
+  notes?: string;
   teamId: string;
   team: TeamSummary;
 };
@@ -146,6 +167,11 @@ export type AdminGoal = {
   targetTimeMs: number;
   targetDate: string;
   horizon: string;
+  isPublic?: boolean;
+  publicNote?: string;
+  adminNote?: string;
+  achievedAt?: string;
+  parentGoalId?: string;
   swimmer?: Pick<AdminSwimmer, "id" | "nickname" | "realName" | "teamId" | "team">;
   event?: EventDefinition;
 };
@@ -157,6 +183,8 @@ export type AdminPerformance = {
   timeMs: number;
   performedOn: string;
   resultStatus: string;
+  publicNote?: string;
+  adminNote?: string;
   tags: string[];
   swimmer: Pick<AdminSwimmer, "id" | "nickname" | "realName" | "teamId" | "team">;
   event: EventDefinition;

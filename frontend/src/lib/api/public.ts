@@ -1,5 +1,6 @@
 import { apiGet } from "@/lib/api/client";
 import type {
+  ComparePayload,
   PublicEventAnalytics,
   PublicSwimmerDetail,
   PublicSwimmerEventSummary,
@@ -35,4 +36,13 @@ export function getPublicEventAnalytics(slug: string, eventId: string) {
   return apiGet<PublicEventAnalytics>(
     `/api/public/swimmers/${slug}/events/${eventId}/analytics`,
   );
+}
+
+export function comparePublicEvent(eventId: string, swimmerIds: string[]) {
+  const params = new URLSearchParams({ eventId });
+  for (const swimmerId of swimmerIds) {
+    params.append("swimmerId", swimmerId);
+  }
+
+  return apiGet<ComparePayload>(`/api/public/compare?${params.toString()}`);
 }

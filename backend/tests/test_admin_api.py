@@ -32,6 +32,8 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "nickname": "小海豚",
             "publicNameMode": "nickname",
             "isPublic": True,
+            "birthYear": 2016,
+            "notes": "主项偏自由泳",
             "teamId": team["id"],
         },
     )
@@ -39,6 +41,8 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     swimmer = swimmer_response.get_json()
     assert swimmer["teamId"] == team["id"]
     assert swimmer["team"]["name"] == "海星提升队"
+    assert swimmer["birthYear"] == 2016
+    assert swimmer["notes"] == "主项偏自由泳"
 
     update_response = admin_client.patch(
         f"/api/admin/swimmers/{swimmer['id']}",
@@ -47,12 +51,16 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "nickname": "小海豚",
             "publicNameMode": "nickname",
             "isPublic": True,
+            "birthYear": 2015,
+            "notes": "改练 50 自冲刺",
             "teamId": second_team["id"],
         },
     )
     assert update_response.status_code == 200
     assert update_response.get_json()["teamId"] == second_team["id"]
     assert update_response.get_json()["team"]["name"] == "海豚冲刺队"
+    assert update_response.get_json()["birthYear"] == 2015
+    assert update_response.get_json()["notes"] == "改练 50 自冲刺"
 
     team_update_response = admin_client.patch(
         f"/api/admin/teams/{second_team['id']}",
@@ -85,9 +93,14 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "timeMs": 32000,
             "sourceType": "competition",
             "performedOn": "2026-04-01",
+            "publicNote": "出发不错",
+            "adminNote": "后程仍可提速",
+            "tags": ["周赛", "晚训"],
         },
     )
     assert quick_response.status_code == 201
+    assert quick_response.get_json()["performance"]["publicNote"] == "出发不错"
+    assert quick_response.get_json()["performance"]["adminNote"] == "后程仍可提速"
 
     goal_response = admin_client.post(
         "/api/admin/goals",
@@ -98,10 +111,16 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "title": "暑假前游进 31 秒",
             "targetTimeMs": 31000,
             "targetDate": "2026-08-01",
-            "isPublic": True,
+            "isPublic": False,
+            "publicNote": "暑假里程碑",
+            "adminNote": "暑假前必须达成",
         },
     )
     assert goal_response.status_code == 201
+    goal = goal_response.get_json()
+    assert goal["isPublic"] is False
+    assert goal["publicNote"] == "暑假里程碑"
+    assert goal["adminNote"] == "暑假前必须达成"
 
     context_response = admin_client.post(
         "/api/admin/contexts",
@@ -109,11 +128,17 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "sourceType": "training",
             "title": "周三训练",
             "performedOn": "2026-04-03",
+            "location": "东区 25 米池",
+            "publicNote": "周中晚训",
+            "adminNote": "观察转身技术",
             "tags": ["月测"],
         },
     )
     assert context_response.status_code == 201
     context = context_response.get_json()
+    assert context["location"] == "东区 25 米池"
+    assert context["publicNote"] == "周中晚训"
+    assert context["adminNote"] == "观察转身技术"
 
     add_performance_response = admin_client.post(
         f"/api/admin/contexts/{context['id']}/performances",
@@ -124,12 +149,17 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
                     "eventId": event["id"],
                     "timeMs": 31500,
                     "resultStatus": "valid",
+                    "publicNote": "转身更顺",
+                    "adminNote": "出发节奏还要收紧",
                     "tags": ["出发好"],
                 }
             ]
         },
     )
     assert add_performance_response.status_code == 201
+    created_performance = add_performance_response.get_json()["performances"][0]
+    assert created_performance["publicNote"] == "转身更顺"
+    assert created_performance["adminNote"] == "出发节奏还要收紧"
 
     teams_response = admin_client.get("/api/admin/teams")
     assert teams_response.status_code == 200
@@ -146,6 +176,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     assert goals_response.status_code == 200
     assert goals_response.get_json()["goals"][0]["title"] == "暑假前游进 31 秒"
     assert goals_response.get_json()["goals"][0]["swimmer"]["team"]["name"] == "海豚冲刺一队"
+    assert goals_response.get_json()["goals"][0]["isPublic"] is False
 
     performances_response = admin_client.get("/api/admin/performances")
     assert performances_response.status_code == 200
@@ -154,6 +185,8 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
         == "海豚冲刺一队"
     )
     assert set(performances_response.get_json()["performances"][0]["tags"]) == {"出发好", "月测"}
+    assert performances_response.get_json()["performances"][0]["publicNote"] == "转身更顺"
+    assert performances_response.get_json()["performances"][0]["adminNote"] == "出发节奏还要收紧"
 
 
 def test_admin_api_rejects_unknown_team_assignment(admin_client):

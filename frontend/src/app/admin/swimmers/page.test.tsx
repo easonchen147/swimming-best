@@ -95,6 +95,8 @@ describe("AdminSwimmersPage", () => {
         isPublic: true,
         gender: "female",
         teamId: "team-a",
+        birthYear: undefined,
+        notes: "",
       });
     });
   });

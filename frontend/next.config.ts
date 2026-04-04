@@ -20,15 +20,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async redirects() {
-    return [
-      {
-        source: "/compare",
-        destination: "/",
-        permanent: true,
-      },
-    ];
-  },
 };
 
 export default nextConfig;

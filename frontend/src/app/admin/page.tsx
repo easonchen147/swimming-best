@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { 
@@ -134,27 +135,33 @@ export default function AdminDashboardPage() {
                    <CardDescription className="text-white/60">常用功能的一键入口</CardDescription>
                 </CardHeader>
                 <CardContent className="relative z-10 flex flex-col gap-3">
-                   <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
-                      <div className="flex items-center gap-3">
-                         <Activity className="h-5 w-5" />
-                         <span className="font-bold text-base">录入新成绩</span>
-                      </div>
-                      <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
-                   </Button>
-                   <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
-                      <div className="flex items-center gap-3">
-                         <History className="h-5 w-5" />
-                         <span className="font-bold text-base">批量导入表格</span>
-                      </div>
-                      <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
-                   </Button>
-                   <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
-                      <div className="flex items-center gap-3">
-                         <Users className="h-5 w-5" />
-                         <span className="font-bold text-base">管理学员档案</span>
-                      </div>
-                      <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
-                   </Button>
+                   <Link href="/admin/records">
+                     <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
+                        <div className="flex items-center gap-3">
+                           <Activity className="h-5 w-5" />
+                           <span className="font-bold text-base">录入新成绩</span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
+                     </Button>
+                   </Link>
+                   <Link href="/admin/import">
+                     <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
+                        <div className="flex items-center gap-3">
+                           <History className="h-5 w-5" />
+                           <span className="font-bold text-base">批量导入表格</span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
+                     </Button>
+                   </Link>
+                   <Link href="/admin/swimmers">
+                     <Button variant="outline" className="w-full justify-between bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/40 h-14 rounded-2xl group px-6">
+                        <div className="flex items-center gap-3">
+                           <Users className="h-5 w-5" />
+                           <span className="font-bold text-base">管理学员档案</span>
+                        </div>
+                        <ArrowRight className="h-4 w-4 opacity-40 group-hover:opacity-100 transition-all" />
+                     </Button>
+                   </Link>
                 </CardContent>
                 <CardFooter className="relative z-10 pt-12 pb-8">
                    <div className="flex flex-col items-center w-full gap-2 opacity-40">

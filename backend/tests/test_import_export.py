@@ -87,3 +87,74 @@ def test_admin_import_export_endpoints_cover_template_preview_confirm_and_export
     assert "选手slug,选手昵称,项目,日期,成绩(秒),来源类型,状态,是否PB" in team_csv
     assert swimmer["slug"] in team_csv
     assert "是" in team_csv
+
+
+def test_team_export_marks_pb_using_valid_results_only(admin_client):
+    team = admin_client.post(
+        "/api/admin/teams",
+        json={"name": "导出 PB 队", "sortOrder": 1, "isActive": True},
+    ).get_json()
+    swimmer = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Bella Chen",
+            "nickname": "小浪花",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "gender": "female",
+            "teamId": team["id"],
+        },
+    ).get_json()
+    event = admin_client.post(
+        "/api/admin/events",
+        json={
+            "poolLengthM": 25,
+            "distanceM": 50,
+            "stroke": "freestyle",
+            "effortType": "race",
+            "displayName": "50m 自由泳 短池",
+        },
+    ).get_json()
+
+    quick_response = admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer["id"],
+            "eventId": event["id"],
+            "timeMs": 33000,
+            "sourceType": "training",
+            "performedOn": "2026-04-01",
+        },
+    )
+    assert quick_response.status_code == 201
+
+    context = admin_client.post(
+        "/api/admin/contexts",
+        json={
+            "sourceType": "competition",
+            "title": "无效比赛",
+            "performedOn": "2026-04-02",
+        },
+    ).get_json()
+    add_response = admin_client.post(
+        f"/api/admin/contexts/{context['id']}/performances",
+        json={
+            "performances": [
+                {
+                    "swimmerId": swimmer["id"],
+                    "eventId": event["id"],
+                    "timeMs": 30000,
+                    "resultStatus": "invalid",
+                }
+            ]
+        },
+    )
+    assert add_response.status_code == 201
+
+    team_export = admin_client.get(
+        f"/api/admin/export/teams/{team['id']}/performances.csv"
+    )
+    assert team_export.status_code == 200
+    lines = team_export.get_data(as_text=True).strip().splitlines()
+    assert lines[1].endswith(",是")
+    assert lines[2].endswith(",")

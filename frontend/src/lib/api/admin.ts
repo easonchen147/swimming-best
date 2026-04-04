@@ -63,6 +63,8 @@ export function createAdminSwimmer(input: {
   isPublic: boolean;
   gender: Gender;
   teamId: string;
+  birthYear?: number;
+  notes?: string;
 }) {
   return apiPost<AdminSwimmer>("/api/admin/swimmers", input);
 }
@@ -76,6 +78,8 @@ export function updateAdminSwimmer(
     isPublic: boolean;
     gender: Gender;
     teamId: string;
+    birthYear?: number;
+    notes?: string;
   },
 ) {
   return apiPatch<AdminSwimmer>(`/api/admin/swimmers/${swimmerId}`, input);
@@ -103,6 +107,9 @@ export function quickRecordPerformance(input: {
   timeMs: number;
   sourceType: string;
   performedOn?: string;
+  publicNote?: string;
+  adminNote?: string;
+  tags?: string[];
 }) {
   return apiPost("/api/admin/performances/quick", input);
 }
@@ -112,6 +119,9 @@ export function createContext(input: {
   title: string;
   performedOn?: string;
   location?: string;
+  publicNote?: string;
+  adminNote?: string;
+  tags?: string[];
 }) {
   return apiPost<{ id: string }>("/api/admin/contexts", input);
 }
@@ -122,6 +132,9 @@ export function addContextPerformances(
     swimmerId: string;
     eventId: string;
     timeMs: number;
+    publicNote?: string;
+    adminNote?: string;
+    tags?: string[];
   }>,
 ) {
   return apiPost(`/api/admin/contexts/${contextId}/performances`, {
@@ -136,6 +149,9 @@ export function createGoal(input: {
   title: string;
   targetTimeMs: number;
   targetDate: string;
+  isPublic?: boolean;
+  publicNote?: string;
+  adminNote?: string;
 }) {
   return apiPost<AdminGoal>("/api/admin/goals", input);
 }

@@ -54,6 +54,8 @@ export default function AdminSwimmersPage() {
     isPublic: true,
     gender: "unknown" as "male" | "female" | "unknown",
     teamId: "",
+    birthYear: "",
+    notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -91,6 +93,8 @@ export default function AdminSwimmersPage() {
       isPublic: true,
       gender: "unknown",
       teamId: teams[0]?.id || "",
+      birthYear: "",
+      notes: "",
     });
   }
 
@@ -98,15 +102,19 @@ export default function AdminSwimmersPage() {
     event.preventDefault();
     setSubmitting(true);
     setSuccess(false);
+    const payload = {
+      ...form,
+      birthYear: form.birthYear ? Number(form.birthYear) : undefined,
+    };
     try {
       if (editingId) {
-        const swimmer = await updateAdminSwimmer(editingId, form);
+        const swimmer = await updateAdminSwimmer(editingId, payload);
         setSwimmers((current) =>
           current.map((item) => (item.id === swimmer.id ? swimmer : item)),
         );
         toast.success("孩子档案已更新");
       } else {
-        const swimmer = await createAdminSwimmer(form);
+        const swimmer = await createAdminSwimmer(payload);
         setSwimmers((current) => [...current, swimmer]);
         toast.success("孩子档案已创建");
       }
@@ -131,6 +139,8 @@ export default function AdminSwimmersPage() {
       isPublic: swimmer.isPublic,
       gender: swimmer.gender,
       teamId: swimmer.teamId,
+      birthYear: swimmer.birthYear ? String(swimmer.birthYear) : "",
+      notes: swimmer.notes ?? "",
     });
     if (window.innerWidth < 1024) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -180,6 +190,27 @@ export default function AdminSwimmersPage() {
                       onChange={(event) => setForm((current) => ({ ...current, nickname: event.target.value }))}
                       value={form.nickname}
                       required
+                    />
+                  </Field>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="出生年份">
+                    <Input
+                      placeholder="例如: 2016"
+                      onChange={(event) =>
+                        setForm((current) => ({ ...current, birthYear: event.target.value }))
+                      }
+                      value={form.birthYear}
+                    />
+                  </Field>
+                  <Field label="备注">
+                    <Input
+                      placeholder="例如: 主项偏自由泳"
+                      onChange={(event) =>
+                        setForm((current) => ({ ...current, notes: event.target.value }))
+                      }
+                      value={form.notes}
                     />
                   </Field>
                 </div>

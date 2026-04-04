@@ -53,15 +53,24 @@ export default function AdminRecordsPage() {
     timeMs: 15000,
     sourceType: "test",
     performedOn: new Date().toISOString().split('T')[0],
+    publicNote: "",
+    adminNote: "",
+    tags: "",
   });
   
   const [contextForm, setContextForm] = useState({
     sourceType: "competition",
     title: "",
     performedOn: new Date().toISOString().split('T')[0],
+    location: "",
+    publicNote: "",
+    adminNote: "",
     swimmerId: "",
     eventId: "",
     timeMs: 15000,
+    performancePublicNote: "",
+    performanceAdminNote: "",
+    tags: "",
   });
 
   useEffect(() => {
@@ -94,6 +103,10 @@ export default function AdminRecordsPage() {
       await quickRecordPerformance({
         ...quickForm,
         timeMs: Number(quickForm.timeMs),
+        tags: quickForm.tags
+          .split(/[,;，；]/)
+          .map((item) => item.trim())
+          .filter(Boolean),
       });
       await refreshPerformances();
       setQuickSuccess(true);
@@ -115,12 +128,25 @@ export default function AdminRecordsPage() {
         sourceType: contextForm.sourceType,
         title: contextForm.title,
         performedOn: contextForm.performedOn,
+        location: contextForm.location,
+        publicNote: contextForm.publicNote,
+        adminNote: contextForm.adminNote,
+        tags: contextForm.tags
+          .split(/[,;，；]/)
+          .map((item) => item.trim())
+          .filter(Boolean),
       });
       await addContextPerformances(context.id, [
         {
           swimmerId: contextForm.swimmerId,
           eventId: contextForm.eventId,
           timeMs: Number(contextForm.timeMs),
+          publicNote: contextForm.performancePublicNote,
+          adminNote: contextForm.performanceAdminNote,
+          tags: contextForm.tags
+            .split(/[,;，；]/)
+            .map((item) => item.trim())
+            .filter(Boolean),
         },
       ]);
       await refreshPerformances();
@@ -199,6 +225,22 @@ export default function AdminRecordsPage() {
                     value={quickForm.performedOn}
                   />
                 </Field>
+
+                <Field label="公开备注">
+                  <Input
+                    placeholder="例如: 出发反应很好"
+                    onChange={(event) => setQuickForm((current) => ({ ...current, publicNote: event.target.value }))}
+                    value={quickForm.publicNote}
+                  />
+                </Field>
+
+                <Field label="内部备注 / 标签">
+                  <Input
+                    placeholder="例如: 月测; 出发台"
+                    onChange={(event) => setQuickForm((current) => ({ ...current, tags: event.target.value }))}
+                    value={quickForm.tags}
+                  />
+                </Field>
               </CardContent>
               
               <CardFooter className="pt-2">
@@ -264,6 +306,31 @@ export default function AdminRecordsPage() {
                   />
                 </Field>
 
+                <Field label="地点 / 场馆">
+                  <Input
+                    placeholder="例如: 东区 25 米池"
+                    onChange={(event) => setContextForm((current) => ({ ...current, location: event.target.value }))}
+                    value={contextForm.location}
+                  />
+                </Field>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <Field label="公开备注">
+                    <Input
+                      placeholder="例如: 四月月测"
+                      onChange={(event) => setContextForm((current) => ({ ...current, publicNote: event.target.value }))}
+                      value={contextForm.publicNote}
+                    />
+                  </Field>
+                  <Field label="内部备注 / 标签">
+                    <Input
+                      placeholder="例如: 月测; 晚训"
+                      onChange={(event) => setContextForm((current) => ({ ...current, tags: event.target.value }))}
+                      value={contextForm.tags}
+                    />
+                  </Field>
+                </div>
+
                 <div className="pt-4 border-t border-border/40 space-y-5">
                   <SelectField
                     label="关联孩子"
@@ -283,6 +350,33 @@ export default function AdminRecordsPage() {
                       <TimeInput
                         onChange={(ms) => setContextForm((current) => ({ ...current, timeMs: ms }))}
                         value={contextForm.timeMs}
+                      />
+                    </Field>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <Field label="成绩公开备注">
+                      <Input
+                        placeholder="例如: 冲刺表现稳定"
+                        onChange={(event) =>
+                          setContextForm((current) => ({
+                            ...current,
+                            performancePublicNote: event.target.value,
+                          }))
+                        }
+                        value={contextForm.performancePublicNote}
+                      />
+                    </Field>
+                    <Field label="成绩内部备注">
+                      <Input
+                        placeholder="例如: 转身还需压低重心"
+                        onChange={(event) =>
+                          setContextForm((current) => ({
+                            ...current,
+                            performanceAdminNote: event.target.value,
+                          }))
+                        }
+                        value={contextForm.performanceAdminNote}
                       />
                     </Field>
                   </div>
