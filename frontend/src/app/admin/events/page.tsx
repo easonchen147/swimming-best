@@ -37,6 +37,22 @@ const strokeOptions = [
   { label: "混合泳", value: "medley" },
 ];
 
+function eventIdentity(event: Pick<EventDefinition, "poolLengthM" | "distanceM" | "stroke">) {
+  return `${event.poolLengthM}-${event.distanceM}-${event.stroke}`;
+}
+
+function dedupeEvents(events: EventDefinition[]) {
+  const seen = new Set<string>();
+  return events.filter((event) => {
+    const key = eventIdentity(event);
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 function strokeLabel(stroke: string) {
   return strokeOptions.find((item) => item.value === stroke)?.label ?? stroke;
 }
@@ -54,7 +70,7 @@ export default function AdminEventsPage() {
 
   useEffect(() => {
     listAdminEvents()
-      .then((response) => setEvents(response.events))
+      .then((response) => setEvents(dedupeEvents(response.events)))
       .finally(() => setLoading(false));
   }, []);
 
@@ -68,11 +84,21 @@ export default function AdminEventsPage() {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const duplicate = events.some(
+      (item) =>
+        item.poolLengthM === form.poolLengthM
+        && item.distanceM === form.distanceM
+        && item.stroke === form.stroke,
+    );
+    if (duplicate) {
+      toast.error("该项目已经存在");
+      return;
+    }
     setSubmitting(true);
 
     try {
       const created = await createAdminEvent(form);
-      setEvents((current) => [...current, created]);
+      setEvents((current) => dedupeEvents([...current, created]));
       setForm({
         poolLengthM: 25,
         distanceM: 50,
@@ -203,7 +229,7 @@ export default function AdminEventsPage() {
                   variants={STAGGER_CONTAINER}
                 >
                   {filteredEvents.map((event) => (
-                    <motion.div key={event.id} variants={FADE_IN_UP}>
+                    <motion.div key={eventIdentity(event)} variants={FADE_IN_UP}>
                       <Card className="h-full border-border/40 transition-all hover:border-primary/20 hover:bg-primary/5">
                         <CardContent className="flex h-full flex-col gap-4 p-6">
                           <div className="flex items-start justify-between">

@@ -1,10 +1,4 @@
-# structured-events Specification
-
-## Purpose
-Define the stable event catalog used across admin entry, goals, analytics, and
-public display.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Events SHALL be defined with structured performance dimensions
 The system SHALL define swim events using pool length, event distance, and
@@ -37,14 +31,3 @@ male and female swimmers rather than duplicated by gender.
 - **WHEN** two swimmers of different genders select `50米 自由泳（长池）`
 - **THEN** the system uses the same event definition for both swimmers and only
   varies the official benchmark lookup by swimmer gender
-
-### Requirement: Events SHALL support admin display and public display
-The system SHALL provide Chinese display names for each structured event while
-keeping the underlying identity stable. Display names SHALL distinguish
-short-course (`25m`) and long-course (`50m`) events explicitly.
-
-#### Scenario: Public page reads event metadata
-- **WHEN** a public endpoint returns event metadata
-- **THEN** the payload includes a Chinese display name derived from pool length,
-  distance, and stroke, including whether the event is short-course or
-  long-course

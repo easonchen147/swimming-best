@@ -59,6 +59,8 @@ export default function AdminSwimmersPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const birthYearOptions = Array.from({ length: 26 }, (_, index) => String(currentYear - index));
 
   useEffect(() => {
     Promise.all([listAdminSwimmers(), listAdminTeams()]).then(([swimmerResponse, teamResponse]) => {
@@ -196,13 +198,19 @@ export default function AdminSwimmersPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="出生年份">
-                    <Input
-                      placeholder="例如: 2016"
+                    <Select
                       onChange={(event) =>
                         setForm((current) => ({ ...current, birthYear: event.target.value }))
                       }
                       value={form.birthYear}
-                    />
+                    >
+                      <option value="">请选择年份</option>
+                      {birthYearOptions.map((year) => (
+                        <option key={year} value={year}>
+                          {year}
+                        </option>
+                      ))}
+                    </Select>
                   </Field>
                   <Field label="备注">
                     <Input

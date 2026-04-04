@@ -1,10 +1,4 @@
-# admin-dashboard-navigation Specification
-
-## Purpose
-Define actionable shortcut navigation from the admin dashboard so operators can
-jump directly into the main workflows.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Admin dashboard shortcut actions SHALL navigate to working management pages
 The admin dashboard SHALL expose actionable shortcut entries that take
@@ -17,19 +11,9 @@ and which keyboard shortcut triggers it.
 #### Scenario: Administrator activates the quick-record action
 - **WHEN** an administrator selects the quick-record action from the dashboard
   quick-action area
-- **THEN** the UI opens the quick-record workflow without requiring a separate
-  page transition and visibly communicates the quick-record shortcut
+- **THEN** the UI opens the quick-record workflow and visibly communicates that
+  the action records a result, including its keyboard shortcut affordance
 
 #### Scenario: Administrator activates the goal action
 - **WHEN** an administrator selects the goal quick action
 - **THEN** the UI navigates to the admin goals page
-
-### Requirement: Admin shortcuts SHALL remain usable on mobile layouts
-The shortcut area SHALL remain reachable and tappable on phone-sized viewports.
-The layout SHALL adapt using a responsive grid that reorders elements for
-optimal thumb-reach on mobile.
-
-#### Scenario: Mobile administrator opens the dashboard
-- **WHEN** the admin dashboard is rendered on a mobile viewport
-- **THEN** the shortcut actions transition to a vertical or multi-row layout
-  that is easily reachable

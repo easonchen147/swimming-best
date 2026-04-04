@@ -86,10 +86,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             </motion.div>
           ) : (
             <motion.div
+              initial={false}
               animate={{ opacity: 1 }}
               className="flex items-center gap-2"
               exit={{ opacity: 0 }}
-              initial={{ opacity: 0 }}
               key="content"
             >
               {children}

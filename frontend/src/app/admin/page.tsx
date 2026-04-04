@@ -188,7 +188,12 @@ export default function AdminDashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     <Zap className="h-5 w-5" />
-                    <span className="text-base font-bold">快速录入成绩</span>
+                    <div className="flex flex-col items-start">
+                      <span className="text-base font-bold">快速录入成绩</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/55">
+                        Ctrl / Cmd + K
+                      </span>
+                    </div>
                   </div>
                   <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
                 </Button>

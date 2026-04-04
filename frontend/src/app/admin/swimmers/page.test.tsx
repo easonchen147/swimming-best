@@ -85,6 +85,9 @@ describe("AdminSwimmersPage", () => {
     fireEvent.change(screen.getByLabelText("性别"), {
       target: { value: "female" },
     });
+    fireEvent.change(screen.getByLabelText("出生年份"), {
+      target: { value: "2016" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "创建档案" }));
 
     await waitFor(() => {
@@ -95,7 +98,7 @@ describe("AdminSwimmersPage", () => {
         isPublic: true,
         gender: "female",
         teamId: "team-a",
-        birthYear: undefined,
+        birthYear: 2016,
         notes: "",
       });
     });

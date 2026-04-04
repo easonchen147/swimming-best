@@ -44,6 +44,7 @@ describe("AdminDashboardPage", () => {
     render(<AdminDashboardPage />);
 
     expect(await screen.findByRole("button", { name: /快速录入成绩/i })).toBeInTheDocument();
+    expect(screen.getByText(/Ctrl \/ Cmd \+ K/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /添加目标成绩/i })).toHaveAttribute(
       "href",
       "/admin/goals",
