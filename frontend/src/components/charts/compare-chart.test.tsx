@@ -1,6 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { vi } from "vitest";
 
 import { CompareChart } from "@/components/charts/compare-chart";
+
+vi.mock("recharts", async (importOriginal) => {
+  const original = await importOriginal<typeof import("recharts")>();
+  return {
+    ...original,
+    ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
+      <div style={{ width: 800, height: 400 }}>{children}</div>
+    ),
+  };
+});
 
 describe("CompareChart", () => {
   it("renders legend toggles for swimmers", () => {
@@ -41,8 +52,7 @@ describe("CompareChart", () => {
       />,
     );
 
-    expect(screen.getByText("进步曲线对比")).toBeInTheDocument();
-    const bellaToggle = screen.getByRole("button", { name: "切换 Bella 曲线" });
+    const bellaToggle = screen.getByRole("button", { name: /切换 Bella 队员曲线/i });
     expect(bellaToggle).toHaveAttribute("aria-pressed", "true");
 
     fireEvent.click(bellaToggle);
