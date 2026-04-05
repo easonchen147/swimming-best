@@ -18,7 +18,9 @@ the shared shadcn/ui-style component layer consistently, and the quick-actions
 panel SHALL use the same light-surface card semantics as the rest of the admin
 overview instead of a visually isolated dark promo panel. Shortcut links that
 are presented as buttons SHALL attach their button styling to the real
-interactive root node rather than to a nested wrapper.
+interactive root node rather than to a nested wrapper. The three quick-action
+entries SHALL share one identical layout template with consistent left
+alignment for icon, text block, and affordance arrow.
 
 #### Scenario: Administrator activates the quick-record action
 - **WHEN** an administrator selects the quick-record action from the dashboard
@@ -32,11 +34,17 @@ interactive root node rather than to a nested wrapper.
 - **THEN** the header does not repeat a standalone `Ctrl / Cmd + K` shortcut
   hint, presents the public-page action as a full button, and also exposes a
   sibling logout button with the same shared action treatment, with both
-  actions using true button-style clickable roots
+  actions using true button-style clickable roots, matched typography, and
+  aligned surface styling
 
 #### Scenario: Administrator activates the goal action
 - **WHEN** an administrator selects the goal quick action
 - **THEN** the UI navigates to the admin goals page
+
+#### Scenario: Administrator scans the quick-action area
+- **WHEN** the admin dashboard quick-action panel is rendered
+- **THEN** all three shortcut entries share the same left-aligned composition
+  and appear as one coherent button family
 
 ### Requirement: Admin navigation chrome SHALL expose complete icon-backed navigation
 The admin sidebar SHALL render every primary navigation item with an icon from

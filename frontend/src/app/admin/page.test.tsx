@@ -52,6 +52,13 @@ describe("AdminDashboardPage", () => {
       "href",
       "/admin/goals",
     );
+    expect(screen.getByRole("link", { name: /查看项目目录/i })).toHaveAttribute(
+      "href",
+      "/admin/events",
+    );
+    expect(screen.getByRole("button", { name: /快速录入成绩/i })).toHaveClass("text-left");
+    expect(screen.getByRole("link", { name: /添加目标成绩/i })).toHaveClass("text-left");
+    expect(screen.getByRole("link", { name: /查看项目目录/i })).toHaveClass("text-left");
 
     fireEvent.click(screen.getByRole("button", { name: /快速录入成绩/i }));
     expect(triggerQuickRecord).toHaveBeenCalled();
