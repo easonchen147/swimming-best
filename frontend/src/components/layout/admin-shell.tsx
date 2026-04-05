@@ -167,12 +167,12 @@ export function AdminShell({
               <Link
                 className={cn(
                   headerActionButtonClassName,
-                  "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800",
+                  "border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800",
                 )}
                 href="/"
               >
                 <Globe2 className="h-4 w-4" />
-                <span className="hidden sm:inline">查看公开页</span>
+                <span className="hidden sm:inline">公开页</span>
               </Link>
               <Button
                 aria-label="退出登录"
