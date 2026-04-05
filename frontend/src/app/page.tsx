@@ -39,14 +39,14 @@ export default function HomePage() {
 
   return (
     <PublicShell>
-      {/* Hero Section */}
+      {/* Hero Section - Even More Compact */}
       <motion.section 
         initial="initial"
         animate="animate"
         variants={STAGGER_CONTAINER}
-        className="relative mb-16 overflow-hidden rounded-[40px] bg-primary px-8 py-20 text-center text-white shadow-2xl shadow-primary/20 md:px-12 md:py-28"
+        className="relative mb-8 overflow-hidden rounded-[32px] bg-primary px-8 py-10 text-center text-white shadow-xl shadow-primary/20 md:px-12 md:py-14"
       >
-        {/* Animated Background Elements */}
+        {/* Restored Animated Background Elements */}
         <div className="absolute inset-0 z-0 opacity-10">
            <div className="grid-sheen absolute inset-0" />
            <motion.div 
@@ -74,33 +74,32 @@ export default function HomePage() {
         <div className="relative z-10 flex flex-col items-center">
           <motion.div 
             variants={FADE_IN_UP}
-            className="mb-6 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-md"
+            className="mb-4 flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md"
           >
-            <Star className="h-3 w-3 text-accent" />
+            <Star className="h-2.5 w-2.5 text-accent" />
             <span>让每一份进步都被看见</span>
           </motion.div>
           
           <motion.h1 
             variants={FADE_IN_UP}
-            className="max-w-4xl text-5xl font-black leading-[1.1] tracking-tight md:text-7xl"
+            className="max-w-3xl text-4xl font-black leading-[1.1] tracking-tight md:text-6xl"
           >
             记录成长，<span className="text-secondary">超越</span>自我
           </motion.h1>
           
           <motion.p 
             variants={FADE_IN_UP}
-            className="mt-8 max-w-2xl text-lg font-medium text-white/70 text-balance md:text-xl"
+            className="mt-6 max-w-xl text-base font-medium text-white/70 text-balance"
           >
-            欢迎来到 Swimming Best。这里记录了孩子们在泳池中的每一次划水与突破，见证从初学者到小选手的蜕变。
+            欢迎来到 Swimming Best。见证孩子们在泳池中的每一次突破与蜕变。
           </motion.p>
           
-          <motion.div variants={FADE_IN_UP} className="mt-12 flex flex-wrap justify-center gap-4">
-             <div className="flex flex-col items-center gap-1">
+          <motion.div variants={FADE_IN_UP} className="mt-8 flex flex-wrap justify-center gap-8">
+             <div className="flex flex-col items-center gap-0.5">
                 <span className="text-3xl font-black">{swimmers.length}</span>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">已录入档案</span>
              </div>
-             <div className="mx-8 h-12 w-px bg-white/10 hidden md:block" />
-             <div className="flex flex-col items-center gap-1">
+             <div className="flex flex-col items-center gap-0.5">
                 <span className="text-3xl font-black">{teams.length}</span>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/50">活跃队伍</span>
              </div>
@@ -109,44 +108,43 @@ export default function HomePage() {
       </motion.section>
 
       {/* Main Content */}
-      <section className="flex flex-col gap-8">
-        {/* Controls */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-           <div className="flex flex-col gap-1">
-              <h2 className="text-3xl font-black tracking-tight text-foreground">学员档案库</h2>
-              <p className="text-sm font-medium text-muted">选择一个档案查看详细的成绩分析与目标进度</p>
+      <section className="flex flex-col gap-6">
+        {/* Controls - More Compact */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+           <div className="flex flex-col gap-0.5">
+              <h2 className="text-2xl font-black tracking-tight text-foreground">学员档案库</h2>
+              <p className="text-xs font-medium text-muted">选择档案查看详细分析与目标进度</p>
            </div>
            
-           <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted" />
+           <div className="relative w-full md:w-72">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
               <Input 
-                className="h-12 rounded-full pl-12 pr-6 shadow-sm border-border/60 bg-surface/50 transition-all focus:bg-white focus:shadow-xl focus:shadow-primary/5"
-                placeholder="搜索学员姓名..."
+                className="h-10 rounded-full pl-11 pr-5 shadow-sm border-border/60 bg-surface/50 transition-all focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm"
+                placeholder="搜索姓名..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
            </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 border-b border-border/40 pb-6">
-           <Filter className="mr-2 h-4 w-4 text-muted" />
+        <div className="flex flex-wrap items-center gap-1.5 border-b border-border/40 pb-4">
            <Button
-             className="rounded-full"
+             className="h-8 rounded-full px-4 text-xs font-bold"
              onClick={() => setTeamFilter("")}
              size="sm"
              type="button"
-             variant={teamFilter === "" ? "primary" : "outline"}
+             variant={teamFilter === "" ? "primary" : "ghost"}
            >
-             全部队伍
+             全部
            </Button>
            {teams.map((team) => (
              <Button
-               className="rounded-full"
+               className="h-8 rounded-full px-4 text-xs font-bold"
                key={team.id}
                onClick={() => setTeamFilter(team.id)}
                size="sm"
                type="button"
-               variant={teamFilter === team.id ? "primary" : "outline"}
+               variant={teamFilter === team.id ? "primary" : "ghost"}
              >
                {team.name}
              </Button>
@@ -154,19 +152,15 @@ export default function HomePage() {
         </div>
 
         {error && (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="rounded-3xl border border-rose-200 bg-rose-50/50 p-6 text-sm font-bold text-rose-600 backdrop-blur-sm"
-          >
+          <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-4 text-center text-xs font-bold text-rose-600">
             {error}
-          </motion.div>
+          </div>
         )}
 
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-               <LoadingState key={i} label={`档案加载中 ${i}`} />
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
+               <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />
             ))}
           </div>
         ) : (
@@ -174,7 +168,7 @@ export default function HomePage() {
             variants={STAGGER_CONTAINER}
             initial="initial"
             animate="animate"
-            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
           >
             <AnimatePresence mode="popLayout">
               {filteredSwimmers.map((swimmer) => (
@@ -186,35 +180,25 @@ export default function HomePage() {
                   className="group"
                 >
                   <Link href={`/swimmers/${swimmer.slug}`}>
-                    <Card className="h-full border-border/40 transition-all group-hover:border-primary/30 group-hover:shadow-2xl group-hover:shadow-primary/5">
-                      <CardContent className="flex flex-col gap-6 p-8">
-                        <div className="flex items-start justify-between">
-                           <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/5 text-primary text-2xl font-black group-hover:bg-primary group-hover:text-white transition-colors">
+                    <Card className="h-full border-border/40 transition-all duration-300 group-hover:-translate-y-1 group-hover:border-primary/20 group-hover:shadow-xl group-hover:shadow-primary/5">
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-3">
+                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary text-base font-black group-hover:bg-primary group-hover:text-white transition-all">
                               {swimmer.displayName.slice(0, 1)}
                            </div>
-                           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-strong border border-border/60 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                              <ArrowRight className="h-5 w-5 text-primary" />
+                           <div className="flex flex-col min-w-0">
+                              <h3 className="truncate text-sm font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
+                                {swimmer.displayName}
+                              </h3>
+                              {swimmer.team && (
+                                <div className="flex items-center gap-1 text-[9px] font-bold text-muted/60">
+                                   <span className="truncate uppercase tracking-tighter">{swimmer.team.name}</span>
+                                </div>
+                              )}
                            </div>
-                        </div>
-                        
-                        <div className="flex flex-col gap-1">
-                           <h3 className="text-2xl font-black tracking-tight text-foreground group-hover:text-primary transition-colors">
-                             {swimmer.displayName}
-                           </h3>
-                           {swimmer.team && (
-                             <div className="flex items-center gap-2 text-sm font-bold text-muted/60">
-                                <Users className="h-4 w-4" />
-                                <span>{swimmer.team.name}</span>
-                             </div>
-                           )}
-                        </div>
-
-                        <div className="mt-auto pt-6 border-t border-border/40 flex items-center justify-between text-xs font-bold uppercase tracking-widest text-muted/40">
-                           <div className="flex items-center gap-1.5">
-                              <Trophy className="h-3.5 w-3.5" />
-                              <span>查看详细成绩</span>
+                           <div className="ml-auto opacity-0 group-hover:opacity-100 transition-all">
+                              <ChevronRight className="h-3.5 w-3.5 text-primary" />
                            </div>
-                           <ChevronRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
                       </CardContent>
                     </Card>
