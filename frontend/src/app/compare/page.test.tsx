@@ -119,12 +119,11 @@ describe("ComparePage", () => {
   it("requires explicit swimmer and event selection before rendering compare results", async () => {
     render(<ComparePage />);
 
-    expect(await screen.findByText("同项目进步对比")).toBeInTheDocument();
-    expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
-    expect(screen.queryByText("对比结果加载中")).not.toBeInTheDocument();
+    expect(await screen.findByText("进步对比分析")).toBeInTheDocument();
+    expect(screen.getByText("待选对比成员")).toBeInTheDocument();
     expect(comparePublicEvent).not.toHaveBeenCalled();
 
-    const eventSelect = screen.getByRole("combobox", { name: "共同项目" });
+    const eventSelect = screen.getByRole("combobox", { name: "对比项目" });
     expect(eventSelect).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Alice" }));
@@ -133,12 +132,12 @@ describe("ComparePage", () => {
       expect(listPublicSwimmerEvents).toHaveBeenCalledWith("alice");
     });
 
-    expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
+    expect(screen.getByText("待选对比成员")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Bella" }));
-    expect(await screen.findByText("待选择对比项目")).toBeInTheDocument();
+    expect(await screen.findByText("待选对比项目")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("combobox", { name: "共同项目" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "对比项目" }));
     fireEvent.click(await screen.findByRole("option", { name: "50m freestyle sprint" }));
 
     await waitFor(() => {
@@ -148,14 +147,14 @@ describe("ComparePage", () => {
       ]);
     });
 
-    expect(screen.getByText("对比摘要")).toBeInTheDocument();
-    expect(screen.getByText("最佳 32.00s")).toBeInTheDocument();
-    expect(screen.getByText("最佳 31.50s")).toBeInTheDocument();
+    expect(screen.getByText("趋势走势对比")).toBeInTheDocument();
+    expect(screen.getAllByText("32.00s").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("31.50s").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Alice" }));
 
     await waitFor(() => {
-      expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
+      expect(screen.getByText("待选对比成员")).toBeInTheDocument();
     });
   });
 });

@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
+import {
+  Star,
+  Users,
+  Waves,
+  Trophy,
+  TimerReset,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { CompareChart } from "@/components/charts/compare-chart";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Select,
@@ -33,6 +38,7 @@ import type {
   PublicSwimmerEventSummary,
   PublicSwimmerSummary,
 } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function ComparePage() {
   const [swimmers, setSwimmers] = useState<PublicSwimmerSummary[]>([]);
@@ -169,7 +175,7 @@ export default function ComparePage() {
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <div className="h-2 w-8 rounded-full bg-primary" />
-            <Badge variant="secondary" className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+            <Badge variant="solid" className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
               Comparison Engine
             </Badge>
           </div>

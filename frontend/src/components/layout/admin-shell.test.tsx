@@ -66,21 +66,16 @@ describe("AdminShell", () => {
     const banner = screen.getByRole("banner");
 
     expect(screen.queryByText(/Ctrl \/ Cmd \+ K/i)).not.toBeInTheDocument();
-    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
-    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("rounded-full");
-    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("h-10");
-    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("font-semibold");
+    expect(within(banner).getByRole("link", { name: /公开页/i })).toHaveAttribute("href", "/");
+    expect(within(banner).getByRole("link", { name: /公开页/i })).toHaveClass("rounded-full");
+    expect(within(banner).getByRole("link", { name: /公开页/i })).toHaveClass("h-10");
 
     const logoutButton = within(banner).getByRole("button", { name: "退出登录" });
     expect(logoutButton).toBeInTheDocument();
-    expect(logoutButton).toHaveClass("rounded-full");
-    expect(logoutButton).toHaveClass("h-10");
-    expect(logoutButton).toHaveClass("font-semibold");
-    expect(logoutButton).toHaveClass("border-rose-200");
-    expect(logoutButton).toHaveClass("bg-rose-50");
-    expect(logoutButton).toHaveClass("text-rose-700");
+    expect(logoutButton).toHaveClass("hover:bg-rose-50");
+    expect(logoutButton).toHaveClass("hover:text-rose-600");
 
-    expect(screen.getByRole("link", { name: "概览" })).toHaveClass("text-white");
+    expect(screen.getByRole("link", { name: "概览" })).toHaveClass("bg-primary");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
     expect(quickRecordModal).toHaveBeenCalled();

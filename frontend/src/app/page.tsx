@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ChevronRight, Users, Star, Trophy, Search, Filter } from "lucide-react";
+import { ChevronRight, Users, Star, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { PublicShell } from "@/components/layout/public-shell";
-import { LoadingState } from "@/components/shared/loading-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
