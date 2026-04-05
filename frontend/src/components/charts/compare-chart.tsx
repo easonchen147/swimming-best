@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ChartTooltip } from "@/components/charts/chart-tooltip";
 import type { CompareSwimmer } from "@/lib/types";
@@ -42,9 +42,18 @@ function buildCompareData(swimmers: CompareSwimmer[]) {
 export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const data = useMemo(() => buildCompareData(swimmers), [swimmers]);
   const visibleSwimmers = swimmers.filter((swimmer) => !hiddenIds.includes(swimmer.swimmerId));
+
+  if (!mounted) {
+    return <div className="h-[400px] w-full animate-pulse rounded-2xl bg-slate-50 md:h-[500px]" />;
+  }
 
   if (!data.length) {
     return (
@@ -101,7 +110,7 @@ export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
       </div>
 
       <div className="h-[400px] w-full min-w-0 md:h-[500px]">
-        <ResponsiveContainer height="100%" width="100%">
+        <ResponsiveContainer height="100%" minHeight={300} width="100%">
           <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
             <CartesianGrid
               stroke="rgba(15,23,42,0.06)"
