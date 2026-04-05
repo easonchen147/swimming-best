@@ -75,12 +75,15 @@ describe("AdminSwimmersPage", () => {
     render(<AdminSwimmersPage />);
 
     const inputs = await screen.findAllByRole("textbox");
+
     fireEvent.change(inputs[0], { target: { value: "Alice Wang" } });
     fireEvent.change(inputs[1], { target: { value: "小海豚" } });
 
-    fireEvent.change(screen.getByLabelText("性别"), {
-      target: { value: "female" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "所属队伍" }));
+    fireEvent.click(await screen.findByRole("option", { name: "海豚预备队" }));
+
+    fireEvent.click(screen.getByRole("combobox", { name: "性别" }));
+    fireEvent.click(await screen.findByRole("option", { name: "女" }));
 
     fireEvent.click(screen.getByRole("button", { name: "出生年份" }));
     fireEvent.click(screen.getByRole("button", { name: "2016" }));

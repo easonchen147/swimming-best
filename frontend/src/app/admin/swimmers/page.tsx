@@ -20,7 +20,13 @@ import { Field } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -60,6 +66,9 @@ export default function AdminSwimmersPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const teamSelectId = "swimmer-team";
+  const genderSelectId = "swimmer-gender";
+  const publicNameModeSelectId = "swimmer-public-name-mode";
   useEffect(() => {
     Promise.all([listAdminSwimmers(), listAdminTeams()]).then(([swimmerResponse, teamResponse]) => {
       setSwimmers(swimmerResponse.swimmers);
@@ -215,47 +224,65 @@ export default function AdminSwimmersPage() {
                   </Field>
                 </div>
 
-                <Field label="所属队伍">
+                <Field label="所属队伍" labelFor={teamSelectId}>
                   <Select
-                    onChange={(event) => setForm((current) => ({ ...current, teamId: event.target.value }))}
+                    onValueChange={(value) => setForm((current) => ({ ...current, teamId: value }))}
                     value={form.teamId}
-                    required
                   >
-                    {teams.length === 0 ? (
-                      <option value="">请先到“队伍”页面创建队伍</option>
-                    ) : null}
-                    {selectableTeams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name} {!team.isActive ? " (已停用)" : ""}
-                      </option>
-                    ))}
+                    <SelectTrigger id={teamSelectId}>
+                      <SelectValue placeholder="请选择所属队伍" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {teams.length === 0 ? (
+                        <SelectItem disabled value="__empty__">
+                          请先到“队伍”页面创建队伍
+                        </SelectItem>
+                      ) : null}
+                      {selectableTeams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name} {!team.isActive ? " (已停用)" : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </Field>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="性别">
+                  <Field label="性别" labelFor={genderSelectId}>
                     <Select
-                      onChange={(event) =>
+                      onValueChange={(value) =>
                         setForm((current) => ({
                           ...current,
-                          gender: event.target.value as Gender,
+                          gender: value as Gender,
                         }))
                       }
                       value={form.gender}
                     >
-                      <option value="unknown">未设置</option>
-                      <option value="male">男</option>
-                      <option value="female">女</option>
+                      <SelectTrigger id={genderSelectId}>
+                        <SelectValue placeholder="请选择性别" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unknown">未设置</SelectItem>
+                        <SelectItem value="male">男</SelectItem>
+                        <SelectItem value="female">女</SelectItem>
+                      </SelectContent>
                     </Select>
                   </Field>
-                  <Field label="展示姓名模式">
+                  <Field label="展示姓名模式" labelFor={publicNameModeSelectId}>
                     <Select
-                      onChange={(event) => setForm((current) => ({ ...current, publicNameMode: event.target.value }))}
+                      onValueChange={(value) =>
+                        setForm((current) => ({ ...current, publicNameMode: value }))
+                      }
                       value={form.publicNameMode}
                     >
-                      <option value="nickname">展示昵称</option>
-                      <option value="real_name">展示真名</option>
-                      <option value="hidden">完全隐藏</option>
+                      <SelectTrigger id={publicNameModeSelectId}>
+                        <SelectValue placeholder="请选择展示模式" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nickname">展示昵称</SelectItem>
+                        <SelectItem value="real_name">展示真名</SelectItem>
+                        <SelectItem value="hidden">完全隐藏</SelectItem>
+                      </SelectContent>
                     </Select>
                   </Field>
                 </div>

@@ -116,7 +116,8 @@ async function openCompareResults(page: import("@playwright/test").Page) {
   await page.getByRole("button", { name: "Bella" }).click();
   await expect(page.getByText("待选择对比项目")).toBeVisible();
 
-  await page.getByLabel("共同项目").selectOption("event-1");
+  await page.getByRole("combobox", { name: "共同项目" }).click();
+  await page.getByRole("option", { name: "50m 自由泳" }).click();
   await expect(page.getByText("对比摘要")).toBeVisible();
 }
 

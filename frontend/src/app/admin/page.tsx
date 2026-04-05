@@ -61,6 +61,9 @@ const workflowItems = [
   },
 ];
 
+const quickActionButtonClassName =
+  "group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5";
+
 export default function AdminDashboardPage() {
   const [username, setUsername] = useState("");
   const [swimmerCount, setSwimmerCount] = useState(0);
@@ -180,61 +183,59 @@ export default function AdminDashboardPage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3 p-6 md:p-8">
                 <Button
-                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
+                  className={quickActionButtonClassName}
                   onClick={() => triggerQuickRecord()}
                   variant="outline"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
-                      <Zap className="h-5 w-5" />
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <span className="text-base font-black text-foreground">快速录入成绩</span>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
-                        Ctrl / Cmd + K
-                      </span>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-                </Button>
-                <Button
-                  asChild
-                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
-                  variant="outline"
-                >
-                  <Link href="/admin/goals">
+                  <div className="flex w-full items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
-                        <Flag className="h-5 w-5" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                        <Zap className="h-5 w-5" />
                       </div>
                       <div className="flex flex-col items-start">
-                        <span className="text-base font-black text-foreground">添加目标成绩</span>
+                        <span className="text-base font-black text-foreground">快速录入成绩</span>
                         <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
-                          Goal Setup
+                          Ctrl / Cmd + K
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                    <ArrowRight className="h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </div>
+                </Button>
+                <Button asChild className={quickActionButtonClassName} variant="outline">
+                  <Link href="/admin/goals">
+                    <div className="flex w-full items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                          <Flag className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className="text-base font-black text-foreground">添加目标成绩</span>
+                          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
+                            Goal Setup
+                          </span>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                    </div>
                   </Link>
                 </Button>
-                <Button
-                  asChild
-                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
-                  variant="outline"
-                >
+                <Button asChild className={quickActionButtonClassName} variant="outline">
                   <Link href="/admin/events">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
-                        <Layers className="h-5 w-5" />
+                    <div className="flex w-full items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
+                          <Layers className="h-5 w-5" />
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className="text-base font-black text-foreground">查看项目目录</span>
+                          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
+                            Event Catalog
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-start">
-                        <span className="text-base font-black text-foreground">查看项目目录</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
-                          Event Catalog
-                        </span>
-                      </div>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                     </div>
-                    <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                   </Link>
                 </Button>
               </CardContent>

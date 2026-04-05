@@ -57,6 +57,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const currentVariant = success ? "success" : variant;
     const classes = cn(buttonVariants({ variant: currentVariant, size }), className);
     const motionButtonProps = props as React.ComponentPropsWithoutRef<typeof motion.button>;
+
+    if (asChild) {
+      return (
+        <Slot className={classes} ref={ref} {...props}>
+          {children}
+        </Slot>
+      );
+    }
+
     const content = (
       <AnimatePresence mode="wait">
         {loading ? (
@@ -94,14 +103,6 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </AnimatePresence>
     );
-
-    if (asChild) {
-      return (
-        <Slot className={classes} ref={ref} {...props}>
-          {content}
-        </Slot>
-      );
-    }
 
     return (
       <motion.button

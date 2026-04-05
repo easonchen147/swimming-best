@@ -65,7 +65,11 @@ describe("AdminShell", () => {
 
     expect(screen.queryByText(/Ctrl \/ Cmd \+ K/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveClass("rounded-full");
+    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveClass("h-10");
     expect(screen.getByRole("button", { name: "退出登录" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("rounded-full");
+    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("h-10");
     expect(screen.getByRole("link", { name: "概览" })).toHaveClass("text-white");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });

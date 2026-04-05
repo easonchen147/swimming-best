@@ -30,7 +30,10 @@ feeling of a premium interface. All state changes MUST use defined `motion`
 spring or tween transitions for a more organic feel. Shared select controls and
 shared picker triggers SHALL visually align with the application's modern
 surface styling. Buttons, inputs, selects, cards, badges, tables, dialogs, and
-picker triggers SHALL read as one coherent shadcn/ui-style family.
+picker triggers SHALL read as one coherent shadcn/ui-style family. Shared
+select controls SHALL use the shadcn-style Radix Select pattern with a styled
+trigger, overlay content surface, and selectable items rather than a
+browser-native select wrapped in custom decoration.
 
 #### Scenario: User hovers over a primary action button
 - **WHEN** a user moves their cursor over a "Create Swimmer" button
@@ -42,6 +45,11 @@ picker triggers SHALL read as one coherent shadcn/ui-style family.
   picker
 - **THEN** the control matches the application's modern card and input styling
   rather than appearing as an out-of-place browser-default control
+
+#### Scenario: User opens a shared select menu
+- **WHEN** a user opens any shared select control in the frontend
+- **THEN** the menu is rendered through the shared Radix Select overlay
+  structure with a styled trigger, content surface, and selectable items
 
 ### Requirement: Modern Data Presentation
 Data tables and lists SHALL be upgraded to a modern, clean aesthetic with

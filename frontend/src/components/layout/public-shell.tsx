@@ -21,20 +21,20 @@ export function PublicShell({
       label: "首页",
       variant: "outline" as const,
       className:
-        "rounded-full border-border/60 bg-white text-foreground hover:border-primary/20 hover:bg-surface hover:text-primary",
+        "h-10 rounded-full border-border/60 bg-white px-4 text-foreground hover:border-primary/20 hover:bg-surface hover:text-primary",
     },
     {
       href: "/compare",
       label: "对比",
       variant: "outline" as const,
       className:
-        "rounded-full border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800",
+        "h-10 rounded-full border-sky-200 bg-sky-50 px-4 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800",
     },
     {
       href: "/admin",
       label: "管理后台",
       variant: "primary" as const,
-      className: "rounded-full shadow-primary/25",
+      className: "h-10 rounded-full px-4 shadow-primary/25",
     },
   ];
 

@@ -24,7 +24,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createAdminEvent, listAdminEvents } from "@/lib/api/admin";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { EventDefinition } from "@/lib/types";
@@ -67,6 +73,8 @@ export default function AdminEventsPage() {
     distanceM: 50,
     stroke: "freestyle",
   });
+  const poolLengthSelectId = "event-pool-length";
+  const strokeSelectId = "event-stroke";
 
   useEffect(() => {
     listAdminEvents()
@@ -141,18 +149,23 @@ export default function AdminEventsPage() {
 
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-5">
-                <Field label="泳池长度">
+                <Field label="泳池长度" labelFor={poolLengthSelectId}>
                   <Select
-                    onChange={(event) =>
+                    onValueChange={(value) =>
                       setForm((current) => ({
                         ...current,
-                        poolLengthM: Number(event.target.value),
+                        poolLengthM: Number(value),
                       }))
                     }
                     value={String(form.poolLengthM)}
                   >
-                    <option value="25">25 米（短池）</option>
-                    <option value="50">50 米（长池）</option>
+                    <SelectTrigger id={poolLengthSelectId}>
+                      <SelectValue placeholder="请选择泳池长度" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="25">25 米（短池）</SelectItem>
+                      <SelectItem value="50">50 米（长池）</SelectItem>
+                    </SelectContent>
                   </Select>
                 </Field>
 
@@ -171,18 +184,23 @@ export default function AdminEventsPage() {
                   />
                 </Field>
 
-                <Field label="泳姿">
+                <Field label="泳姿" labelFor={strokeSelectId}>
                   <Select
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, stroke: event.target.value }))
+                    onValueChange={(value) =>
+                      setForm((current) => ({ ...current, stroke: value }))
                     }
                     value={form.stroke}
                   >
-                    {strokeOptions.map((item) => (
-                      <option key={item.value} value={item.value}>
-                        {item.label}
-                      </option>
-                    ))}
+                    <SelectTrigger id={strokeSelectId}>
+                      <SelectValue placeholder="请选择泳姿" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {strokeOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </Field>
               </CardContent>

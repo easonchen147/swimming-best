@@ -16,7 +16,9 @@ and which keyboard shortcut triggers it, while the header SHALL not duplicate
 that shortcut hint. Dashboard quick actions and surrounding surfaces SHALL use
 the shared shadcn/ui-style component layer consistently, and the quick-actions
 panel SHALL use the same light-surface card semantics as the rest of the admin
-overview instead of a visually isolated dark promo panel.
+overview instead of a visually isolated dark promo panel. Shortcut links that
+are presented as buttons SHALL attach their button styling to the real
+interactive root node rather than to a nested wrapper.
 
 #### Scenario: Administrator activates the quick-record action
 - **WHEN** an administrator selects the quick-record action from the dashboard
@@ -29,7 +31,8 @@ overview instead of a visually isolated dark promo panel.
 - **WHEN** the admin dashboard header is rendered
 - **THEN** the header does not repeat a standalone `Ctrl / Cmd + K` shortcut
   hint, presents the public-page action as a full button, and also exposes a
-  sibling logout button with the same shared action treatment
+  sibling logout button with the same shared action treatment, with both
+  actions using true button-style clickable roots
 
 #### Scenario: Administrator activates the goal action
 - **WHEN** an administrator selects the goal quick action

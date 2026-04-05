@@ -124,7 +124,7 @@ describe("ComparePage", () => {
     expect(screen.queryByText("对比结果加载中")).not.toBeInTheDocument();
     expect(comparePublicEvent).not.toHaveBeenCalled();
 
-    const eventSelect = screen.getByLabelText("共同项目");
+    const eventSelect = screen.getByRole("combobox", { name: "共同项目" });
     expect(eventSelect).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Alice" }));
@@ -138,9 +138,8 @@ describe("ComparePage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Bella" }));
     expect(await screen.findByText("待选择对比项目")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("共同项目"), {
-      target: { value: "event-1" },
-    });
+    fireEvent.click(screen.getByRole("combobox", { name: "共同项目" }));
+    fireEvent.click(await screen.findByRole("option", { name: "50m freestyle sprint" }));
 
     await waitFor(() => {
       expect(comparePublicEvent).toHaveBeenCalledWith("event-1", [

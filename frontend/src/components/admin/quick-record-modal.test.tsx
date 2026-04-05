@@ -61,6 +61,12 @@ describe("QuickRecordModal", () => {
 
     expect(await screen.findByText("快速成绩录入")).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("combobox", { name: "孩子姓名" }));
+    fireEvent.click(await screen.findByRole("option", { name: "小海豚" }));
+
+    fireEvent.click(screen.getByRole("combobox", { name: "项目" }));
+    fireEvent.click(await screen.findByRole("option", { name: "50米 自由泳（短池）" }));
+
     fireEvent.change(screen.getByLabelText("标签（分号或逗号分隔）"), {
       target: { value: "月测;主项" },
     });

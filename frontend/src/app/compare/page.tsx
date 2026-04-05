@@ -15,7 +15,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   comparePublicEvent,
   listPublicSwimmerEvents,
@@ -37,6 +43,7 @@ export default function ComparePage() {
   const [loading, setLoading] = useState(true);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [compareLoading, setCompareLoading] = useState(false);
+  const compareEventTriggerId = "compare-event";
 
   useEffect(() => {
     listPublicSwimmers()
@@ -215,24 +222,29 @@ export default function ComparePage() {
                 </label>
                 <Select
                   disabled={!primarySelectedSwimmer || eventsLoading || events.length === 0}
-                  id="compare-event"
-                  onChange={(event) => handleEventChange(event.target.value)}
+                  onValueChange={handleEventChange}
                   value={selectedEventId}
                 >
-                  <option value="">
-                    {!primarySelectedSwimmer
-                      ? "先选择孩子后再选项目"
-                      : eventsLoading
-                        ? "项目加载中..."
-                        : events.length === 0
-                          ? "该孩子暂无可对比项目"
-                          : "请选择项目"}
-                  </option>
-                  {events.map((item) => (
-                    <option key={item.event.id} value={item.event.id}>
-                      {item.event.displayName}
-                    </option>
-                  ))}
+                  <SelectTrigger id={compareEventTriggerId}>
+                    <SelectValue
+                      placeholder={
+                        !primarySelectedSwimmer
+                          ? "先选择孩子后再选项目"
+                          : eventsLoading
+                            ? "项目加载中..."
+                            : events.length === 0
+                              ? "该孩子暂无可对比项目"
+                              : "请选择项目"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {events.map((item) => (
+                      <SelectItem key={item.event.id} value={item.event.id}>
+                        {item.event.displayName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
                 <p className="text-xs text-muted/70">
                   项目列表会跟随第一个已选中的孩子切换。

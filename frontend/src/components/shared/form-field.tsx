@@ -4,7 +4,13 @@ import * as React from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 export function Field({
@@ -13,18 +19,20 @@ export function Field({
   className,
   error,
   hint,
+  labelFor,
 }: {
   children: React.ReactNode;
   label: string;
   className?: string;
   error?: string;
   hint?: string;
+  labelFor?: string;
 }) {
   const fallbackId = React.useId();
   let control = children;
-  let htmlFor: string | undefined;
+  let htmlFor: string | undefined = labelFor;
 
-  if (React.isValidElement<{ id?: string; className?: string }>(children)) {
+  if (!labelFor && React.isValidElement<{ id?: string; className?: string }>(children)) {
     htmlFor = children.props.id ?? fallbackId;
     control = React.cloneElement(children, {
       id: htmlFor,
@@ -80,6 +88,8 @@ export function SelectField({
   className,
   error,
   hint,
+  placeholder = "请选择",
+  disabled = false,
 }: {
   label: string;
   options: Array<{ label: string; value: string }>;
@@ -88,22 +98,24 @@ export function SelectField({
   className?: string;
   error?: string;
   hint?: string;
+  placeholder?: string;
+  disabled?: boolean;
 }) {
-  const id = React.useId();
+  const triggerId = React.useId();
 
   return (
-    <Field className={className} error={error} hint={hint} label={label}>
-      <Select
-        className={cn(error && "border-rose-500 focus:border-rose-500")}
-        id={id}
-        onChange={(event) => onChange(event.target.value)}
-        value={value}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
+    <Field className={className} error={error} hint={hint} label={label} labelFor={triggerId}>
+      <Select disabled={disabled} onValueChange={onChange} value={value}>
+        <SelectTrigger className={cn(error && "border-rose-500 focus:ring-rose-500/10")} id={triggerId}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
     </Field>
   );

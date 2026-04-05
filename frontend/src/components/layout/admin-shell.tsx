@@ -155,14 +155,19 @@ export function AdminShell({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button asChild className="rounded-full" size="sm" variant="secondary">
+              <Button
+                asChild
+                className="h-10 rounded-full border-emerald-200 bg-emerald-50 px-4 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800"
+                size="sm"
+                variant="outline"
+              >
                 <Link href="/">
                   <Globe2 className="h-4 w-4" />
                   <span>查看公开页</span>
                 </Link>
               </Button>
               <Button
-                className="rounded-full"
+                className="h-10 rounded-full px-4"
                 loading={logoutPending}
                 onClick={handleLogout}
                 size="sm"

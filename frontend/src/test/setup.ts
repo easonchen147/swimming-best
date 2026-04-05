@@ -8,6 +8,11 @@ class ResizeObserverMock {
 
 global.ResizeObserver = ResizeObserverMock as typeof ResizeObserver;
 
+Object.defineProperty(window.HTMLElement.prototype, "scrollIntoView", {
+  configurable: true,
+  value: () => {},
+});
+
 class IntersectionObserverMock {
   root = null;
   rootMargin = "";
