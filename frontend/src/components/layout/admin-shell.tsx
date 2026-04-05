@@ -33,7 +33,7 @@ import { PageTransition } from "./page-transition";
 const navItems = [
   { href: "/admin", label: "概览", icon: LayoutDashboard },
   { href: "/admin/teams", label: "队伍", icon: Shield },
-  { href: "/admin/swimmers", label: "孩子", icon: Users },
+  { href: "/admin/swimmers", label: "队员", icon: Users },
   { href: "/admin/events", label: "项目", icon: Waves },
   { href: "/admin/records", label: "成绩", icon: Trophy },
   { href: "/admin/goals", label: "目标", icon: Flag },

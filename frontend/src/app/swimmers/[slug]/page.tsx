@@ -83,7 +83,7 @@ export default function SwimmerDetailPage() {
     return (
       <PublicShell>
         <div className="grid gap-8">
-          <LoadingState label="孩子档案加载中" />
+          <LoadingState label="队员档案加载中" />
           <LoadingState label="项目分析加载中" />
         </div>
       </PublicShell>

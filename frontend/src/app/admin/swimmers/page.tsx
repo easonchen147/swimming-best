@@ -121,11 +121,11 @@ export default function AdminSwimmersPage() {
         setSwimmers((current) =>
           current.map((item) => (item.id === swimmer.id ? swimmer : item)),
         );
-        toast.success("孩子档案已更新");
+        toast.success("队员档案已更新");
       } else {
         const swimmer = await createAdminSwimmer(payload);
         setSwimmers((current) => [...current, swimmer]);
-        toast.success("孩子档案已创建");
+        toast.success("队员档案已创建");
       }
       setSuccess(true);
       setTimeout(() => {
@@ -158,8 +158,8 @@ export default function AdminSwimmersPage() {
 
   return (
     <AdminShell 
-      description="管理所有参与项目的孩子，决定他们的公开展示模式和隐私设置。" 
-      title="孩子管理"
+      description="管理所有参与项目的队员，决定他们的公开展示模式和隐私设置。" 
+      title="队员管理"
     >
       <div className="grid gap-8 xl:grid-cols-[400px_minmax(0,1fr)] items-start">
         {/* Form Card */}
@@ -174,7 +174,7 @@ export default function AdminSwimmersPage() {
                   {editingId ? <Edit3 className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                 </div>
                 <div>
-                  <CardTitle className="text-xl">{editingId ? "编辑孩子档案" : "新建孩子档案"}</CardTitle>
+                  <CardTitle className="text-xl">{editingId ? "编辑队员档案" : "新建队员档案"}</CardTitle>
                   <CardDescription>
                     {editingId ? "修改已有档案信息" : "录入一名新成员的基本信息"}
                   </CardDescription>
@@ -296,8 +296,8 @@ export default function AdminSwimmersPage() {
                     className="h-5 w-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
                   />
                   <label htmlFor="isPublic" className="flex flex-col cursor-pointer">
-                    <span className="text-sm font-bold text-foreground">公开展示该孩子</span>
-                    <span className="text-xs text-muted/80">允许在公共门户页面搜索和查看该孩子。</span>
+                    <span className="text-sm font-bold text-foreground">公开展示该队员</span>
+                    <span className="text-xs text-muted/80">允许在公共门户页面搜索和查看该队员。</span>
                   </label>
                 </div>
               </CardContent>
@@ -466,7 +466,7 @@ export default function AdminSwimmersPage() {
                     <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-muted/5 text-muted/40">
                        <Users className="h-10 w-10" />
                     </div>
-                    <h3 className="mt-4 text-lg font-bold text-foreground">没有找到任何孩子</h3>
+                    <h3 className="mt-4 text-lg font-bold text-foreground">没有找到任何队员</h3>
                     <p className="text-sm text-muted">尝试更换筛选条件或搜索关键词。</p>
                     <Button 
                       variant="outline" 

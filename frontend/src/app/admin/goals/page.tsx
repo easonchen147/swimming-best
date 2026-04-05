@@ -96,7 +96,7 @@ export default function AdminGoalsPage() {
 
   return (
     <AdminShell
-      description="目标只和孩子、项目、截止日期以及目标成绩有关。日期和年份控件都与当前设计系统保持统一。"
+      description="目标只和队员、项目、截止日期以及目标成绩有关。日期和年份控件都与当前设计系统保持统一。"
       title="目标管理"
     >
       <div className="grid items-start gap-8 xl:grid-cols-[400px_minmax(0,1fr)]">
@@ -109,7 +109,7 @@ export default function AdminGoalsPage() {
                 </div>
                 <div>
                   <CardTitle className="text-xl">创建新目标</CardTitle>
-                  <CardDescription>为孩子设置明确的项目成绩里程碑。</CardDescription>
+                  <CardDescription>为队员设置明确的项目成绩里程碑。</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -117,7 +117,7 @@ export default function AdminGoalsPage() {
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-5">
                 <SelectField
-                  label="孩子"
+                  label="队员"
                   onChange={(value) => setForm((current) => ({ ...current, swimmerId: value }))}
                   options={swimmers.map((swimmer) => ({
                     label: describeSwimmer(swimmer),
@@ -287,7 +287,7 @@ export default function AdminGoalsPage() {
                                 </div>
                                 <div>
                                   <div className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
-                                    孩子
+                                    队员
                                   </div>
                                   <div className="text-xs font-bold text-foreground">
                                     {describeSwimmer(goal.swimmer)}

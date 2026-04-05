@@ -109,16 +109,16 @@ async function mockCompareRoutes(page: import("@playwright/test").Page) {
 
 async function openCompareResults(page: import("@playwright/test").Page) {
   await page.goto("/compare");
-  await expect(page.getByRole("heading", { name: "同项目进步对比" })).toBeVisible();
-  await expect(page.getByText("待选择对比的孩子")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "进步对比分析" })).toBeVisible();
+  await expect(page.getByText("待选对比成员")).toBeVisible();
 
   await page.getByRole("button", { name: "Alice" }).click();
   await page.getByRole("button", { name: "Bella" }).click();
-  await expect(page.getByText("待选择对比项目")).toBeVisible();
+  await expect(page.getByText("待选对比项目")).toBeVisible();
 
-  await page.getByRole("combobox", { name: "共同项目" }).click();
+  await page.getByRole("combobox", { name: "对比项目" }).click();
   await page.getByRole("option", { name: "50m 自由泳" }).click();
-  await expect(page.getByText("对比摘要")).toBeVisible();
+  await expect(page.getByText("趋势走势对比")).toBeVisible();
 }
 
 test("compare chart supports interactive legend toggles", async ({ page }) => {

@@ -120,7 +120,7 @@ export default function AdminTeamsPage() {
 
   return (
     <AdminShell
-      description="管理受管队伍实体。队伍用于对孩子进行归类，并直接影响公开页的筛选和展示。"
+      description="管理受管队伍实体。队伍用于对队员进行归类，并直接影响公开页的筛选和展示。"
       title="队伍管理"
     >
       <div className="grid gap-8 xl:grid-cols-[400px_minmax(0,1fr)] items-start">
@@ -174,7 +174,7 @@ export default function AdminTeamsPage() {
                   />
                   <label htmlFor="isActive" className="flex flex-col cursor-pointer">
                     <span className="text-sm font-bold text-foreground">队伍当前有效</span>
-                    <span className="text-xs text-muted/80">非有效队伍在分配孩子时将不可见。</span>
+                    <span className="text-xs text-muted/80">非有效队伍在分配队员时将不可见。</span>
                   </label>
                 </div>
               </CardContent>

@@ -180,7 +180,7 @@ export default function AdminRecordsPage() {
             <form onSubmit={submitQuickRecord}>
               <CardContent className="space-y-5">
                 <SelectField
-                  label="孩子"
+                  label="队员"
                   onChange={(value) => setQuickForm((current) => ({ ...current, swimmerId: value }))}
                   options={swimmers.map((swimmer) => ({
                     label: describeSwimmer(swimmer),
@@ -340,7 +340,7 @@ export default function AdminRecordsPage() {
 
                 <div className="space-y-5 border-t border-border/40 pt-5">
                   <SelectField
-                    label="关联孩子"
+                    label="关联队员"
                     onChange={(value) => setContextForm((current) => ({ ...current, swimmerId: value }))}
                     options={swimmers.map((swimmer) => ({
                       label: describeSwimmer(swimmer),

@@ -134,7 +134,7 @@ export function QuickRecordModal({
                   <form className="space-y-5 p-6" onSubmit={handleSubmit}>
                     <SelectField
                       hint="Ctrl/Cmd + K"
-                      label="孩子姓名"
+                      label="队员姓名"
                       onChange={(value) => setForm((current) => ({ ...current, swimmerId: value }))}
                       options={swimmers.map((swimmer) => ({
                         label: describeSwimmer(swimmer),

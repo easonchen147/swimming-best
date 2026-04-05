@@ -61,7 +61,7 @@ describe("QuickRecordModal", () => {
 
     expect(await screen.findByText("快速成绩录入")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("combobox", { name: "孩子姓名" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "队员姓名" }));
     fireEvent.click(await screen.findByRole("option", { name: "小海豚" }));
 
     fireEvent.click(screen.getByRole("combobox", { name: "项目" }));

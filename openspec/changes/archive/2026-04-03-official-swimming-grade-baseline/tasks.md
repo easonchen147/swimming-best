@@ -4,7 +4,7 @@
 - [x] 1.2 在启动迁移中兼容历史数据库，保证旧库升级后所有 swimmer 都有 `gender`
 - [x] 1.3 在 `repository.py` 的 `create_swimmer()`、`update_swimmer()`、`_row_to_swimmer()` 中增加 `gender`
 - [x] 1.4 更新 admin/public API payload 与前端 `types.ts`，统一透出 `gender`
-- [x] 1.5 修改 Admin 孩子管理页，新增性别选择与编辑能力
+- [x] 1.5 修改 Admin 队员管理页，新增性别选择与编辑能力
 
 ## 2. Official Grade Baseline Resource
 
@@ -23,7 +23,7 @@
 ## 4. Public Presentation
 
 - [x] 4.1 前端新增官方等级类型定义
-- [x] 4.2 在孩子详情页展示当前官方等级与距离下一等级提示
+- [x] 4.2 在队员详情页展示当前官方等级与距离下一等级提示
 - [x] 4.3 在项目详情页展示官方等级徽章和差距信息
 - [x] 4.4 当 `gender=unknown` 或项目无官方标准时，展示明确但低干扰的降级提示
 
@@ -31,4 +31,4 @@
 
 - [x] 5.1 编写后端测试：历史库 gender 迁移、官方 JSON 加载、等级匹配、状态码返回
 - [x] 5.2 编写后端测试：`event_analytics()` 中 `officialGrade` / `nextOfficialGrade` 集成
-- [x] 5.3 编写前端测试：孩子管理页性别字段、详情页官方等级展示、缺省状态提示
+- [x] 5.3 编写前端测试：队员管理页性别字段、详情页官方等级展示、缺省状态提示

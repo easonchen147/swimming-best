@@ -9,7 +9,7 @@ type SwimmerLike = {
 
 export function describeSwimmer(swimmer: SwimmerLike) {
   const baseName =
-    swimmer.displayName || swimmer.nickname || swimmer.realName || "未命名孩子";
+    swimmer.displayName || swimmer.nickname || swimmer.realName || "未命名队员";
 
   if (!swimmer.team?.name) {
     return baseName;

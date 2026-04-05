@@ -50,7 +50,7 @@
   - `GET /api/admin/export/teams/:id/performances.csv`
 - 新增后台导入页：
   - `/admin/import`
-- 在后台孩子页和队伍页补充 CSV 导出入口
+- 在后台队员页和队伍页补充 CSV 导出入口
 
 ## Environment Cleanup
 

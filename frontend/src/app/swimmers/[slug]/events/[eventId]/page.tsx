@@ -63,7 +63,7 @@ export default function PublicEventDetailPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <MetricCard
           caption={swimmer.team?.name || "公开成长档案"}
-          label="孩子"
+          label="队员"
           value={swimmer.displayName}
         />
         <MetricCard

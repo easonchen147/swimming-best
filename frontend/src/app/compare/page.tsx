@@ -241,8 +241,7 @@ export default function ComparePage() {
                       <SelectValue
                         placeholder={
                           !primarySelectedSwimmer
-                            ? "先选孩子"
-                            : eventsLoading
+                            ? "先选队员"                            : eventsLoading
                               ? "加载中..."
                               : "请选择项目"
                         }

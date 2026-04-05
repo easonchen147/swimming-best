@@ -2,7 +2,7 @@
 
 The swimming performance app has a Next.js 16 frontend (React 19, Tailwind CSS 4, Recharts, Radix UI) and a Flask/SQLite backend. The public portal currently shows:
 - A hero section with comparison CTA
-- Three metric cards (公开孩子 count, 对比准备 count, 访问场景)
+- Three metric cards (公开队员 count, 对比准备 count, 访问场景)
 - A two-column layout: swimmer directory cards + "你能看到什么" info panel
 - Individual swimmer pages with line charts (raw/PB/trend), timeline, and goal progress bars
 - A multi-swimmer comparison page

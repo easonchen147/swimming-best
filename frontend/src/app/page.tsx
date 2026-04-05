@@ -81,7 +81,7 @@ export default function HomePage() {
           
           <motion.h1 
             variants={FADE_IN_UP}
-            className="max-w-3xl text-4xl font-black leading-[1.1] tracking-tight md:text-6xl"
+            className="max-w-3xl text-3xl font-black leading-[1.1] tracking-tight md:text-6xl"
           >
             记录成长，<span className="text-secondary">超越</span>自我
           </motion.h1>
@@ -90,7 +90,7 @@ export default function HomePage() {
             variants={FADE_IN_UP}
             className="mt-6 max-w-xl text-base font-medium text-white/70 text-balance"
           >
-            欢迎来到 Swimming Best。见证孩子们在泳池中的每一次突破与蜕变。
+            欢迎来到 Swimming Best。见证队员们在泳池中的每一次突破与蜕变。
           </motion.p>
           
           <motion.div variants={FADE_IN_UP} className="mt-8 flex flex-wrap justify-center gap-8">
@@ -111,17 +111,18 @@ export default function HomePage() {
         {/* Controls - More Compact */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
            <div className="flex flex-col gap-0.5">
-              <h2 className="text-2xl font-black tracking-tight text-foreground">学员档案库</h2>
+              <h2 className="text-2xl font-black tracking-tight text-foreground">队员档案库</h2>
               <p className="text-xs font-medium text-muted">选择档案查看详细分析与目标进度</p>
            </div>
            
            <div className="relative w-full md:w-72">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+              <Search className="absolute left-4 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-muted" />
               <Input 
                 className="h-10 rounded-full pl-11 pr-5 shadow-sm border-border/60 bg-surface/50 transition-all focus:bg-white focus:shadow-xl focus:shadow-primary/5 text-sm"
                 placeholder="搜索姓名..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                whileFocus={{ scale: 1 }}
               />
            </div>
         </div>

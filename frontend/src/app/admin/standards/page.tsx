@@ -123,7 +123,7 @@ export default function AdminStandardsPage() {
 
   return (
     <AdminShell 
-      description="管理自定义的成绩达标标准。这些标准将作为参考线显示在孩子们的成绩趋势图中。" 
+      description="管理自定义的成绩达标标准。这些标准将作为参考线显示在队员们的成绩趋势图中。" 
       title="标准体系管理"
     >
       <div className="grid gap-8 xl:grid-cols-[400px_minmax(0,1fr)] items-start">

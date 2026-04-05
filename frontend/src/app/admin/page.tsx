@@ -35,8 +35,8 @@ import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 
 const workflowItems = [
   {
-    title: "维护队伍与孩子档案",
-    desc: "先建立队伍和孩子档案，后面的成绩、目标和公开页都会依赖这些关系。",
+    title: "维护队伍与队员档案",
+    desc: "先建立队伍和队员档案，后面的成绩、目标和公开页都会依赖这些关系。",
     icon: ShieldCheck,
     step: "01",
   },
@@ -156,7 +156,7 @@ export default function AdminDashboardPage() {
 
   return (
     <AdminShell
-      description="这里是系统总览。你可以快速检查项目、队伍和孩子规模，并从下方快捷操作与管理流程继续推进。"
+      description="这里是系统总览。你可以快速检查项目、队伍和队员规模，并从下方快捷操作与管理流程继续推进。"
       title="管理后台首页"
     >
       <motion.div
@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
               <MetricCard caption="身份已校验" label="当前管理员" value={username} />
             </motion.div>
             <motion.div variants={FADE_IN_UP}>
-              <MetricCard caption="位在册孩子" label="孩子档案" value={`${swimmerCount}`} />
+              <MetricCard caption="位在册队员" label="队员档案" value={`${swimmerCount}`} />
             </motion.div>
             <motion.div variants={FADE_IN_UP}>
               <MetricCard caption="个可用项目" label="项目目录" value={`${eventCount}`} />

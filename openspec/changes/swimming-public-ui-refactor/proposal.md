@@ -1,11 +1,11 @@
 ## Why
 
-The public-facing swimming performance portal is overcrowded with unnecessary metrics ("公开孩子个数", "对比准备", "访问场景", "你能看到什么"), uses a cluttered layout, and lacks professional visual design. The comparison page adds complexity without clear value. Additionally, goals configured in admin are invisible on the public page due to a `is_public` default bug, performance source types are hidden from the public view, time entry requires raw milliseconds which is tedious, and the current line charts are poor at conveying swimming progress and goal distance at a glance.
+The public-facing swimming performance portal is overcrowded with unnecessary metrics ("公开队员个数", "对比准备", "访问场景", "你能看到什么"), uses a cluttered layout, and lacks professional visual design. The comparison page adds complexity without clear value. Additionally, goals configured in admin are invisible on the public page due to a `is_public` default bug, performance source types are hidden from the public view, time entry requires raw milliseconds which is tedious, and the current line charts are poor at conveying swimming progress and goal distance at a glance.
 
 ## What Changes
 
 - **BREAKING**: Remove the multi-swimmer comparison page (`/compare`) and all related UI elements (compare button on home page, compare chart component, compare API client calls)
-- Redesign public home page: remove metric cards (公开孩子/对比准备/访问场景) and "你能看到什么" sidebar; replace with a clean full-width table/grid of all swimmer profiles with team tab switching
+- Redesign public home page: remove metric cards (公开队员/对比准备/访问场景) and "你能看到什么" sidebar; replace with a clean full-width table/grid of all swimmer profiles with team tab switching
 - Redesign public header/title bar for a clean, professional look
 - Overhaul color palette and typography for a professional sports analytics aesthetic
 - Redesign performance visualization: replace line charts with bar-based improvement visualization and gauge/progress indicators for goal distance

@@ -52,7 +52,7 @@ describe("AdminShell", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "打开导航" }));
 
-    expect(screen.getAllByText("孩子").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("队员").length).toBeGreaterThan(0);
     expect(screen.getAllByText("队伍").length).toBeGreaterThan(0);
   });
 

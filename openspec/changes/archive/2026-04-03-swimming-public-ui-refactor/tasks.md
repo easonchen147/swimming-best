@@ -21,7 +21,7 @@
 ## 4. Frontend: Public Home Page Redesign
 
 - [x] 4.1 Redesign `PublicShell` header: clean professional title bar with app name and minimal navigation
-- [x] 4.2 Remove hero section, metric cards (公开孩子/对比准备/访问场景), and "你能看到什么" sidebar from home page
+- [x] 4.2 Remove hero section, metric cards (公开队员/对比准备/访问场景), and "你能看到什么" sidebar from home page
 - [x] 4.3 Build full-width swimmer table component with columns: display name, team, best event, action link
 - [x] 4.4 Add team tab strip using Radix Tabs for filtering swimmers by team
 - [x] 4.5 Implement responsive table-to-card collapse for mobile viewports
