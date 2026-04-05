@@ -33,8 +33,9 @@ export function PublicShell({
     {
       href: "/admin",
       label: "管理后台",
-      variant: "primary" as const,
-      className: "h-10 rounded-full px-4 shadow-primary/25",
+      variant: "outline" as const,
+      className:
+        "h-10 rounded-full border-violet-200 bg-violet-50 px-4 text-violet-700 hover:border-violet-300 hover:bg-violet-100 hover:text-violet-800",
     },
   ];
 

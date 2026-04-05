@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { AdminShell } from "@/components/layout/admin-shell";
@@ -56,24 +56,30 @@ describe("AdminShell", () => {
     expect(screen.getAllByText("队伍").length).toBeGreaterThan(0);
   });
 
-  it("removes header shortcut hint and keeps public-page button plus keyboard quick record", () => {
+  it("removes header shortcut hint and keeps public-page button plus logout button in header", () => {
     render(
       <AdminShell description="后台说明" title="后台概览">
         <div>body</div>
       </AdminShell>,
     );
 
+    const banner = screen.getByRole("banner");
+
     expect(screen.queryByText(/Ctrl \/ Cmd \+ K/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveClass("rounded-full");
-    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveClass("h-10");
-    expect(screen.getByRole("link", { name: "查看公开页" })).toHaveClass("font-semibold");
-    expect(screen.getByRole("button", { name: "退出登录" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("rounded-full");
-    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("h-10");
-    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("font-semibold");
-    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("bg-rose-50");
-    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("text-foreground");
+    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
+    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("rounded-full");
+    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("h-10");
+    expect(within(banner).getByRole("link", { name: "查看公开页" })).toHaveClass("font-semibold");
+
+    const logoutButton = within(banner).getByRole("button", { name: "退出登录" });
+    expect(logoutButton).toBeInTheDocument();
+    expect(logoutButton).toHaveClass("rounded-full");
+    expect(logoutButton).toHaveClass("h-10");
+    expect(logoutButton).toHaveClass("font-semibold");
+    expect(logoutButton).toHaveClass("border-rose-200");
+    expect(logoutButton).toHaveClass("bg-rose-50");
+    expect(logoutButton).toHaveClass("text-rose-700");
+
     expect(screen.getByRole("link", { name: "概览" })).toHaveClass("text-white");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
@@ -87,7 +93,8 @@ describe("AdminShell", () => {
       </AdminShell>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+    const banner = screen.getByRole("banner");
+    fireEvent.click(within(banner).getByRole("button", { name: "退出登录" }));
 
     await waitFor(() => {
       expect(logoutAdmin).toHaveBeenCalledTimes(1);

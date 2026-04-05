@@ -17,7 +17,6 @@ import { useEffect, useState } from "react";
 import { AdminShell, triggerQuickRecord } from "@/components/layout/admin-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { MetricCard } from "@/components/shared/metric-card";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -62,7 +61,7 @@ const workflowItems = [
 ];
 
 const quickActionButtonClassName =
-  "group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-left text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5";
+  "group flex h-auto w-full items-center justify-between gap-4 rounded-[28px] border border-border/60 bg-white/80 px-5 py-4 text-left text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5";
 
 const quickActions = [
   {
@@ -106,9 +105,9 @@ function QuickActionButton({
   onClick?: () => void;
 }) {
   const content = (
-    <div className="flex w-full items-start justify-between gap-4 text-left">
+    <>
       <div className="flex items-center gap-3">
-        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${iconClassName}`}>
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="flex flex-col items-start">
@@ -118,22 +117,22 @@ function QuickActionButton({
           </span>
         </div>
       </div>
-      <ArrowRight className="mt-3 h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
-    </div>
+      <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+    </>
   );
 
   if (href) {
     return (
-      <Button asChild className={quickActionButtonClassName} variant="outline">
-        <Link href={href}>{content}</Link>
-      </Button>
+      <Link className={quickActionButtonClassName} href={href}>
+        {content}
+      </Link>
     );
   }
 
   return (
-    <Button className={quickActionButtonClassName} onClick={onClick} variant="outline">
+    <button className={quickActionButtonClassName} onClick={onClick} type="button">
       {content}
-    </Button>
+    </button>
   );
 }
 

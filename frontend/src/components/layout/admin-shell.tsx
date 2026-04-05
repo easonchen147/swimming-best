@@ -41,8 +41,12 @@ const navItems = [
 ];
 
 const QUICK_RECORD_EVENT = "swimming-best:quick-record";
-const headerActionButtonClassName =
-  "h-10 rounded-full px-4 text-sm font-semibold tracking-[0.01em]";
+const headerActionButtonClassName = cn(
+  "inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-full border px-4",
+  "text-sm font-bold tracking-[0.01em] transition-colors",
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20",
+  "focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+);
 
 export function AdminShell({
   children,
@@ -127,7 +131,9 @@ export function AdminShell({
   return (
     <div className="grid min-h-screen grid-cols-1 bg-background lg:grid-cols-[280px_minmax(0,1fr)]">
       <aside className="grid-sheen sticky top-0 hidden h-screen border-r border-border bg-surface/40 px-6 py-8 backdrop-blur-2xl lg:block">
-        <Sidebar pathname={pathname} />
+        <Sidebar
+          pathname={pathname}
+        />
       </aside>
 
       <div className="flex min-h-screen min-w-0 flex-col">
@@ -158,42 +164,29 @@ export function AdminShell({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                asChild
+              <Link
                 className={cn(
                   headerActionButtonClassName,
                   "border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-100 hover:text-emerald-800",
                 )}
-                size="sm"
-                variant="outline"
+                href="/"
               >
-                <Link href="/">
-                  <Globe2 className="h-4 w-4" />
-                  <span>查看公开页</span>
-                </Link>
-              </Button>
+                <Globe2 className="h-4 w-4" />
+                <span className="hidden sm:inline">查看公开页</span>
+              </Link>
               <Button
-                asChild
-                className={cn(
-                  headerActionButtonClassName,
-                  "border-rose-200 bg-rose-50 text-foreground hover:border-rose-300 hover:bg-rose-100 hover:text-foreground",
-                )}
-                size="sm"
-                variant="outline"
+                aria-label="退出登录"
+                className="text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
+                disabled={logoutPending}
+                onClick={handleLogout}
+                size="icon"
+                variant="ghost"
               >
-                <button disabled={logoutPending} onClick={handleLogout} type="button">
-                  {logoutPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>处理中...</span>
-                    </>
-                  ) : (
-                    <>
-                      <LogOut className="h-4 w-4" />
-                      <span>退出登录</span>
-                    </>
-                  )}
-                </button>
+                {logoutPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LogOut className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -206,7 +199,10 @@ export function AdminShell({
                 exit={{ height: 0, opacity: 0 }}
                 initial={{ height: 0, opacity: 0 }}
               >
-                <Sidebar compact pathname={pathname} />
+                <Sidebar
+                  compact
+                  pathname={pathname}
+                />
               </motion.div>
             ) : null}
           </AnimatePresence>
