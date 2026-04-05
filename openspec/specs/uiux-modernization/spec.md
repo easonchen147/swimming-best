@@ -33,7 +33,10 @@ surface styling. Buttons, inputs, selects, cards, badges, tables, dialogs, and
 picker triggers SHALL read as one coherent shadcn/ui-style family. Shared
 select controls SHALL use the shadcn-style Radix Select pattern with a styled
 trigger, overlay content surface, and selectable items rather than a
-browser-native select wrapped in custom decoration.
+browser-native select wrapped in custom decoration. Shared primitives SHALL
+prefer official shadcn/Radix component semantics at the root level, and
+project-level visual customization SHALL only build on top of those correct
+primitive semantics.
 
 #### Scenario: User hovers over a primary action button
 - **WHEN** a user moves their cursor over a "Create Swimmer" button
@@ -50,6 +53,12 @@ browser-native select wrapped in custom decoration.
 - **WHEN** a user opens any shared select control in the frontend
 - **THEN** the menu is rendered through the shared Radix Select overlay
   structure with a styled trigger, content surface, and selectable items
+
+#### Scenario: Shared label and badge primitives are rendered
+- **WHEN** a page renders the shared `Label` or `Badge` primitive
+- **THEN** those primitives use the official shadcn-style root semantics rather
+  than falling back to plain HTML wrappers that bypass the intended primitive
+  implementation
 
 ### Requirement: Modern Data Presentation
 Data tables and lists SHALL be upgraded to a modern, clean aesthetic with
