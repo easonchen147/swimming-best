@@ -1,16 +1,26 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { AdminShell } from "@/components/layout/admin-shell";
 
 const quickRecordModal = vi.fn();
+const replaceMock = vi.fn();
+const refreshMock = vi.fn();
+const logoutAdmin = vi.fn();
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/admin",
   useRouter: () => ({
-    replace: vi.fn(),
-    refresh: vi.fn(),
+    replace: replaceMock,
+    refresh: refreshMock,
   }),
+}));
+
+vi.mock("sonner", () => ({
+  toast: {
+    success: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 vi.mock("@/components/admin/quick-record-modal", () => ({
@@ -20,7 +30,17 @@ vi.mock("@/components/admin/quick-record-modal", () => ({
   },
 }));
 
+vi.mock("@/lib/api/admin", () => ({
+  getAdminMe: vi.fn(),
+  logoutAdmin: (...args: unknown[]) => logoutAdmin(...args),
+}));
+
 describe("AdminShell", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    logoutAdmin.mockResolvedValue(undefined);
+  });
+
   it("renders the page title and toggles mobile navigation", () => {
     render(
       <AdminShell description="后台说明" title="后台概览">
@@ -45,8 +65,25 @@ describe("AdminShell", () => {
 
     expect(screen.queryByText(/Ctrl \/ Cmd \+ K/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "查看公开页" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("button", { name: "退出登录" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "概览" })).toHaveClass("text-white");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
     expect(quickRecordModal).toHaveBeenCalled();
+  });
+
+  it("logs the administrator out from the header action button", async () => {
+    render(
+      <AdminShell description="后台说明" title="后台概览">
+        <div>body</div>
+      </AdminShell>,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "退出登录" }));
+
+    await waitFor(() => {
+      expect(logoutAdmin).toHaveBeenCalledTimes(1);
+      expect(replaceMock).toHaveBeenCalledWith("/admin/login");
+    });
   });
 });

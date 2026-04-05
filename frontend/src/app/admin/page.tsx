@@ -171,75 +171,79 @@ export default function AdminDashboardPage() {
           </motion.div>
 
           <motion.div variants={FADE_IN_UP}>
-            <Card className="h-full overflow-hidden border-none bg-[linear-gradient(160deg,#171717_0%,#2d2d2d_100%)] text-white shadow-2xl shadow-black/20">
-              <div className="absolute inset-0 z-0">
-                <div className="grid-sheen absolute inset-0 opacity-10" />
-                <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-primary/35 blur-[60px]" />
-              </div>
-              <CardHeader className="relative z-10 pb-8">
+            <Card className="h-full border-border/40 bg-background shadow-xl shadow-primary/5">
+              <CardHeader className="border-b border-border/40 bg-surface/30 pb-8">
                 <CardTitle className="text-2xl font-black">快速操作</CardTitle>
-                <CardDescription className="text-white/65">
+                <CardDescription>
                   直接从这里完成最常用的动作，不再依赖顶部提示。
                 </CardDescription>
               </CardHeader>
-              <CardContent className="relative z-10 flex flex-col gap-3">
+              <CardContent className="flex flex-col gap-3 p-6 md:p-8">
                 <Button
-                  className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
+                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
                   onClick={() => triggerQuickRecord()}
                   variant="outline"
                 >
                   <div className="flex items-center gap-3">
-                    <Zap className="h-5 w-5 text-amber-300" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+                      <Zap className="h-5 w-5" />
+                    </div>
                     <div className="flex flex-col items-start">
-                      <span className="text-base font-black">快速录入成绩</span>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/60">
+                      <span className="text-base font-black text-foreground">快速录入成绩</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
                         Ctrl / Cmd + K
                       </span>
                     </div>
                   </div>
-                  <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
+                  <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
                 </Button>
-                <Link href="/admin/goals">
-                  <Button
-                    className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
-                    variant="outline"
-                  >
+                <Button
+                  asChild
+                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
+                  variant="outline"
+                >
+                  <Link href="/admin/goals">
                     <div className="flex items-center gap-3">
-                      <Flag className="h-5 w-5 text-emerald-300" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+                        <Flag className="h-5 w-5" />
+                      </div>
                       <div className="flex flex-col items-start">
-                        <span className="text-base font-black">添加目标成绩</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                        <span className="text-base font-black text-foreground">添加目标成绩</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
                           Goal Setup
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
-                  </Button>
-                </Link>
-                <Link href="/admin/events">
-                  <Button
-                    className="group h-16 w-full justify-between rounded-3xl border-white/10 bg-white/12 px-6 text-white hover:border-white/20 hover:bg-white/18"
-                    variant="outline"
-                  >
+                    <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  className="group h-auto w-full rounded-[28px] border-border/60 bg-white/80 px-5 py-4 text-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:bg-surface hover:shadow-lg hover:shadow-primary/5 [&>span]:w-full [&>span]:justify-between"
+                  variant="outline"
+                >
+                  <Link href="/admin/events">
                     <div className="flex items-center gap-3">
-                      <Layers className="h-5 w-5 text-sky-300" />
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sky-600">
+                        <Layers className="h-5 w-5" />
+                      </div>
                       <div className="flex flex-col items-start">
-                        <span className="text-base font-black">查看项目目录</span>
-                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/55">
+                        <span className="text-base font-black text-foreground">查看项目目录</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted/60">
                           Event Catalog
                         </span>
                       </div>
                     </div>
-                    <ArrowRight className="h-4 w-4 opacity-40 transition-all group-hover:opacity-100" />
-                  </Button>
-                </Link>
+                    <ArrowRight className="h-4 w-4 text-muted/60 transition-all group-hover:translate-x-0.5 group-hover:text-primary" />
+                  </Link>
+                </Button>
               </CardContent>
-              <CardFooter className="relative z-10 pb-8 pt-12">
-                <div className="flex w-full flex-col items-center gap-2 opacity-45">
+              <CardFooter className="border-t border-border/40 pt-6">
+                <div className="flex w-full flex-col items-center gap-2 text-muted/60">
                   <div className="text-[10px] font-bold uppercase tracking-[0.4em]">
                     Swimming Best
                   </div>
-                  <div className="text-[9px] font-medium italic">
+                  <div className="text-[10px] font-medium">
                     Unified Admin Shortcuts
                   </div>
                 </div>

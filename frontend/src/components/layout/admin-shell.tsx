@@ -2,21 +2,28 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import {
+  FileUp,
+  Flag,
+  Globe2,
   LayoutDashboard,
   LogOut,
   Menu,
+  Shield,
+  Trophy,
   TimerReset,
   Users,
+  Waves,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import { QuickRecordModal } from "@/components/admin/quick-record-modal";
 import { LoadingState } from "@/components/shared/loading-state";
 import { Button } from "@/components/ui/button";
-import { getAdminMe } from "@/lib/api/admin";
+import { getAdminMe, logoutAdmin } from "@/lib/api/admin";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 
@@ -24,12 +31,12 @@ import { PageTransition } from "./page-transition";
 
 const navItems = [
   { href: "/admin", label: "概览", icon: LayoutDashboard },
-  { href: "/admin/teams", label: "队伍" },
+  { href: "/admin/teams", label: "队伍", icon: Shield },
   { href: "/admin/swimmers", label: "孩子", icon: Users },
-  { href: "/admin/events", label: "项目" },
-  { href: "/admin/records", label: "成绩" },
-  { href: "/admin/goals", label: "目标" },
-  { href: "/admin/import", label: "导入" },
+  { href: "/admin/events", label: "项目", icon: Waves },
+  { href: "/admin/records", label: "成绩", icon: Trophy },
+  { href: "/admin/goals", label: "目标", icon: Flag },
+  { href: "/admin/import", label: "导入", icon: FileUp },
 ];
 
 const QUICK_RECORD_EVENT = "swimming-best:quick-record";
@@ -51,6 +58,7 @@ export function AdminShell({
     || process.env.NEXT_PUBLIC_E2E_BYPASS_AUTH === "1",
   );
   const [quickRecordOpen, setQuickRecordOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
 
   const openQuickRecord = useCallback(() => {
     setQuickRecordOpen(true);
@@ -84,6 +92,24 @@ export function AdminShell({
       .then(() => setAuthChecked(true))
       .catch(() => router.replace("/admin/login"));
   }, [router]);
+
+  async function handleLogout() {
+    if (logoutPending) {
+      return;
+    }
+
+    try {
+      setLogoutPending(true);
+      await logoutAdmin();
+      toast.success("已退出登录");
+      router.replace("/admin/login");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "退出登录失败";
+      toast.error(message);
+    } finally {
+      setLogoutPending(false);
+    }
+  }
 
   if (!authChecked) {
     return (
@@ -128,11 +154,24 @@ export function AdminShell({
               </div>
             </div>
 
-            <Link href="/">
-              <button className="cursor-pointer rounded-full bg-foreground px-5 py-2 text-sm font-bold text-background transition-all hover:bg-foreground/90 active:scale-95">
-                查看公开页
-              </button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Button asChild className="rounded-full" size="sm" variant="secondary">
+                <Link href="/">
+                  <Globe2 className="h-4 w-4" />
+                  <span>查看公开页</span>
+                </Link>
+              </Button>
+              <Button
+                className="rounded-full"
+                loading={logoutPending}
+                onClick={handleLogout}
+                size="sm"
+                variant="danger"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>退出登录</span>
+              </Button>
+            </div>
           </div>
 
           <AnimatePresence>
@@ -222,7 +261,9 @@ function Sidebar({
         variants={STAGGER_CONTAINER}
       >
         {navItems.map((item) => {
-          const active = pathname === item.href;
+          const active = item.href === "/admin"
+            ? pathname === item.href
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
             <motion.div key={item.href} variants={FADE_IN_UP}>
               <Link
@@ -254,18 +295,6 @@ function Sidebar({
           );
         })}
       </motion.nav>
-
-      {!compact ? (
-        <div className="mt-auto px-2">
-          <Button
-            className="w-full justify-start gap-3 rounded-2xl text-muted hover:bg-rose-50 hover:text-rose-500"
-            variant="ghost"
-          >
-            <LogOut className="h-4.5 w-4.5" />
-            <span>退出登录</span>
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }

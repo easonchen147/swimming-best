@@ -116,10 +116,31 @@ describe("ComparePage", () => {
     });
   });
 
-  it("loads compare selections and renders compare results", async () => {
+  it("requires explicit swimmer and event selection before rendering compare results", async () => {
     render(<ComparePage />);
 
     expect(await screen.findByText("同项目进步对比")).toBeInTheDocument();
+    expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
+    expect(screen.queryByText("对比结果加载中")).not.toBeInTheDocument();
+    expect(comparePublicEvent).not.toHaveBeenCalled();
+
+    const eventSelect = screen.getByLabelText("共同项目");
+    expect(eventSelect).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Alice" }));
+
+    await waitFor(() => {
+      expect(listPublicSwimmerEvents).toHaveBeenCalledWith("alice");
+    });
+
+    expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Bella" }));
+    expect(await screen.findByText("待选择对比项目")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("共同项目"), {
+      target: { value: "event-1" },
+    });
 
     await waitFor(() => {
       expect(comparePublicEvent).toHaveBeenCalledWith("event-1", [
@@ -133,13 +154,9 @@ describe("ComparePage", () => {
     expect(screen.getByText("最佳 31.50s")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Alice" }));
-    fireEvent.click(screen.getByRole("button", { name: "Alice" }));
 
     await waitFor(() => {
-      expect(comparePublicEvent).toHaveBeenLastCalledWith("event-1", [
-        "swimmer-a",
-        "swimmer-b",
-      ]);
+      expect(screen.getByText("待选择对比的孩子")).toBeInTheDocument();
     });
   });
 });

@@ -1,10 +1,4 @@
-# responsive-ui Specification
-
-## Purpose
-Ensure the product remains usable on desktop and mobile for both public
-browsing and admin workflows.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Primary pages SHALL support desktop and mobile layouts
 The system SHALL render all primary admin and public pages in layouts that
@@ -28,6 +22,8 @@ actions.
 - **THEN** the page presents dense navigation, summary cards, forms, and data
   views optimized for large screens without breaking the shared component
   states
+
+## MODIFIED Requirements
 
 ### Requirement: Responsive interactions SHALL preserve core workflows
 The system SHALL keep core workflows functional across viewport sizes,

@@ -35,40 +35,84 @@ export default function ComparePage() {
   const [selectedEventId, setSelectedEventId] = useState("");
   const [payload, setPayload] = useState<ComparePayload | null>(null);
   const [loading, setLoading] = useState(true);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [compareLoading, setCompareLoading] = useState(false);
 
   useEffect(() => {
     listPublicSwimmers()
-      .then((response) => {
-        const nextSwimmers = response.swimmers;
-        setSwimmers(nextSwimmers);
-        setSelectedSwimmerIds(nextSwimmers.slice(0, 2).map((item) => item.id));
-        return nextSwimmers[0]?.slug;
-      })
-      .then((slug) => {
-        if (!slug) {
-          return null;
-        }
-        return listPublicSwimmerEvents(slug);
-      })
-      .then((response) => {
-        if (!response) {
-          return;
-        }
-        setEvents(response.events);
-        setSelectedEventId(response.events[0]?.event.id ?? "");
-      })
+      .then((response) => setSwimmers(response.swimmers))
       .catch((error: Error) => toast.error(error.message))
       .finally(() => setLoading(false));
   }, []);
+
+  const primarySelectedSwimmer = useMemo(
+    () => swimmers.find((item) => item.id === selectedSwimmerIds[0]) ?? null,
+    [swimmers, selectedSwimmerIds],
+  );
+
+  useEffect(() => {
+    const slug = primarySelectedSwimmer?.slug;
+
+    if (!slug) {
+      return;
+    }
+
+    let cancelled = false;
+
+    listPublicSwimmerEvents(slug)
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setEvents(response.events);
+      })
+      .catch((error: Error) => {
+        if (cancelled) {
+          return;
+        }
+        setEvents([]);
+        toast.error(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setEventsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [primarySelectedSwimmer]);
 
   useEffect(() => {
     if (!selectedEventId || selectedSwimmerIds.length < 2) {
       return;
     }
 
+    let cancelled = false;
+
     comparePublicEvent(selectedEventId, selectedSwimmerIds)
-      .then(setPayload)
-      .catch((error: Error) => toast.error(error.message));
+      .then((response) => {
+        if (!cancelled) {
+          setPayload(response);
+        }
+      })
+      .catch((error: Error) => {
+        if (cancelled) {
+          return;
+        }
+        setPayload(null);
+        toast.error(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setCompareLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedEventId, selectedSwimmerIds]);
 
   const selectedEvent = useMemo(
@@ -77,15 +121,39 @@ export default function ComparePage() {
   );
 
   function toggleSwimmer(swimmerId: string) {
-    setSelectedSwimmerIds((current) => {
-      if (current.includes(swimmerId)) {
-        const next = current.filter((item) => item !== swimmerId);
-        return next.length >= 2 ? next : current;
-      }
+    const nextSelection = selectedSwimmerIds.includes(swimmerId)
+      ? selectedSwimmerIds.filter((item) => item !== swimmerId)
+      : selectedSwimmerIds.length >= 4
+        ? selectedSwimmerIds
+        : [...selectedSwimmerIds, swimmerId];
 
-      return [...current, swimmerId].slice(-4);
-    });
+    if (nextSelection === selectedSwimmerIds) {
+      return;
+    }
+
+    const primaryChanged = nextSelection[0] !== selectedSwimmerIds[0];
+    setSelectedSwimmerIds(nextSelection);
+    setPayload(null);
+
+    if (primaryChanged) {
+      setCompareLoading(false);
+      setEvents([]);
+      setEventsLoading(Boolean(nextSelection[0]));
+      setSelectedEventId("");
+      return;
+    }
+
+    setCompareLoading(selectedEventId !== "" && nextSelection.length >= 2);
   }
+
+  function handleEventChange(nextEventId: string) {
+    setSelectedEventId(nextEventId);
+    setPayload(null);
+    setCompareLoading(nextEventId !== "" && selectedSwimmerIds.length >= 2);
+  }
+
+  const missingSwimmers = selectedSwimmerIds.length < 2;
+  const missingEvent = !missingSwimmers && !selectedEventId;
 
   return (
     <PublicShell className="gap-8">
@@ -133,6 +201,9 @@ export default function ComparePage() {
                     );
                   })}
                 </div>
+                <p className="text-xs text-muted/70">
+                  当前已选择 {selectedSwimmerIds.length} 位孩子，至少需要 2 位才能生成对比结果。
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -143,16 +214,29 @@ export default function ComparePage() {
                   共同项目
                 </label>
                 <Select
+                  disabled={!primarySelectedSwimmer || eventsLoading || events.length === 0}
                   id="compare-event"
-                  onChange={(event) => setSelectedEventId(event.target.value)}
+                  onChange={(event) => handleEventChange(event.target.value)}
                   value={selectedEventId}
                 >
+                  <option value="">
+                    {!primarySelectedSwimmer
+                      ? "先选择孩子后再选项目"
+                      : eventsLoading
+                        ? "项目加载中..."
+                        : events.length === 0
+                          ? "该孩子暂无可对比项目"
+                          : "请选择项目"}
+                  </option>
                   {events.map((item) => (
                     <option key={item.event.id} value={item.event.id}>
                       {item.event.displayName}
                     </option>
                   ))}
                 </Select>
+                <p className="text-xs text-muted/70">
+                  项目列表会跟随第一个已选中的孩子切换。
+                </p>
               </div>
 
               {selectedEvent ? (
@@ -168,7 +252,19 @@ export default function ComparePage() {
           </Card>
 
           <div className="grid gap-6">
-            {payload ? (
+            {missingSwimmers ? (
+              <SelectionStateCard
+                description="请先从左侧至少勾选两位孩子，再继续选择项目并查看成长对比。"
+                title="待选择对比的孩子"
+              />
+            ) : missingEvent ? (
+              <SelectionStateCard
+                description="孩子已经选好，接下来请选择一个共同项目后再生成对比结果。"
+                title="待选择对比项目"
+              />
+            ) : compareLoading ? (
+              <LoadingState label="对比结果加载中" />
+            ) : payload ? (
               <>
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {payload.swimmers.map((swimmer) => (
@@ -235,11 +331,31 @@ export default function ComparePage() {
                 </Card>
               </>
             ) : (
-              <LoadingState label="对比结果加载中" />
+              <SelectionStateCard
+                description="当前选择组合暂时没有可展示的对比数据，请尝试切换项目或孩子。"
+                title="暂无可用的对比结果"
+              />
             )}
           </div>
         </div>
       )}
     </PublicShell>
+  );
+}
+
+function SelectionStateCard({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <Card className="border-dashed border-border/60 bg-surface/30">
+      <CardContent className="flex min-h-[260px] flex-col items-center justify-center gap-3 px-6 py-12 text-center">
+        <h2 className="text-2xl font-black tracking-tight text-foreground">{title}</h2>
+        <p className="max-w-md text-sm leading-relaxed text-muted">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

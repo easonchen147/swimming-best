@@ -15,10 +15,33 @@ export function PublicShell({
   children: React.ReactNode;
   className?: string;
 }) {
+  const navActions = [
+    {
+      href: "/",
+      label: "首页",
+      variant: "outline" as const,
+      className:
+        "rounded-full border-border/60 bg-white text-foreground hover:border-primary/20 hover:bg-surface hover:text-primary",
+    },
+    {
+      href: "/compare",
+      label: "对比",
+      variant: "outline" as const,
+      className:
+        "rounded-full border-sky-200 bg-sky-50 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800",
+    },
+    {
+      href: "/admin",
+      label: "管理后台",
+      variant: "primary" as const,
+      className: "rounded-full shadow-primary/25",
+    },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-primary/10">
       <header className="sticky top-0 z-50 border-b border-border bg-surface/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 md:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 md:px-6 lg:flex-row lg:items-center lg:justify-between">
           <Link className="group flex items-center gap-3" href="/">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
               <Waves className="h-5 w-5" />
@@ -28,26 +51,19 @@ export function PublicShell({
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-2 md:flex">
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/">首页</Link>
-            </Button>
-            <Button asChild size="sm" variant="ghost">
-              <Link href="/compare">对比</Link>
-            </Button>
-            <Button asChild className="ml-2 rounded-full" size="sm" variant="primary">
-              <Link href="/admin">管理后台</Link>
-            </Button>
+          <nav className="grid w-full grid-cols-3 gap-2 lg:flex lg:w-auto lg:items-center">
+            {navActions.map((item) => (
+              <Button
+                asChild
+                className={item.className}
+                key={item.href}
+                size="sm"
+                variant={item.variant}
+              >
+                <Link href={item.href}>{item.label}</Link>
+              </Button>
+            ))}
           </nav>
-
-          <div className="flex items-center gap-2 md:hidden">
-            <Button asChild size="sm" variant="outline">
-              <Link href="/compare">对比</Link>
-            </Button>
-            <Button asChild size="sm" variant="primary">
-              <Link href="/admin">管理</Link>
-            </Button>
-          </div>
         </div>
       </header>
 

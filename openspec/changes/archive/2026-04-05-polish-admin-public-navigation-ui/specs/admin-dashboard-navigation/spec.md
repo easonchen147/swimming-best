@@ -1,10 +1,4 @@
-# admin-dashboard-navigation Specification
-
-## Purpose
-Define actionable shortcut navigation from the admin dashboard so operators can
-jump directly into the main workflows.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Admin dashboard shortcut actions SHALL navigate to working management pages
 The admin dashboard SHALL expose actionable shortcut entries that take
@@ -14,9 +8,9 @@ the top header, and goal creation SHALL also be surfaced as a quick action. The
 quick-actions area SHALL clearly communicate what the quick-record action does
 and which keyboard shortcut triggers it, while the header SHALL not duplicate
 that shortcut hint. Dashboard quick actions and surrounding surfaces SHALL use
-the shared shadcn/ui-style component layer consistently, and the quick-actions
-panel SHALL use the same light-surface card semantics as the rest of the admin
-overview instead of a visually isolated dark promo panel.
+the shared component layer consistently, and the quick-actions panel SHALL use
+the same light-surface card semantics as the rest of the admin overview instead
+of a visually isolated dark promo panel.
 
 #### Scenario: Administrator activates the quick-record action
 - **WHEN** an administrator selects the quick-record action from the dashboard
@@ -35,6 +29,8 @@ overview instead of a visually isolated dark promo panel.
 - **WHEN** an administrator selects the goal quick action
 - **THEN** the UI navigates to the admin goals page
 
+## ADDED Requirements
+
 ### Requirement: Admin navigation chrome SHALL expose complete icon-backed navigation
 The admin sidebar SHALL render every primary navigation item with an icon from
 the shared icon set. Active navigation items SHALL keep white text and white
@@ -50,22 +46,3 @@ legible in desktop and mobile menus.
 - **WHEN** the current route matches one of the admin navigation items
 - **THEN** that item displays a highlighted background with white label text and
   white icon contrast
-
-### Requirement: Admin shortcuts SHALL remain usable on mobile layouts
-The shortcut area SHALL remain reachable and tappable on phone-sized viewports.
-The layout SHALL adapt using a responsive grid that reorders elements for
-optimal thumb-reach on mobile.
-
-#### Scenario: Mobile administrator opens the dashboard
-- **WHEN** the admin dashboard is rendered on a mobile viewport
-- **THEN** the shortcut actions transition to a vertical or multi-row layout
-  that is easily reachable
-
-### Requirement: Dashboard guidance SHALL present a visual management flow
-The admin dashboard SHALL present the recommended management sequence as a
-flowchart-style process instead of a flat list of independent cards.
-
-#### Scenario: Administrator reads the recommended flow
-- **WHEN** an administrator opens the dashboard guidance area
-- **THEN** the steps are visually connected in sequence so the operator can
-  understand the order of operations at a glance

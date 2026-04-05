@@ -107,11 +107,22 @@ async function mockCompareRoutes(page: import("@playwright/test").Page) {
   });
 }
 
+async function openCompareResults(page: import("@playwright/test").Page) {
+  await page.goto("/compare");
+  await expect(page.getByRole("heading", { name: "同项目进步对比" })).toBeVisible();
+  await expect(page.getByText("待选择对比的孩子")).toBeVisible();
+
+  await page.getByRole("button", { name: "Alice" }).click();
+  await page.getByRole("button", { name: "Bella" }).click();
+  await expect(page.getByText("待选择对比项目")).toBeVisible();
+
+  await page.getByLabel("共同项目").selectOption("event-1");
+  await expect(page.getByText("对比摘要")).toBeVisible();
+}
+
 test("compare chart supports interactive legend toggles", async ({ page }) => {
   await mockCompareRoutes(page);
-  await page.goto("/compare");
-
-  await expect(page.getByRole("heading", { name: "同项目进步对比" })).toBeVisible();
+  await openCompareResults(page);
 
   const bellaToggle = page.getByRole("button", { name: "切换 Bella 曲线" });
   await expect(bellaToggle).toHaveAttribute("aria-pressed", "true");
@@ -127,8 +138,7 @@ test("compare page stays within mobile and tablet viewport bounds", async ({ pag
     { width: 820, height: 1180 },
   ]) {
     await page.setViewportSize(viewport);
-    await page.goto("/compare");
-    await expect(page.getByRole("heading", { name: "同项目进步对比" })).toBeVisible();
+    await openCompareResults(page);
 
     const noOverflow = await page.evaluate(() => {
       const root = document.documentElement;
