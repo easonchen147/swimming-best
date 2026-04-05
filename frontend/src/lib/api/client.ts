@@ -1,4 +1,25 @@
-async function parseJSON<T>(response: Response): Promise<T> {
+export const clientNavigation = {
+  replace(path: string) {
+    window.location.replace(path);
+  },
+};
+
+function shouldRedirectAdminUnauthorized(path: string, response: Response, errorMessage: string) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (path === "/api/admin/login") {
+    return false;
+  }
+
+  return window.location.pathname.startsWith("/admin")
+    && path.startsWith("/api/admin/")
+    && response.status === 401
+    && errorMessage === "unauthorized";
+}
+
+async function parseJSON<T>(path: string, response: Response): Promise<T> {
   const rawText = response.status === 204 ? "" : await response.text();
   const hasBody = rawText.trim().length > 0;
 
@@ -12,6 +33,12 @@ async function parseJSON<T>(response: Response): Promise<T> {
         errorMessage = rawText;
       }
     }
+
+    if (shouldRedirectAdminUnauthorized(path, response, errorMessage)) {
+      clientNavigation.replace("/admin/login");
+      return await new Promise<T>(() => {});
+    }
+
     throw new Error(errorMessage);
   }
 
@@ -32,7 +59,7 @@ export async function apiGet<T>(path: string) {
     cache: "no-store",
   });
 
-  return parseJSON<T>(response);
+  return parseJSON<T>(path, response);
 }
 
 export async function apiPost<T>(path: string, body?: unknown) {
@@ -45,7 +72,7 @@ export async function apiPost<T>(path: string, body?: unknown) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  return parseJSON<T>(response);
+  return parseJSON<T>(path, response);
 }
 
 export async function apiPatch<T>(path: string, body?: unknown) {
@@ -58,7 +85,7 @@ export async function apiPatch<T>(path: string, body?: unknown) {
     body: body ? JSON.stringify(body) : undefined,
   });
 
-  return parseJSON<T>(response);
+  return parseJSON<T>(path, response);
 }
 
 export async function apiDelete<T>(path: string) {
@@ -67,5 +94,5 @@ export async function apiDelete<T>(path: string) {
     credentials: "include",
   });
 
-  return parseJSON<T>(response);
+  return parseJSON<T>(path, response);
 }

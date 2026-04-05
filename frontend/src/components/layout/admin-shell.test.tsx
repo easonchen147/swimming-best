@@ -73,6 +73,7 @@ describe("AdminShell", () => {
     expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("h-10");
     expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("font-semibold");
     expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("bg-rose-50");
+    expect(screen.getByRole("button", { name: "退出登录" })).toHaveClass("text-foreground");
     expect(screen.getByRole("link", { name: "概览" })).toHaveClass("text-white");
 
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });

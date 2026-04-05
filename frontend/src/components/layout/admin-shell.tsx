@@ -6,6 +6,7 @@ import {
   Flag,
   Globe2,
   LayoutDashboard,
+  Loader2,
   LogOut,
   Menu,
   Shield,
@@ -172,17 +173,27 @@ export function AdminShell({
                 </Link>
               </Button>
               <Button
+                asChild
                 className={cn(
                   headerActionButtonClassName,
-                  "border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300 hover:bg-rose-100 hover:text-rose-800",
+                  "border-rose-200 bg-rose-50 text-foreground hover:border-rose-300 hover:bg-rose-100 hover:text-foreground",
                 )}
-                loading={logoutPending}
-                onClick={handleLogout}
                 size="sm"
                 variant="outline"
               >
-                <LogOut className="h-4 w-4" />
-                <span>退出登录</span>
+                <button disabled={logoutPending} onClick={handleLogout} type="button">
+                  {logoutPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>处理中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="h-4 w-4" />
+                      <span>退出登录</span>
+                    </>
+                  )}
+                </button>
               </Button>
             </div>
           </div>
