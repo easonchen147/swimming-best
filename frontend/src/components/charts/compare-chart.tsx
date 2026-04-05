@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import { useMemo, useState } from "react";
 
-import { Card } from "@/components/ui/card";
 import { AnimatedChart } from "@/components/charts/animated-chart";
 import { ChartTooltip } from "@/components/charts/chart-tooltip";
 import type { CompareSwimmer } from "@/lib/types";
@@ -62,53 +61,42 @@ export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
 
   return (
     <AnimatedChart>
-      <Card className="min-w-0 border-border/40 p-6 shadow-xl shadow-primary/5 md:p-8">
-        <div className="mb-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-primary/40">
-              Comparative Analysis
-            </div>
-            <h3 className="text-2xl font-black tracking-tight text-foreground">
-              进步曲线对比
-            </h3>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {swimmers.map((swimmer, index) => {
-              const hidden = hiddenIds.includes(swimmer.swimmerId);
-              return (
-                <button
-                  aria-label={`切换 ${swimmer.displayName} 曲线`}
-                  aria-pressed={!hidden}
-                  className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${
-                    hidden
-                      ? "border-border bg-surface text-muted"
-                      : "border-transparent text-white shadow-lg"
-                  }`}
-                  key={swimmer.swimmerId}
-                  onClick={() => toggleSwimmer(swimmer.swimmerId)}
-                  onMouseEnter={() => setActiveId(swimmer.swimmerId)}
-                  onMouseLeave={() => setActiveId(null)}
-                  style={
-                    hidden
-                      ? undefined
-                      : {
-                          backgroundColor: colors[index % colors.length],
-                          boxShadow: `0 12px 30px ${colors[index % colors.length]}33`,
-                        }
-                  }
-                  type="button"
-                >
-                  {swimmer.displayName}
-                </button>
-              );
-            })}
-          </div>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap gap-2">
+          {swimmers.map((swimmer, index) => {
+            const hidden = hiddenIds.includes(swimmer.swimmerId);
+            return (
+              <button
+                aria-label={`切换 ${swimmer.displayName} 曲线`}
+                aria-pressed={!hidden}
+                className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-all ${
+                  hidden
+                    ? "border-border bg-surface text-muted"
+                    : "border-transparent text-white shadow-lg"
+                }`}
+                key={swimmer.swimmerId}
+                onClick={() => toggleSwimmer(swimmer.swimmerId)}
+                onMouseEnter={() => setActiveId(swimmer.swimmerId)}
+                onMouseLeave={() => setActiveId(null)}
+                style={
+                  hidden
+                    ? undefined
+                    : {
+                        backgroundColor: colors[index % colors.length],
+                        boxShadow: `0 12px 30px ${colors[index % colors.length]}33`,
+                      }
+                }
+                type="button"
+              >
+                {swimmer.displayName}
+              </button>
+            );
+          })}
         </div>
 
-        <div className="h-[360px] min-w-0 w-full md:h-[480px]">
-          <ResponsiveContainer height="100%" minHeight={320} minWidth={0} width="100%">
-            <LineChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 0 }}>
+        <div className="h-[400px] w-full min-w-0 md:h-[500px]">
+          <ResponsiveContainer height="100%" width="100%">
+            <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
               <CartesianGrid
                 stroke="rgba(15,23,42,0.06)"
                 strokeDasharray="4 4"
@@ -117,7 +105,7 @@ export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
               <XAxis
                 axisLine={false}
                 dataKey="date"
-                dy={10}
+                dy={15}
                 tick={{ fill: "#64748b", fontSize: 11, fontWeight: 600 }}
                 tickLine={false}
               />
@@ -137,8 +125,9 @@ export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
                 <Line
                   activeDot={{ r: 8, strokeWidth: 0 }}
                   animationDuration={1000 + index * 250}
+                  connectNulls
                   dataKey={swimmer.swimmerId}
-                  dot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
+                  dot={{ r: 4, stroke: colors[index % colors.length], strokeWidth: 2, fill: "#fff" }}
                   key={swimmer.swimmerId}
                   name={swimmer.displayName}
                   stroke={colors[index % colors.length]}
@@ -152,7 +141,7 @@ export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
             </LineChart>
           </ResponsiveContainer>
         </div>
-      </Card>
+      </div>
     </AnimatedChart>
   );
 }
