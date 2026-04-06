@@ -103,4 +103,39 @@ describe("AdminSwimmersPage", () => {
       });
     });
   });
+
+  it("passes roster search input to the swimmers api", async () => {
+    listAdminSwimmers.mockResolvedValue({
+      swimmers: [
+        {
+          id: "swimmer-a",
+          slug: "xiao-hai-tun",
+          realName: "Alice Wang",
+          nickname: "小海豚",
+          publicNameMode: "nickname",
+          isPublic: true,
+          gender: "female",
+          teamId: "team-a",
+          team: {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+        },
+      ],
+    });
+
+    render(<AdminSwimmersPage />);
+
+    expect(await screen.findByText("小海豚 · 海豚预备队")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("搜索姓名或昵称..."), {
+      target: { value: "海豚" },
+    });
+
+    await waitFor(() => {
+      expect(listAdminSwimmers).toHaveBeenLastCalledWith(undefined, "海豚");
+    });
+  });
 });

@@ -140,7 +140,15 @@ describe("SwimmerDetailPage", () => {
 
     const [target, options] = toPng.mock.calls[0] as [
       HTMLDivElement,
-      { backgroundColor: string; filter: (node: HTMLElement | SVGElement) => boolean },
+      {
+        backgroundColor: string;
+        canvasHeight: number;
+        canvasWidth: number;
+        filter: (node: HTMLElement | SVGElement) => boolean;
+        height: number;
+        skipAutoScale: boolean;
+        width: number;
+      },
     ];
 
     expect(target.dataset.testid).toBe("swimmer-detail-export");
@@ -148,6 +156,11 @@ describe("SwimmerDetailPage", () => {
     expect(target.textContent).toContain("PB");
     expect(target.textContent).toContain("成长曲线模块");
     expect(options.backgroundColor).toBe("#f8fafc");
+    expect(typeof options.width).toBe("number");
+    expect(typeof options.height).toBe("number");
+    expect(options.canvasWidth).toBe(options.width * 2);
+    expect(options.canvasHeight).toBe(options.height * 2);
+    expect(options.skipAutoScale).toBe(true);
 
     const ignored = document.createElement("button");
     ignored.dataset.exportIgnore = "true";

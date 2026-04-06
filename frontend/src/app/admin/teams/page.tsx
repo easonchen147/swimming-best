@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { 
@@ -17,6 +17,7 @@ import {
 import { AdminShell } from "@/components/layout/admin-shell";
 import { Field } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -46,6 +47,7 @@ export default function AdminTeamsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm.trim());
   const [form, setForm] = useState({
     name: "",
     sortOrder: "0",
@@ -53,14 +55,22 @@ export default function AdminTeamsPage() {
   });
 
   useEffect(() => {
-    listAdminTeams()
-      .then((response) => setTeams(sortTeams(response.teams)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filteredTeams = teams.filter(team => 
-    team.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    let cancelled = false;
+    listAdminTeams(deferredSearchTerm || undefined)
+      .then((response) => {
+        if (!cancelled) {
+          setTeams(sortTeams(response.teams));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [deferredSearchTerm]);
 
   function resetForm() {
     setEditingId(null);
@@ -84,14 +94,14 @@ export default function AdminTeamsPage() {
 
     try {
       if (editingId) {
-        const team = await updateAdminTeam(editingId, payload);
-        setTeams((current) =>
-          sortTeams(current.map((item) => (item.id === team.id ? team : item))),
-        );
+        await updateAdminTeam(editingId, payload);
+        const response = await listAdminTeams(deferredSearchTerm || undefined);
+        setTeams(sortTeams(response.teams));
         toast.success("队伍已更新");
       } else {
-        const team = await createAdminTeam(payload);
-        setTeams((current) => sortTeams([...current, team]));
+        await createAdminTeam(payload);
+        const response = await listAdminTeams(deferredSearchTerm || undefined);
+        setTeams(sortTeams(response.teams));
         toast.success("队伍已创建");
       }
       setSuccess(true);
@@ -164,13 +174,13 @@ export default function AdminTeamsPage() {
                   />
                 </Field>
 
-                <div className="flex items-center space-x-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
-                  <input
+                <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
+                  <Checkbox
                     id="isActive"
                     checked={form.isActive}
-                    onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))}
-                    type="checkbox"
-                    className="h-5 w-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
+                    onCheckedChange={(checked) =>
+                      setForm((current) => ({ ...current, isActive: checked === true }))
+                    }
                   />
                   <label htmlFor="isActive" className="flex flex-col cursor-pointer">
                     <span className="text-sm font-bold text-foreground">队伍当前有效</span>
@@ -210,7 +220,7 @@ export default function AdminTeamsPage() {
                   </div>
                   <div>
                     <CardTitle>已管理队伍</CardTitle>
-                    <CardDescription>共有 {teams.length} 个队伍实体</CardDescription>
+                    <CardDescription>当前显示 {teams.length} 个队伍实体</CardDescription>
                   </div>
                 </div>
                 
@@ -234,7 +244,7 @@ export default function AdminTeamsPage() {
                  className="grid gap-4 md:grid-cols-2"
                >
                  <AnimatePresence mode="popLayout">
-                   {filteredTeams.map((team) => (
+                   {teams.map((team) => (
                      <motion.div
                        layout
                        key={team.id}
@@ -295,7 +305,7 @@ export default function AdminTeamsPage() {
                  </AnimatePresence>
                </motion.div>
 
-               {filteredTeams.length === 0 && !loading && (
+               {teams.length === 0 && !loading && (
                  <div className="flex flex-col items-center justify-center py-20 text-center">
                     <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-muted/5 text-muted/20 mb-4">
                        <Users className="h-8 w-8" />

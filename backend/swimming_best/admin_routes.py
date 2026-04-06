@@ -34,7 +34,7 @@ def create_admin_blueprint(
     @admin_required
     def list_teams():
         admin_service = get_admin_service()
-        return jsonify({"teams": admin_service.list_teams()})
+        return jsonify({"teams": admin_service.list_teams(search=request.args.get("search"))})
 
     @admin.post("/teams")
     @admin_required
@@ -54,7 +54,10 @@ def create_admin_blueprint(
     @admin_required
     def list_swimmers():
         admin_service = get_admin_service()
-        swimmers = admin_service.list_swimmers(team_id=request.args.get("teamId"))
+        swimmers = admin_service.list_swimmers(
+            team_id=request.args.get("teamId"),
+            search=request.args.get("search"),
+        )
         return jsonify({"swimmers": swimmers})
 
     @admin.post("/swimmers")
@@ -75,7 +78,7 @@ def create_admin_blueprint(
     @admin_required
     def list_events():
         admin_service = get_admin_service()
-        return jsonify({"events": admin_service.list_events()})
+        return jsonify({"events": admin_service.list_events(search=request.args.get("search"))})
 
     @admin.post("/events")
     @admin_required

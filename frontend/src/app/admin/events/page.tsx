@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion } from "motion/react";
 import {
@@ -27,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -65,9 +66,11 @@ function strokeLabel(stroke: string) {
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<EventDefinition[]>([]);
+  const [visibleEvents, setVisibleEvents] = useState<EventDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm.trim());
   const [form, setForm] = useState({
     poolLengthM: 25,
     distanceM: 50,
@@ -77,18 +80,27 @@ export default function AdminEventsPage() {
   const strokeSelectId = "event-stroke";
 
   useEffect(() => {
-    listAdminEvents()
-      .then((response) => setEvents(dedupeEvents(response.events)))
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filteredEvents = useMemo(
-    () =>
-      events.filter((event) =>
-        event.displayName.toLowerCase().includes(searchTerm.toLowerCase()),
-      ),
-    [events, searchTerm],
-  );
+    let cancelled = false;
+    listAdminEvents(deferredSearchTerm || undefined)
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        const nextEvents = dedupeEvents(response.events);
+        setVisibleEvents(nextEvents);
+        if (!deferredSearchTerm) {
+          setEvents(nextEvents);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [deferredSearchTerm]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,6 +124,8 @@ export default function AdminEventsPage() {
         return;
       }
       setEvents(nextEvents);
+      const response = await listAdminEvents(deferredSearchTerm || undefined);
+      setVisibleEvents(dedupeEvents(response.events));
       setForm({
         poolLengthM: 25,
         distanceM: 50,
@@ -163,8 +177,10 @@ export default function AdminEventsPage() {
                       <SelectValue placeholder="请选择泳池长度" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="25">25 米（短池）</SelectItem>
-                      <SelectItem value="50">50 米（长池）</SelectItem>
+                      <SelectGroup>
+                        <SelectItem value="25">25 米（短池）</SelectItem>
+                        <SelectItem value="50">50 米（长池）</SelectItem>
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -195,11 +211,13 @@ export default function AdminEventsPage() {
                       <SelectValue placeholder="请选择泳姿" />
                     </SelectTrigger>
                     <SelectContent>
-                      {strokeOptions.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {strokeOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -225,7 +243,7 @@ export default function AdminEventsPage() {
                   </div>
                   <div>
                     <CardTitle>项目目录</CardTitle>
-                    <CardDescription>当前可用项目共 {events.length} 个。</CardDescription>
+                    <CardDescription>当前显示项目共 {visibleEvents.length} 个。</CardDescription>
                   </div>
                 </div>
 
@@ -251,7 +269,7 @@ export default function AdminEventsPage() {
                   initial="initial"
                   variants={STAGGER_CONTAINER}
                 >
-                  {filteredEvents.map((event) => (
+                  {visibleEvents.map((event) => (
                     <motion.div key={eventIdentity(event)} variants={FADE_IN_UP}>
                       <Card className="h-full border-border/40 transition-all hover:border-primary/20 hover:bg-primary/5">
                         <CardContent className="flex h-full flex-col gap-4 p-6">

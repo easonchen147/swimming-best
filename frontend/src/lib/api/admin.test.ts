@@ -46,9 +46,12 @@ describe("admin api client", () => {
   it("routes admin reads through /api/admin", async () => {
     await getAdminMe();
     await listAdminTeams();
+    await listAdminTeams("冲刺");
     await listAdminSwimmers();
     await listAdminSwimmers("team-1");
+    await listAdminSwimmers("team-1", "海豚");
     await listAdminEvents();
+    await listAdminEvents("自由泳");
     await listAdminGoals();
     await listAdminPerformances();
     await listAdminStandards();
@@ -57,14 +60,17 @@ describe("admin api client", () => {
 
     expect(apiGet).toHaveBeenNthCalledWith(1, "/api/admin/me");
     expect(apiGet).toHaveBeenNthCalledWith(2, "/api/admin/teams");
-    expect(apiGet).toHaveBeenNthCalledWith(3, "/api/admin/swimmers");
-    expect(apiGet).toHaveBeenNthCalledWith(4, "/api/admin/swimmers?teamId=team-1");
-    expect(apiGet).toHaveBeenNthCalledWith(5, "/api/admin/events");
-    expect(apiGet).toHaveBeenNthCalledWith(6, "/api/admin/goals");
-    expect(apiGet).toHaveBeenNthCalledWith(7, "/api/admin/performances");
-    expect(apiGet).toHaveBeenNthCalledWith(8, "/api/admin/standards");
-    expect(apiGet).toHaveBeenNthCalledWith(9, "/api/admin/standards/standard-1/entries");
-    expect(apiGet).toHaveBeenNthCalledWith(10, "/api/admin/export/swimmers/swimmer-1/summary");
+    expect(apiGet).toHaveBeenNthCalledWith(3, "/api/admin/teams?search=%E5%86%B2%E5%88%BA");
+    expect(apiGet).toHaveBeenNthCalledWith(4, "/api/admin/swimmers");
+    expect(apiGet).toHaveBeenNthCalledWith(5, "/api/admin/swimmers?teamId=team-1");
+    expect(apiGet).toHaveBeenNthCalledWith(6, "/api/admin/swimmers?teamId=team-1&search=%E6%B5%B7%E8%B1%9A");
+    expect(apiGet).toHaveBeenNthCalledWith(7, "/api/admin/events");
+    expect(apiGet).toHaveBeenNthCalledWith(8, "/api/admin/events?search=%E8%87%AA%E7%94%B1%E6%B3%B3");
+    expect(apiGet).toHaveBeenNthCalledWith(9, "/api/admin/goals");
+    expect(apiGet).toHaveBeenNthCalledWith(10, "/api/admin/performances");
+    expect(apiGet).toHaveBeenNthCalledWith(11, "/api/admin/standards");
+    expect(apiGet).toHaveBeenNthCalledWith(12, "/api/admin/standards/standard-1/entries");
+    expect(apiGet).toHaveBeenNthCalledWith(13, "/api/admin/export/swimmers/swimmer-1/summary");
   });
 
   it("routes admin writes through /api/admin", async () => {

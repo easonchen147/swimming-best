@@ -63,6 +63,34 @@ describe("AdminTeamsPage", () => {
   });
 
   it("loads managed teams and creates a new team", async () => {
+    listAdminTeams
+      .mockResolvedValueOnce({
+        teams: [
+          {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        teams: [
+          {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+          {
+            id: "team-b",
+            name: "浪花竞速队",
+            sortOrder: 2,
+            isActive: true,
+          },
+        ],
+      });
+
     render(<AdminTeamsPage />);
 
     expect(await screen.findByText("海豚预备队")).toBeInTheDocument();
@@ -83,5 +111,19 @@ describe("AdminTeamsPage", () => {
       });
     });
     expect(await screen.findByText("浪花竞速队")).toBeInTheDocument();
+  });
+
+  it("passes search input to the teams api", async () => {
+    render(<AdminTeamsPage />);
+
+    expect(await screen.findByText("海豚预备队")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("搜索队伍名称..."), {
+      target: { value: "海豚" },
+    });
+
+    await waitFor(() => {
+      expect(listAdminTeams).toHaveBeenLastCalledWith("海豚");
+    });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import { 
@@ -19,11 +19,13 @@ import { AdminShell } from "@/components/layout/admin-shell";
 import { YearPickerInput } from "@/components/shared/date-picker";
 import { Field } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -56,6 +58,7 @@ export default function AdminSwimmersPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm.trim());
   const [form, setForm] = useState({
     realName: "",
     nickname: "",
@@ -72,8 +75,7 @@ export default function AdminSwimmersPage() {
   const genderSelectId = "swimmer-gender";
   const publicNameModeSelectId = "swimmer-public-name-mode";
   useEffect(() => {
-    Promise.all([listAdminSwimmers(), listAdminTeams()]).then(([swimmerResponse, teamResponse]) => {
-      setSwimmers(swimmerResponse.swimmers);
+    listAdminTeams().then((teamResponse) => {
       setTeams(teamResponse.teams);
       setForm((current) => ({
         ...current,
@@ -82,18 +84,24 @@ export default function AdminSwimmersPage() {
     });
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    listAdminSwimmers(teamFilter || undefined, deferredSearchTerm || undefined).then(
+      (swimmerResponse) => {
+        if (!cancelled) {
+          setSwimmers(swimmerResponse.swimmers);
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [deferredSearchTerm, teamFilter]);
+
   const visibleTeams = teams.length > 0 ? teams : listTeams(swimmers);
   const selectableTeams = teams.filter(
     (team) => team.isActive || team.id === form.teamId,
   );
-  
-  const filteredSwimmers = swimmers.filter((swimmer) => {
-    const matchesTeam = !teamFilter || swimmer.teamId === teamFilter;
-    const matchesSearch = !searchTerm || 
-      swimmer.realName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      swimmer.nickname.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTeam && matchesSearch;
-  });
 
   function resetForm() {
     setEditingId(null);
@@ -119,16 +127,17 @@ export default function AdminSwimmersPage() {
     };
     try {
       if (editingId) {
-        const swimmer = await updateAdminSwimmer(editingId, payload);
-        setSwimmers((current) =>
-          current.map((item) => (item.id === swimmer.id ? swimmer : item)),
-        );
+        await updateAdminSwimmer(editingId, payload);
         toast.success("队员档案已更新");
       } else {
-        const swimmer = await createAdminSwimmer(payload);
-        setSwimmers((current) => [...current, swimmer]);
+        await createAdminSwimmer(payload);
         toast.success("队员档案已创建");
       }
+      const swimmerResponse = await listAdminSwimmers(
+        teamFilter || undefined,
+        deferredSearchTerm || undefined,
+      );
+      setSwimmers(swimmerResponse.swimmers);
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -235,16 +244,18 @@ export default function AdminSwimmersPage() {
                       <SelectValue placeholder="请选择所属队伍" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teams.length === 0 ? (
-                        <SelectItem disabled value="__empty__">
-                          请先到“队伍”页面创建队伍
-                        </SelectItem>
-                      ) : null}
-                      {selectableTeams.map((team) => (
-                        <SelectItem key={team.id} value={team.id}>
-                          {team.name} {!team.isActive ? " (已停用)" : ""}
-                        </SelectItem>
-                      ))}
+                      <SelectGroup>
+                        {teams.length === 0 ? (
+                          <SelectItem disabled value="__empty__">
+                            请先到“队伍”页面创建队伍
+                          </SelectItem>
+                        ) : null}
+                        {selectableTeams.map((team) => (
+                          <SelectItem key={team.id} value={team.id}>
+                            {team.name} {!team.isActive ? " (已停用)" : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
                     </SelectContent>
                   </Select>
                 </Field>
@@ -264,9 +275,11 @@ export default function AdminSwimmersPage() {
                         <SelectValue placeholder="请选择性别" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="unknown">未设置</SelectItem>
-                        <SelectItem value="male">男</SelectItem>
-                        <SelectItem value="female">女</SelectItem>
+                        <SelectGroup>
+                          <SelectItem value="unknown">未设置</SelectItem>
+                          <SelectItem value="male">男</SelectItem>
+                          <SelectItem value="female">女</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   </Field>
@@ -281,21 +294,23 @@ export default function AdminSwimmersPage() {
                         <SelectValue placeholder="请选择展示模式" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="nickname">展示昵称</SelectItem>
-                        <SelectItem value="real_name">展示真名</SelectItem>
-                        <SelectItem value="hidden">完全隐藏</SelectItem>
+                        <SelectGroup>
+                          <SelectItem value="nickname">展示昵称</SelectItem>
+                          <SelectItem value="real_name">展示真名</SelectItem>
+                          <SelectItem value="hidden">完全隐藏</SelectItem>
+                        </SelectGroup>
                       </SelectContent>
                     </Select>
                   </Field>
                 </div>
 
-                <div className="flex items-center space-x-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
-                  <input
+                <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
+                  <Checkbox
                     id="isPublic"
                     checked={form.isPublic}
-                    onChange={(event) => setForm((current) => ({ ...current, isPublic: event.target.checked }))}
-                    type="checkbox"
-                    className="h-5 w-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
+                    onCheckedChange={(checked) =>
+                      setForm((current) => ({ ...current, isPublic: checked === true }))
+                    }
                   />
                   <label htmlFor="isPublic" className="flex flex-col cursor-pointer">
                     <span className="text-sm font-bold text-foreground">公开展示该队员</span>
@@ -336,7 +351,7 @@ export default function AdminSwimmersPage() {
                   </div>
                   <div>
                     <CardTitle>已录入成员</CardTitle>
-                    <CardDescription>共有 {swimmers.length} 名成员录入系统</CardDescription>
+                    <CardDescription>当前显示 {swimmers.length} 名成员</CardDescription>
                   </div>
                 </div>
                 
@@ -391,7 +406,7 @@ export default function AdminSwimmersPage() {
                  </TableHeader>
                  <TableBody>
                    <AnimatePresence mode="popLayout">
-                     {filteredSwimmers.map((swimmer) => (
+                     {swimmers.map((swimmer) => (
                        <TableRow 
                          key={swimmer.id} 
                          layoutId={swimmer.id}
@@ -467,7 +482,7 @@ export default function AdminSwimmersPage() {
                  </TableBody>
                </Table>
                
-               {filteredSwimmers.length === 0 && (
+               {swimmers.length === 0 && (
                  <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}

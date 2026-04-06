@@ -166,11 +166,31 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     teams = teams_response.get_json()["teams"]
     assert [item["name"] for item in teams] == ["海星提升队", "海豚冲刺一队"]
 
+    searched_teams_response = admin_client.get("/api/admin/teams?search=%E5%86%B2%E5%88%BA")
+    assert searched_teams_response.status_code == 200
+    searched_teams = searched_teams_response.get_json()["teams"]
+    assert len(searched_teams) == 1
+    assert searched_teams[0]["name"] == "海豚冲刺一队"
+
     swimmers_response = admin_client.get(f"/api/admin/swimmers?teamId={second_team['id']}")
     assert swimmers_response.status_code == 200
     swimmers = swimmers_response.get_json()["swimmers"]
     assert len(swimmers) == 1
     assert swimmers[0]["team"]["name"] == "海豚冲刺一队"
+
+    searched_swimmers_response = admin_client.get(
+        f"/api/admin/swimmers?teamId={second_team['id']}&search=%E5%B0%8F%E6%B5%B7%E8%B1%9A"
+    )
+    assert searched_swimmers_response.status_code == 200
+    searched_swimmers = searched_swimmers_response.get_json()["swimmers"]
+    assert len(searched_swimmers) == 1
+    assert searched_swimmers[0]["nickname"] == "小海豚"
+
+    searched_events_response = admin_client.get("/api/admin/events?search=%E8%87%AA%E7%94%B1%E6%B3%B3")
+    assert searched_events_response.status_code == 200
+    searched_events = searched_events_response.get_json()["events"]
+    assert len(searched_events) >= 1
+    assert event["displayName"] in [item["displayName"] for item in searched_events]
 
     goals_response = admin_client.get("/api/admin/goals")
     assert goals_response.status_code == 200

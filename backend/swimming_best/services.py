@@ -16,8 +16,8 @@ class AdminService:
     def __init__(self, repository: Repository):
         self.repository = repository
 
-    def list_teams(self) -> list[dict[str, Any]]:
-        return self.repository.list_teams()
+    def list_teams(self, search: str | None = None) -> list[dict[str, Any]]:
+        return self.repository.list_teams(search=search)
 
     def create_team(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.repository.create_team(payload)
@@ -25,8 +25,12 @@ class AdminService:
     def update_team(self, team_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         return self.repository.update_team(team_id, payload)
 
-    def list_swimmers(self, team_id: str | None = None) -> list[dict[str, Any]]:
-        return self.repository.list_swimmers(team_id=team_id)
+    def list_swimmers(
+        self,
+        team_id: str | None = None,
+        search: str | None = None,
+    ) -> list[dict[str, Any]]:
+        return self.repository.list_swimmers(team_id=team_id, search=search)
 
     def create_swimmer(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.repository.create_swimmer(payload)
@@ -34,8 +38,8 @@ class AdminService:
     def update_swimmer(self, swimmer_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         return self.repository.update_swimmer(swimmer_id, payload)
 
-    def list_events(self) -> list[dict[str, Any]]:
-        return self.repository.list_events()
+    def list_events(self, search: str | None = None) -> list[dict[str, Any]]:
+        return self.repository.list_events(search=search)
 
     def create_event(self, payload: dict[str, Any]) -> dict[str, Any]:
         return self.repository.create_event(payload)
@@ -282,8 +286,12 @@ class PublicService:
     def __init__(self, repository: Repository):
         self.repository = repository
 
-    def list_swimmers(self, team_id: str | None = None) -> list[dict[str, Any]]:
-        swimmers = self.repository.list_public_swimmers(team_id=team_id)
+    def list_swimmers(
+        self,
+        team_id: str | None = None,
+        search: str | None = None,
+    ) -> list[dict[str, Any]]:
+        swimmers = self.repository.list_public_swimmers(team_id=team_id, search=search)
         summaries = []
         for swimmer in swimmers:
             summaries.append(

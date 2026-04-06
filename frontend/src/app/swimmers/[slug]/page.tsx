@@ -70,11 +70,18 @@ export default function SwimmerDetailPage() {
 
     setExporting(true);
     try {
+      const exportWidth = shareRef.current.scrollWidth;
+      const exportHeight = shareRef.current.scrollHeight;
       const dataUrl = await toPng(shareRef.current, {
         backgroundColor: "#f8fafc",
         cacheBust: true,
+        canvasHeight: exportHeight * 2,
+        canvasWidth: exportWidth * 2,
         filter: exportFilter,
-        pixelRatio: 2.5,
+        height: exportHeight,
+        pixelRatio: 1,
+        skipAutoScale: true,
+        width: exportWidth,
       });
       const link = document.createElement("a");
       link.download = `${slug}-performance.png`;
@@ -102,9 +109,9 @@ export default function SwimmerDetailPage() {
   const primaryGoal = analytics?.goals[0];
 
   return (
-    <PublicShell className="gap-10 lg:gap-12">
+    <PublicShell className="gap-12">
       <div
-        className="flex flex-col gap-10 lg:gap-12"
+        className="flex flex-col gap-12"
         data-testid="swimmer-detail-export"
         ref={shareRef}
       >

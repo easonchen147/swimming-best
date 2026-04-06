@@ -60,14 +60,17 @@ class Repository:
         self.connection.commit()
         return team
 
-    def list_teams(self) -> list[dict[str, Any]]:
-        rows = self.connection.execute(
-            """
+    def list_teams(self, search: str | None = None) -> list[dict[str, Any]]:
+        params: list[Any] = []
+        query = """
             SELECT id, name, sort_order, is_active, created_at, updated_at
             FROM teams
-            ORDER BY sort_order ASC, created_at ASC
             """
-        ).fetchall()
+        if pattern := search_pattern(search):
+            query += " WHERE LOWER(name) LIKE ?"
+            params.append(pattern)
+        query += " ORDER BY sort_order ASC, created_at ASC"
+        rows = self.connection.execute(query, params).fetchall()
         return [self._row_to_team(row) for row in rows]
 
     def get_team(self, team_id: str) -> dict[str, Any]:
@@ -222,20 +225,34 @@ class Repository:
         self.connection.commit()
         return self.get_swimmer(swimmer_id)
 
-    def list_swimmers(self, team_id: str | None = None) -> list[dict[str, Any]]:
+    def list_swimmers(
+        self,
+        team_id: str | None = None,
+        search: str | None = None,
+    ) -> list[dict[str, Any]]:
         clauses: list[str] = []
         params: list[Any] = []
         if team_id:
             clauses.append("s.team_id = ?")
             params.append(team_id)
+        if pattern := search_pattern(search):
+            clauses.append("(LOWER(s.real_name) LIKE ? OR LOWER(s.nickname) LIKE ?)")
+            params.extend([pattern, pattern])
         return self._list_swimmers(clauses, params)
 
-    def list_public_swimmers(self, team_id: str | None = None) -> list[dict[str, Any]]:
+    def list_public_swimmers(
+        self,
+        team_id: str | None = None,
+        search: str | None = None,
+    ) -> list[dict[str, Any]]:
         clauses = ["s.is_public = 1", "s.public_name_mode != 'hidden'"]
         params: list[Any] = []
         if team_id:
             clauses.append("s.team_id = ?")
             params.append(team_id)
+        if pattern := search_pattern(search):
+            clauses.append("(LOWER(s.real_name) LIKE ? OR LOWER(s.nickname) LIKE ?)")
+            params.extend([pattern, pattern])
         return self._list_swimmers(clauses, params)
 
     def get_swimmer(self, swimmer_id: str) -> dict[str, Any]:
@@ -317,15 +334,18 @@ class Repository:
         self.connection.commit()
         return event
 
-    def list_events(self) -> list[dict[str, Any]]:
-        rows = self.connection.execute(
-            """
+    def list_events(self, search: str | None = None) -> list[dict[str, Any]]:
+        params: list[Any] = []
+        query = """
             SELECT id, pool_length_m, distance_m, stroke, effort_type, display_name, sort_order,
                    is_active, created_at, updated_at
             FROM events
-            ORDER BY sort_order ASC, created_at ASC
             """
-        ).fetchall()
+        if pattern := search_pattern(search):
+            query += " WHERE LOWER(display_name) LIKE ?"
+            params.append(pattern)
+        query += " ORDER BY sort_order ASC, created_at ASC"
+        rows = self.connection.execute(query, params).fetchall()
         return [self._row_to_event(row) for row in rows]
 
     def get_event(self, event_id: str) -> dict[str, Any]:
@@ -1301,6 +1321,13 @@ def normalized_tags(tags: list[str]) -> list[str]:
         seen.add(tag)
         unique_tags.append(tag)
     return unique_tags
+
+
+def search_pattern(value: Any) -> str | None:
+    search = str(value or "").strip().lower()
+    if not search:
+        return None
+    return f"%{search}%"
 
 
 def normalize_gender(value: Any) -> str:

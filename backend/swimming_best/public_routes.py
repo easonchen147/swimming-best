@@ -17,7 +17,10 @@ def create_public_blueprint(
     @public.get("/swimmers")
     def list_swimmers():
         public_service = get_public_service()
-        swimmers = public_service.list_swimmers(team_id=request.args.get("teamId"))
+        swimmers = public_service.list_swimmers(
+            team_id=request.args.get("teamId"),
+            search=request.args.get("search"),
+        )
         return jsonify({"swimmers": swimmers})
 
     @public.get("/swimmers/<slug>")

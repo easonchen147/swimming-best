@@ -17,6 +17,7 @@ import { DatePickerInput } from "@/components/shared/date-picker";
 import { Field, SelectField } from "@/components/shared/form-field";
 import { TimeInput } from "@/components/shared/time-input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -185,13 +186,11 @@ export default function AdminGoalsPage() {
                 </div>
 
                 <label className="flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4">
-                  <input
+                  <Checkbox
                     checked={form.isPublic}
-                    className="h-5 w-5 cursor-pointer"
-                    onChange={(event) =>
-                      setForm((current) => ({ ...current, isPublic: event.target.checked }))
+                    onCheckedChange={(checked) =>
+                      setForm((current) => ({ ...current, isPublic: checked === true }))
                     }
-                    type="checkbox"
                   />
                   <span className="text-sm font-medium text-foreground">公开显示该目标</span>
                 </label>

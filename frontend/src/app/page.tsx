@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight, Users, Star, Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useDeferredValue, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { PublicShell } from "@/components/layout/public-shell";
@@ -12,29 +12,51 @@ import { Input } from "@/components/ui/input";
 import { listPublicSwimmers } from "@/lib/api/public";
 import { listTeams } from "@/lib/swimmer-label";
 import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
-import type { PublicSwimmerSummary } from "@/lib/types";
+import type { PublicSwimmerSummary, TeamSummary } from "@/lib/types";
 
 export default function HomePage() {
   const [swimmers, setSwimmers] = useState<PublicSwimmerSummary[]>([]);
+  const [teamOptions, setTeamOptions] = useState<TeamSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teamFilter, setTeamFilter] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm.trim());
 
   useEffect(() => {
-    listPublicSwimmers()
-      .then((response) => setSwimmers(response.swimmers))
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, []);
+    let cancelled = false;
 
-  const teams = listTeams(swimmers);
-  const filteredSwimmers = swimmers.filter((swimmer) => {
-    const matchesTeam = !teamFilter || swimmer.teamId === teamFilter;
-    const matchesSearch = !searchTerm || 
-      swimmer.displayName.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTeam && matchesSearch;
-  });
+    listPublicSwimmers({
+      search: deferredSearchTerm || undefined,
+      teamId: teamFilter || undefined,
+    })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setSwimmers(response.swimmers);
+        if (!teamFilter && !deferredSearchTerm) {
+          setTeamOptions(listTeams(response.swimmers));
+        }
+        setError(null);
+      })
+      .catch((err: Error) => {
+        if (!cancelled) {
+          setError(err.message);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [deferredSearchTerm, teamFilter]);
+
+  const teams = teamOptions.length > 0 ? teamOptions : listTeams(swimmers);
 
   return (
     <PublicShell>
@@ -171,7 +193,7 @@ export default function HomePage() {
             className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
           >
             <AnimatePresence mode="popLayout">
-              {filteredSwimmers.map((swimmer) => (
+              {swimmers.map((swimmer) => (
                 <motion.div
                   key={swimmer.id}
                   layout
@@ -209,7 +231,7 @@ export default function HomePage() {
           </motion.div>
         )}
 
-        {!loading && filteredSwimmers.length === 0 && (
+        {!loading && swimmers.length === 0 && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -17,6 +17,19 @@ def test_public_api_exposes_visible_swimmers_analytics_compare_and_team_filters(
     assert len(filtered_swimmers) == 1
     assert filtered_swimmers[0]["team"]["name"] == "海豚预备队"
 
+    searched_response = client.get("/api/public/swimmers?search=%E5%B0%8F%E6%B5%B7%E8%B1%9A")
+    assert searched_response.status_code == 200
+    searched_swimmers = searched_response.get_json()["swimmers"]
+    assert len(searched_swimmers) == 2
+
+    combined_filtered_response = client.get(
+        f"/api/public/swimmers?teamId={seeded_data['team_alpha_id']}&search=%E5%B0%8F%E6%B5%B7%E8%B1%9A"
+    )
+    assert combined_filtered_response.status_code == 200
+    combined_filtered_swimmers = combined_filtered_response.get_json()["swimmers"]
+    assert len(combined_filtered_swimmers) == 1
+    assert combined_filtered_swimmers[0]["team"]["name"] == "海豚预备队"
+
     detail_response = client.get(f"/api/public/swimmers/{seeded_data['swimmer_a_slug']}")
     assert detail_response.status_code == 200
     assert detail_response.get_json()["team"]["name"] == "海豚预备队"

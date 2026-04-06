@@ -23,8 +23,15 @@ export function getAdminMe() {
   return apiGet<{ username: string }>("/api/admin/me");
 }
 
-export function listAdminTeams() {
-  return apiGet<{ teams: TeamSummary[] }>("/api/admin/teams");
+export function listAdminTeams(search?: string) {
+  const params = new URLSearchParams();
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
+  return apiGet<{ teams: TeamSummary[] }>(
+    `/api/admin/teams${params.size > 0 ? `?${params.toString()}` : ""}`,
+  );
 }
 
 export function createAdminTeam(input: {
@@ -46,10 +53,13 @@ export function updateAdminTeam(
   return apiPatch<TeamSummary>(`/api/admin/teams/${teamId}`, input);
 }
 
-export function listAdminSwimmers(teamId?: string) {
+export function listAdminSwimmers(teamId?: string, search?: string) {
   const params = new URLSearchParams();
   if (teamId) {
     params.set("teamId", teamId);
+  }
+  if (search?.trim()) {
+    params.set("search", search.trim());
   }
 
   return apiGet<{ swimmers: AdminSwimmer[] }>(
@@ -86,8 +96,15 @@ export function updateAdminSwimmer(
   return apiPatch<AdminSwimmer>(`/api/admin/swimmers/${swimmerId}`, input);
 }
 
-export function listAdminEvents() {
-  return apiGet<{ events: EventDefinition[] }>("/api/admin/events");
+export function listAdminEvents(search?: string) {
+  const params = new URLSearchParams();
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
+  return apiGet<{ events: EventDefinition[] }>(
+    `/api/admin/events${params.size > 0 ? `?${params.toString()}` : ""}`,
+  );
 }
 
 export function createAdminEvent(input: {

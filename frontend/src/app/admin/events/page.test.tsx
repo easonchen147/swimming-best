@@ -74,4 +74,18 @@ describe("AdminEventsPage", () => {
     });
     expect(createAdminEvent).not.toHaveBeenCalled();
   });
+
+  it("passes search input to the events api", async () => {
+    render(<AdminEventsPage />);
+
+    expect(await screen.findByText("50米 自由泳（短池）")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText("搜索项目名称..."), {
+      target: { value: "自由泳" },
+    });
+
+    await waitFor(() => {
+      expect(listAdminEvents).toHaveBeenLastCalledWith("自由泳");
+    });
+  });
 });

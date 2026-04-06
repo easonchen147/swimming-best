@@ -8,19 +8,25 @@ import type {
   PublicSwimmerSummary,
 } from "@/lib/types";
 
-export function listPublicSwimmers() {
-  return apiGet<{ swimmers: PublicSwimmerSummary[] }>("/api/public/swimmers");
-}
-
-export function listPublicSwimmersByTeam(teamId?: string) {
+export function listPublicSwimmers(input?: {
+  teamId?: string;
+  search?: string;
+}) {
   const params = new URLSearchParams();
-  if (teamId) {
-    params.set("teamId", teamId);
+  if (input?.teamId) {
+    params.set("teamId", input.teamId);
+  }
+  if (input?.search?.trim()) {
+    params.set("search", input.search.trim());
   }
 
   return apiGet<{ swimmers: PublicSwimmerSummary[] }>(
     `/api/public/swimmers${params.size > 0 ? `?${params.toString()}` : ""}`,
   );
+}
+
+export function listPublicSwimmersByTeam(teamId?: string) {
+  return listPublicSwimmers(teamId ? { teamId } : undefined);
 }
 
 export function getPublicSwimmer(slug: string) {
