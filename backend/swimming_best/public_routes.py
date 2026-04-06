@@ -44,6 +44,17 @@ def create_public_blueprint(
         )
         return jsonify(payload)
 
+    @public.get("/arena")
+    def arena():
+        public_service = get_public_service()
+        pool_length_param = request.args.get("poolLengthM")
+        payload = public_service.arena_board(
+            gender=request.args.get("gender") or None,
+            pool_length_m=int(pool_length_param) if pool_length_param else None,
+            team_id=request.args.get("teamId") or None,
+        )
+        return jsonify(payload)
+
     @public.errorhandler(NotFoundError)
     def handle_not_found(_: NotFoundError):
         return jsonify({"error": "not_found"}), HTTPStatus.NOT_FOUND

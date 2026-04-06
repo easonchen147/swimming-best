@@ -151,6 +151,50 @@ export type ComparePayload = {
   swimmers: CompareSwimmer[];
 };
 
+export type ArenaLeaderboardEntry = {
+  rank: number;
+  swimmerId: string;
+  displayName: string;
+  teamId: string;
+  team: TeamSummary;
+  bestTimeMs: number;
+  gapFromLeaderMs: number;
+};
+
+export type ArenaLeader = {
+  swimmerId: string;
+  displayName: string;
+  teamId: string;
+  team: TeamSummary;
+  bestTimeMs: number;
+};
+
+export type ArenaGroup = {
+  groupKey: string;
+  gender: "male" | "female";
+  event: EventDefinition;
+  competitorCount: number;
+  heatScore: number;
+  heatLabel: string;
+  leaderGapMs: number;
+  leaderGapPercent: number;
+  leader: ArenaLeader;
+  rankings: ArenaLeaderboardEntry[];
+};
+
+export type ArenaPayload = {
+  filters: {
+    gender: "male" | "female" | "all";
+    poolLengthM?: number;
+    teamId: string;
+  };
+  summary: {
+    arenaCount: number;
+    competitorCount: number;
+  };
+  groups: ArenaGroup[];
+};
+
 export type AdminSwimmer = {
   id: string;
   slug: string;

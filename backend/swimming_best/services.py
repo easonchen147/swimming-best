@@ -317,6 +317,96 @@ class PublicService:
             "swimmers": compare_swimmers,
         }
 
+    def arena_board(
+        self,
+        *,
+        gender: str | None = None,
+        pool_length_m: int | None = None,
+        team_id: str | None = None,
+    ) -> dict[str, Any]:
+        rows = self.repository.list_public_best_performances_for_arena(
+            team_id=team_id,
+            gender=gender,
+            pool_length_m=pool_length_m,
+        )
+
+        grouped: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
+        for row in rows:
+            grouped[(row["event"]["id"], row["swimmer"]["gender"])].append(row)
+
+        groups = []
+        for (event_id, arena_gender), ranks in grouped.items():
+            ranks.sort(key=lambda item: item["bestTimeMs"])
+            event = ranks[0]["event"]
+            competitor_count = len(ranks)
+            leader = ranks[0]
+            second = ranks[1] if competitor_count > 1 else None
+            leader_gap_ms = (
+                max(second["bestTimeMs"] - leader["bestTimeMs"], 0)
+                if second is not None
+                else 0
+            )
+            leader_gap_percent = (
+                leader_gap_ms / second["bestTimeMs"]
+                if second is not None and second["bestTimeMs"] > 0
+                else 0.0
+            )
+            heat_score = calculate_arena_heat_score(ranks)
+            groups.append(
+                {
+                    "groupKey": f"{event_id}:{arena_gender}",
+                    "gender": arena_gender,
+                    "event": event,
+                    "competitorCount": competitor_count,
+                    "heatScore": heat_score,
+                    "heatLabel": arena_heat_label(heat_score),
+                    "leaderGapMs": leader_gap_ms,
+                    "leaderGapPercent": leader_gap_percent,
+                    "leader": {
+                        "swimmerId": leader["swimmer"]["id"],
+                        "displayName": public_display_name(leader["swimmer"]),
+                        "teamId": leader["swimmer"]["teamId"],
+                        "team": leader["swimmer"]["team"],
+                        "bestTimeMs": leader["bestTimeMs"],
+                    },
+                    "rankings": [
+                        {
+                            "rank": index + 1,
+                            "swimmerId": item["swimmer"]["id"],
+                            "displayName": public_display_name(item["swimmer"]),
+                            "teamId": item["swimmer"]["teamId"],
+                            "team": item["swimmer"]["team"],
+                            "bestTimeMs": item["bestTimeMs"],
+                            "gapFromLeaderMs": item["bestTimeMs"] - leader["bestTimeMs"],
+                        }
+                        for index, item in enumerate(ranks[:8])
+                    ],
+                }
+            )
+
+        groups.sort(
+            key=lambda item: (
+                -item["heatScore"],
+                -item["competitorCount"],
+                item["event"]["sortOrder"],
+                item["event"]["displayName"],
+                item["gender"],
+            )
+        )
+
+        return {
+            "filters": {
+                "gender": gender or "all",
+                "poolLengthM": pool_length_m,
+                "teamId": team_id or "",
+            },
+            "summary": {
+                "arenaCount": len(groups),
+                "competitorCount": sum(item["competitorCount"] for item in groups),
+            },
+            "groups": groups,
+        }
+
 
 def public_display_name(swimmer: dict[str, Any]) -> str:
     if swimmer["publicNameMode"] == "real_name":
@@ -347,3 +437,32 @@ def build_official_benchmarks(
         }
         for standard in standards
     ]
+
+
+def calculate_arena_heat_score(rankings: list[dict[str, Any]]) -> int:
+    competitor_count = len(rankings)
+    if competitor_count == 0:
+        return 0
+    if competitor_count == 1:
+        return 28
+
+    leader_time = rankings[0]["bestTimeMs"]
+    comparison_time = rankings[min(2, competitor_count - 1)]["bestTimeMs"]
+    relative_spread = (
+        (comparison_time - leader_time) / leader_time
+        if leader_time > 0
+        else 1.0
+    )
+    density = min(competitor_count / 8, 1.0)
+    tightness = max(0.0, 1 - min(relative_spread / 0.08, 1.0))
+    return round((tightness * 0.65 + density * 0.35) * 100)
+
+
+def arena_heat_label(heat_score: int) -> str:
+    if heat_score >= 80:
+        return "白热"
+    if heat_score >= 60:
+        return "激烈"
+    if heat_score >= 40:
+        return "活跃"
+    return "观察"

@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ChartTooltip } from "@/components/charts/chart-tooltip";
 import type { CompareSwimmer } from "@/lib/types";
@@ -42,11 +42,7 @@ function buildCompareData(swimmers: CompareSwimmer[]) {
 export function CompareChart({ swimmers }: { swimmers: CompareSwimmer[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = typeof window !== "undefined";
 
   const data = useMemo(() => buildCompareData(swimmers), [swimmers]);
   const visibleSwimmers = swimmers.filter((swimmer) => !hiddenIds.includes(swimmer.swimmerId));

@@ -4,8 +4,7 @@ import { vi } from "vitest";
 import ComparePage from "@/app/compare/page";
 
 const listPublicSwimmers = vi.fn();
-const listPublicSwimmerEvents = vi.fn();
-const comparePublicEvent = vi.fn();
+const getPublicArena = vi.fn();
 
 vi.mock("sonner", () => ({
   toast: {
@@ -18,19 +17,33 @@ vi.mock("@/components/layout/public-shell", () => ({
   PublicShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("@/components/charts/compare-chart", () => ({
-  CompareChart: ({ swimmers }: { swimmers: Array<{ displayName: string }> }) => (
-    <div>compare-chart:{swimmers.map((item) => item.displayName).join(",")}</div>
+vi.mock("@/components/arena/arena-heatmap", () => ({
+  ArenaHeatmap: ({
+    groups,
+    selectedGroupKey,
+    onSelectGroup,
+  }: {
+    groups: Array<{ groupKey: string; event: { displayName: string } }>;
+    selectedGroupKey: string;
+    onSelectGroup: (groupKey: string) => void;
+  }) => (
+    <div>
+      heatmap:{selectedGroupKey}
+      {groups.map((group) => (
+        <button key={group.groupKey} onClick={() => onSelectGroup(group.groupKey)} type="button">
+          {group.event.displayName}
+        </button>
+      ))}
+    </div>
   ),
 }));
 
 vi.mock("@/lib/api/public", () => ({
   listPublicSwimmers: (...args: unknown[]) => listPublicSwimmers(...args),
-  listPublicSwimmerEvents: (...args: unknown[]) => listPublicSwimmerEvents(...args),
-  comparePublicEvent: (...args: unknown[]) => comparePublicEvent(...args),
+  getPublicArena: (...args: unknown[]) => getPublicArena(...args),
 }));
 
-describe("ComparePage", () => {
+describe("ArenaPage through compare compatibility route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     listPublicSwimmers.mockResolvedValue({
@@ -43,118 +56,122 @@ describe("ComparePage", () => {
           teamId: "team-a",
           team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
         },
-        {
-          id: "swimmer-b",
-          slug: "bella",
-          displayName: "Bella",
-          strongestEventId: "event-1",
-          teamId: "team-b",
-          team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
-        },
       ],
     });
-    listPublicSwimmerEvents.mockResolvedValue({
-      events: [
+    getPublicArena.mockResolvedValue({
+      filters: { gender: "all", poolLengthM: undefined, teamId: "" },
+      summary: { arenaCount: 2, competitorCount: 3 },
+      groups: [
         {
+          groupKey: "event-1:male",
+          gender: "male",
           event: {
             id: "event-1",
             poolLengthM: 25,
             distanceM: 50,
             stroke: "freestyle",
-            effortType: "sprint",
-            displayName: "50m freestyle sprint",
-            sortOrder: 1,
+            effortType: "standard",
+            displayName: "50米 自由泳（短池）",
+            sortOrder: 10,
             isActive: true,
           },
-          currentBestTimeMs: 32000,
-        },
-      ],
-    });
-    comparePublicEvent.mockResolvedValue({
-      event: {
-        id: "event-1",
-        poolLengthM: 25,
-        distanceM: 50,
-        stroke: "freestyle",
-        effortType: "sprint",
-        displayName: "50m freestyle sprint",
-        sortOrder: 1,
-        isActive: true,
-      },
-      swimmers: [
-        {
-          swimmerId: "swimmer-a",
-          displayName: "Alice",
-          teamId: "team-a",
-          team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
-          series: {
-            raw: [{ performedOn: "2026-03-01", timeMs: 32000 }],
-            pb: [],
-            trend: [],
-            currentBestTimeMs: 32000,
+          competitorCount: 2,
+          heatScore: 78,
+          heatLabel: "激烈",
+          leaderGapMs: 500,
+          leaderGapPercent: 0.015,
+          leader: {
+            swimmerId: "swimmer-a",
+            displayName: "男A",
+            teamId: "team-a",
+            team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+            bestTimeMs: 32000,
           },
-          currentBestTimeMs: 32000,
-          improvementTimeMs: 1000,
-          improvementRatio: 0.03,
+          rankings: [
+            {
+              rank: 1,
+              swimmerId: "swimmer-a",
+              displayName: "男A",
+              teamId: "team-a",
+              team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              bestTimeMs: 32000,
+              gapFromLeaderMs: 0,
+            },
+            {
+              rank: 2,
+              swimmerId: "swimmer-b",
+              displayName: "男B",
+              teamId: "team-a",
+              team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              bestTimeMs: 32500,
+              gapFromLeaderMs: 500,
+            },
+          ],
         },
         {
-          swimmerId: "swimmer-b",
-          displayName: "Bella",
-          teamId: "team-b",
-          team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
-          series: {
-            raw: [{ performedOn: "2026-03-01", timeMs: 31500 }],
-            pb: [],
-            trend: [],
-            currentBestTimeMs: 31500,
+          groupKey: "event-2:female",
+          gender: "female",
+          event: {
+            id: "event-2",
+            poolLengthM: 50,
+            distanceM: 100,
+            stroke: "backstroke",
+            effortType: "standard",
+            displayName: "100米 仰泳（长池）",
+            sortOrder: 20,
+            isActive: true,
           },
-          currentBestTimeMs: 31500,
-          improvementTimeMs: 1500,
-          improvementRatio: 0.05,
+          competitorCount: 1,
+          heatScore: 28,
+          heatLabel: "观察",
+          leaderGapMs: 0,
+          leaderGapPercent: 0,
+          leader: {
+            swimmerId: "swimmer-c",
+            displayName: "女A",
+            teamId: "team-a",
+            team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+            bestTimeMs: 71500,
+          },
+          rankings: [
+            {
+              rank: 1,
+              swimmerId: "swimmer-c",
+              displayName: "女A",
+              teamId: "team-a",
+              team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              bestTimeMs: 71500,
+              gapFromLeaderMs: 0,
+            },
+          ],
         },
       ],
     });
   });
 
-  it("requires explicit swimmer and event selection before rendering compare results", async () => {
+  it("renders arena market data and switches selected race group", async () => {
     render(<ComparePage />);
 
-    expect(await screen.findByText("进步对比分析")).toBeInTheDocument();
-    expect(screen.getByText("待选对比成员")).toBeInTheDocument();
-    expect(comparePublicEvent).not.toHaveBeenCalled();
+    expect(await screen.findByText("竞技场")).toBeInTheDocument();
+    expect(screen.getByText("赛道热力板")).toBeInTheDocument();
+    expect(screen.getAllByText("50米 自由泳（短池）").length).toBeGreaterThan(0);
+    expect(screen.getByText("男A")).toBeInTheDocument();
 
-    const eventSelect = screen.getByRole("combobox", { name: "对比项目" });
-    expect(eventSelect).toBeDisabled();
-
-    fireEvent.click(screen.getByRole("button", { name: "Alice" }));
+    fireEvent.click(screen.getByRole("button", { name: "100米 仰泳（长池）" }));
 
     await waitFor(() => {
-      expect(listPublicSwimmerEvents).toHaveBeenCalledWith("alice");
+      expect(screen.getByText("女A")).toBeInTheDocument();
     });
+    expect(screen.getAllByText("100米 仰泳（长池）").length).toBeGreaterThan(0);
 
-    expect(screen.getByText("待选对比成员")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Bella" }));
-    expect(await screen.findByText("待选对比项目")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("combobox", { name: "对比项目" }));
-    fireEvent.click(await screen.findByRole("option", { name: "50m freestyle sprint" }));
+    fireEvent.click(screen.getByRole("button", { name: "女子" }));
 
     await waitFor(() => {
-      expect(comparePublicEvent).toHaveBeenCalledWith("event-1", [
-        "swimmer-a",
-        "swimmer-b",
-      ]);
-    });
-
-    expect(screen.getByText("趋势走势对比")).toBeInTheDocument();
-    expect(screen.getAllByText("32.00s").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("31.50s").length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getByRole("button", { name: "Alice" }));
-
-    await waitFor(() => {
-      expect(screen.getByText("待选对比成员")).toBeInTheDocument();
+      expect(getPublicArena).toHaveBeenCalledWith({
+        gender: "female",
+        poolLengthM: undefined,
+        teamId: undefined,
+      });
     });
   });
 });

@@ -1,5 +1,6 @@
 import { apiGet } from "@/lib/api/client";
 import type {
+  ArenaPayload,
   ComparePayload,
   PublicEventAnalytics,
   PublicSwimmerDetail,
@@ -45,4 +46,25 @@ export function comparePublicEvent(eventId: string, swimmerIds: string[]) {
   }
 
   return apiGet<ComparePayload>(`/api/public/compare?${params.toString()}`);
+}
+
+export function getPublicArena(input?: {
+  gender?: "male" | "female";
+  poolLengthM?: number;
+  teamId?: string;
+}) {
+  const params = new URLSearchParams();
+  if (input?.gender) {
+    params.set("gender", input.gender);
+  }
+  if (typeof input?.poolLengthM === "number") {
+    params.set("poolLengthM", String(input.poolLengthM));
+  }
+  if (input?.teamId) {
+    params.set("teamId", input.teamId);
+  }
+
+  return apiGet<ArenaPayload>(
+    `/api/public/arena${params.size > 0 ? `?${params.toString()}` : ""}`,
+  );
 }

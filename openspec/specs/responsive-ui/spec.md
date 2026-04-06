@@ -54,3 +54,8 @@ loading feedback before required inputs are chosen.
   swimmers and one event
 - **THEN** the page shows a stable explanatory empty state instead of a loading
   placeholder
+
+#### Scenario: Visitor opens the arena on mobile
+- **WHEN** a visitor opens the public arena page on a phone-sized viewport
+- **THEN** the heatmap board and selected arena detail render without
+  horizontal overflow and remain tappable and readable

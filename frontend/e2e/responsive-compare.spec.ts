@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-async function mockCompareRoutes(page: import("@playwright/test").Page) {
+async function mockArenaRoutes(page: import("@playwright/test").Page) {
   await page.route("**/api/public/swimmers", async (route) => {
     await route.fulfill({
       body: JSON.stringify({
@@ -27,119 +27,134 @@ async function mockCompareRoutes(page: import("@playwright/test").Page) {
     });
   });
 
-  await page.route("**/api/public/swimmers/alice/events", async (route) => {
-    await route.fulfill({
-      body: JSON.stringify({
-        events: [
-          {
-            event: {
-              id: "event-1",
-              poolLengthM: 25,
-              distanceM: 50,
-              stroke: "freestyle",
-              effortType: "sprint",
-              displayName: "50m 自由泳",
-              sortOrder: 1,
-              isActive: true,
-            },
-            currentBestTimeMs: 32000,
-          },
-        ],
-      }),
-      contentType: "application/json",
-    });
-  });
-
-  await page.route("**/api/public/compare?*", async (route) => {
-    await route.fulfill({
-      body: JSON.stringify({
+  await page.route("**/api/public/arena*", async (route) => {
+    const url = new URL(route.request().url());
+    const gender = url.searchParams.get("gender");
+    const allGroups = [
+      {
+        groupKey: "event-1:male",
+        gender: "male",
         event: {
           id: "event-1",
           poolLengthM: 25,
           distanceM: 50,
           stroke: "freestyle",
-          effortType: "sprint",
-          displayName: "50m 自由泳",
+          effortType: "standard",
+          displayName: "50米 自由泳（短池）",
           sortOrder: 1,
           isActive: true,
         },
-        swimmers: [
+        competitorCount: 2,
+        heatScore: 78,
+        heatLabel: "激烈",
+        leaderGapMs: 500,
+        leaderGapPercent: 0.015,
+        leader: {
+          swimmerId: "swimmer-a",
+          displayName: "男A",
+          teamId: "team-a",
+          team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+          bestTimeMs: 32000,
+        },
+        rankings: [
           {
+            rank: 1,
             swimmerId: "swimmer-a",
-            displayName: "Alice",
+            displayName: "男A",
             teamId: "team-a",
             team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
-            series: {
-              raw: [
-                { performedOn: "2026-03-01", timeMs: 33000 },
-                { performedOn: "2026-03-10", timeMs: 32000 },
-              ],
-              pb: [],
-              trend: [],
-              currentBestTimeMs: 32000,
-            },
-            currentBestTimeMs: 32000,
-            improvementTimeMs: 1000,
-            improvementRatio: 0.03,
+            bestTimeMs: 32000,
+            gapFromLeaderMs: 0,
           },
           {
+            rank: 2,
             swimmerId: "swimmer-b",
-            displayName: "Bella",
+            displayName: "男B",
             teamId: "team-b",
             team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
-            series: {
-              raw: [
-                { performedOn: "2026-03-01", timeMs: 32500 },
-                { performedOn: "2026-03-10", timeMs: 31500 },
-              ],
-              pb: [],
-              trend: [],
-              currentBestTimeMs: 31500,
-            },
-            currentBestTimeMs: 31500,
-            improvementTimeMs: 1000,
-            improvementRatio: 0.03,
+            bestTimeMs: 32500,
+            gapFromLeaderMs: 500,
           },
         ],
+      },
+      {
+        groupKey: "event-2:female",
+        gender: "female",
+        event: {
+          id: "event-2",
+          poolLengthM: 50,
+          distanceM: 100,
+          stroke: "backstroke",
+          effortType: "standard",
+          displayName: "100米 仰泳（长池）",
+          sortOrder: 2,
+          isActive: true,
+        },
+        competitorCount: 1,
+        heatScore: 28,
+        heatLabel: "观察",
+        leaderGapMs: 0,
+        leaderGapPercent: 0,
+        leader: {
+          swimmerId: "swimmer-c",
+          displayName: "女A",
+          teamId: "team-a",
+          team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+          bestTimeMs: 71500,
+        },
+        rankings: [
+          {
+            rank: 1,
+            swimmerId: "swimmer-c",
+            displayName: "女A",
+            teamId: "team-a",
+            team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+            bestTimeMs: 71500,
+            gapFromLeaderMs: 0,
+          },
+        ],
+      },
+    ];
+    const groups = gender ? allGroups.filter((group) => group.gender === gender) : allGroups;
+
+    await route.fulfill({
+      body: JSON.stringify({
+        filters: { gender: gender ?? "all", poolLengthM: undefined, teamId: "" },
+        summary: {
+          arenaCount: groups.length,
+          competitorCount: groups.reduce((sum, group) => sum + group.competitorCount, 0),
+        },
+        groups,
       }),
       contentType: "application/json",
     });
   });
 }
 
-async function openCompareResults(page: import("@playwright/test").Page) {
-  await page.goto("/compare");
-  await expect(page.getByRole("heading", { name: "进步对比分析" })).toBeVisible();
-  await expect(page.getByText("待选对比成员")).toBeVisible();
-
-  await page.getByRole("button", { name: "Alice" }).click();
-  await page.getByRole("button", { name: "Bella" }).click();
-  await expect(page.getByText("待选对比项目")).toBeVisible();
-
-  await page.getByRole("combobox", { name: "对比项目" }).click();
-  await page.getByRole("option", { name: "50m 自由泳" }).click();
-  await expect(page.getByText("趋势走势对比")).toBeVisible();
+async function openArena(page: import("@playwright/test").Page) {
+  await page.goto("/arena");
+  await expect(page.getByRole("heading", { name: "竞技场" })).toBeVisible();
+  await expect(page.getByText("赛道热力板")).toBeVisible();
 }
 
-test("compare chart supports interactive legend toggles", async ({ page }) => {
-  await mockCompareRoutes(page);
-  await openCompareResults(page);
+test("arena board supports filter-driven drill-down", async ({ page }) => {
+  await mockArenaRoutes(page);
+  await openArena(page);
 
-  const bellaToggle = page.getByRole("button", { name: "切换 Bella 曲线" });
-  await expect(bellaToggle).toHaveAttribute("aria-pressed", "true");
-  await bellaToggle.click();
-  await expect(bellaToggle).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByText("男A", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "女子" }).click();
+  await expect(page.getByText("女A", { exact: true })).toBeVisible();
 });
 
-test("compare page stays within mobile and tablet viewport bounds", async ({ page }) => {
-  await mockCompareRoutes(page);
+test("arena page stays within mobile and tablet viewport bounds", async ({ page }) => {
+  await mockArenaRoutes(page);
 
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 820, height: 1180 },
   ]) {
     await page.setViewportSize(viewport);
-    await openCompareResults(page);
+    await openArena(page);
 
     const noOverflow = await page.evaluate(() => {
       const root = document.documentElement;

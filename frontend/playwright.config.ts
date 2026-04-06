@@ -5,7 +5,7 @@ export default defineConfig({
   testMatch: "**/*.spec.ts",
   timeout: 60_000,
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: "http://127.0.0.1:3001",
     launchOptions: {
       executablePath: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
     },
@@ -13,9 +13,9 @@ export default defineConfig({
   },
   webServer: {
     command:
-      "cmd /c \"set NEXT_PUBLIC_E2E_BYPASS_AUTH=1&& npm run dev -- --hostname 127.0.0.1 --port 3000\"",
-    reuseExistingServer: true,
+      "cmd /c \"set NEXT_PUBLIC_E2E_BYPASS_AUTH=1&& npm run dev -- --hostname 127.0.0.1 --port 3001\"",
+    reuseExistingServer: false,
     timeout: 120_000,
-    url: "http://127.0.0.1:3000",
+    url: "http://127.0.0.1:3001",
   },
 });

@@ -883,6 +883,65 @@ class Repository:
         ).fetchall()
         return [self._row_to_performance(row) for row in rows]
 
+    def list_public_best_performances_for_arena(
+        self,
+        *,
+        team_id: str | None = None,
+        gender: str | None = None,
+        pool_length_m: int | None = None,
+    ) -> list[dict[str, Any]]:
+        clauses = [
+            "s.is_public = 1",
+            "s.public_name_mode != 'hidden'",
+            "s.gender IN ('male', 'female')",
+            "p.result_status = 'valid'",
+        ]
+        params: list[Any] = []
+
+        if team_id:
+            clauses.append("s.team_id = ?")
+            params.append(team_id)
+        if gender:
+            clauses.append("s.gender = ?")
+            params.append(gender)
+        if pool_length_m is not None:
+            clauses.append("e.pool_length_m = ?")
+            params.append(pool_length_m)
+
+        query = f"""
+        SELECT
+            s.id AS swimmer_id,
+            s.slug AS swimmer_slug,
+            s.real_name,
+            s.nickname,
+            s.public_name_mode,
+            s.gender,
+            s.team_id,
+            t.name AS team_name,
+            t.sort_order AS team_sort_order,
+            t.is_active AS team_is_active,
+            t.created_at AS team_created_at,
+            t.updated_at AS team_updated_at,
+            e.id AS event_id,
+            e.pool_length_m,
+            e.distance_m,
+            e.stroke,
+            e.effort_type,
+            e.display_name,
+            e.sort_order,
+            e.is_active,
+            MIN(p.time_ms) AS best_time_ms
+        FROM performances p
+        JOIN swimmers s ON s.id = p.swimmer_id
+        JOIN teams t ON t.id = s.team_id
+        JOIN events e ON e.id = p.event_id
+        WHERE {" AND ".join(f"({clause})" for clause in clauses)}
+        GROUP BY p.event_id, p.swimmer_id
+        ORDER BY e.sort_order ASC, s.gender ASC, best_time_ms ASC
+        """
+        rows = self.connection.execute(query, params).fetchall()
+        return [self._row_to_public_arena_rank(row) for row in rows]
+
     def _unique_slug(self, base: str) -> str:
         candidate = base or str(uuid4())[:8]
         index = 1
@@ -1117,6 +1176,44 @@ class Repository:
         performance = self._row_to_performance(row)
         performance["sourceType"] = row["source_type"]
         return performance
+
+    def _row_to_public_arena_rank(self, row: sqlite3.Row) -> dict[str, Any]:
+        swimmer = {
+            "id": row["swimmer_id"],
+            "slug": row["swimmer_slug"],
+            "realName": row["real_name"],
+            "nickname": row["nickname"],
+            "publicNameMode": row["public_name_mode"],
+            "gender": row["gender"],
+            "teamId": row["team_id"],
+            "team": {
+                "id": row["team_id"],
+                "name": row["team_name"],
+                "sortOrder": row["team_sort_order"],
+                "isActive": bool(row["team_is_active"]),
+                "createdAt": row["team_created_at"],
+                "updatedAt": row["team_updated_at"],
+            },
+        }
+        event = {
+            "id": row["event_id"],
+            "poolLengthM": row["pool_length_m"],
+            "distanceM": row["distance_m"],
+            "stroke": row["stroke"],
+            "effortType": row["effort_type"],
+            "displayName": build_event_display_name(
+                row["pool_length_m"],
+                row["distance_m"],
+                row["stroke"],
+            ),
+            "sortOrder": row["sort_order"],
+            "isActive": bool(row["is_active"]),
+        }
+        return {
+            "swimmer": swimmer,
+            "event": event,
+            "bestTimeMs": row["best_time_ms"],
+        }
 
     def _row_to_goal(self, row: sqlite3.Row, include_nested: bool = False) -> dict[str, Any]:
         goal = {

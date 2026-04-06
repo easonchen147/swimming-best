@@ -142,3 +142,149 @@ def test_analytics_raw_points_include_source_type(client, seeded_data):
     for point in raw_points:
         assert "sourceType" in point
         assert point["sourceType"] in {"training", "test", "competition", "single"}
+
+
+def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
+    team_alpha = admin_client.post(
+        "/api/admin/teams",
+        json={"name": "竞技一队", "sortOrder": 1, "isActive": True},
+    ).get_json()
+    team_beta = admin_client.post(
+        "/api/admin/teams",
+        json={"name": "竞技二队", "sortOrder": 2, "isActive": True},
+    ).get_json()
+
+    swimmer_male_a = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Male A",
+            "nickname": "男A",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "gender": "male",
+            "teamId": team_alpha["id"],
+        },
+    ).get_json()
+    swimmer_male_b = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Male B",
+            "nickname": "男B",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "gender": "male",
+            "teamId": team_beta["id"],
+        },
+    ).get_json()
+    swimmer_female = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Female A",
+            "nickname": "女A",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "gender": "female",
+            "teamId": team_alpha["id"],
+        },
+    ).get_json()
+    swimmer_unknown = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Unknown A",
+            "nickname": "未知A",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "gender": "unknown",
+            "teamId": team_alpha["id"],
+        },
+    ).get_json()
+
+    short_event = admin_client.post(
+        "/api/admin/events",
+        json={"poolLengthM": 25, "distanceM": 50, "stroke": "freestyle"},
+    ).get_json()
+    long_event = admin_client.post(
+        "/api/admin/events",
+        json={"poolLengthM": 50, "distanceM": 50, "stroke": "freestyle"},
+    ).get_json()
+
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer_male_a["id"],
+            "eventId": short_event["id"],
+            "timeMs": 32000,
+            "sourceType": "test",
+            "performedOn": "2026-04-01",
+        },
+    )
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer_male_b["id"],
+            "eventId": short_event["id"],
+            "timeMs": 32500,
+            "sourceType": "test",
+            "performedOn": "2026-04-01",
+        },
+    )
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer_female["id"],
+            "eventId": short_event["id"],
+            "timeMs": 34000,
+            "sourceType": "test",
+            "performedOn": "2026-04-01",
+        },
+    )
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer_unknown["id"],
+            "eventId": short_event["id"],
+            "timeMs": 33000,
+            "sourceType": "test",
+            "performedOn": "2026-04-01",
+        },
+    )
+    admin_client.post(
+        "/api/admin/performances/quick",
+        json={
+            "swimmerId": swimmer_male_a["id"],
+            "eventId": long_event["id"],
+            "timeMs": 35000,
+            "sourceType": "test",
+            "performedOn": "2026-04-02",
+        },
+    )
+
+    client = admin_client
+    arena_response = client.get("/api/public/arena")
+    assert arena_response.status_code == 200
+    payload = arena_response.get_json()
+    assert payload["summary"]["arenaCount"] == 3
+
+    male_short = next(
+        item
+        for item in payload["groups"]
+        if item["event"]["id"] == short_event["id"] and item["gender"] == "male"
+    )
+    assert male_short["competitorCount"] == 2
+    assert male_short["leader"]["displayName"] == "男A"
+    assert male_short["leaderGapMs"] == 500
+    assert [entry["displayName"] for entry in male_short["rankings"]] == ["男A", "男B"]
+
+    female_short = next(
+        item
+        for item in payload["groups"]
+        if item["event"]["id"] == short_event["id"] and item["gender"] == "female"
+    )
+    assert female_short["competitorCount"] == 1
+
+    filtered_response = client.get("/api/public/arena?gender=male&poolLengthM=25")
+    assert filtered_response.status_code == 200
+    filtered_payload = filtered_response.get_json()
+    assert len(filtered_payload["groups"]) == 1
+    assert filtered_payload["groups"][0]["gender"] == "male"
+    assert filtered_payload["groups"][0]["event"]["poolLengthM"] == 25

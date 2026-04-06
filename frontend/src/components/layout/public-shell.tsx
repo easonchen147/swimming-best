@@ -24,8 +24,8 @@ export function PublicShell({
         "h-10 rounded-full border-border/60 bg-white px-4 text-foreground hover:border-primary/20 hover:bg-surface hover:text-primary",
     },
     {
-      href: "/compare",
-      label: "对比",
+      href: "/arena",
+      label: "竞技场",
       variant: "outline" as const,
       className:
         "h-10 rounded-full border-sky-200 bg-sky-50 px-4 text-sky-700 hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800",

@@ -63,13 +63,14 @@ test("admin quick record modal supports keyboard-first entry", async ({ page }) 
   });
 
   await page.goto("/admin");
+  await expect(page.getByRole("link", { name: /公开页/i })).toBeVisible();
   await page.keyboard.press("Control+K");
 
   await expect(page.getByText("快速成绩录入")).toBeVisible();
   await page.getByRole("combobox", { name: "队员姓名" }).click();
-  await page.getByRole("option", { name: "Alice" }).click();
-  await page.getByRole("combobox", { name: "队员姓名" }).click();
-  await page.getByRole("option", { name: "Alice" }).click();
+  await page.getByRole("option", { name: "小海豚" }).click();
+  await page.getByRole("combobox", { name: "项目" }).click();
+  await page.getByRole("option", { name: "50m 自由泳" }).click();
   await page.getByLabel("标签（分号或逗号分隔）").fill("月测;主项");
   await page.getByRole("button", { name: "立即保存" }).click();
 
