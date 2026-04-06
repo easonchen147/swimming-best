@@ -1328,10 +1328,18 @@ def age_bucket_label(birth_year: Any) -> str:
     age = datetime.now(UTC).year - year
     if age <= 8:
         return "u8"
-    if age <= 10:
+    if age == 9:
+        return "u9"
+    if age == 10:
         return "u10"
-    if age <= 12:
+    if age == 11:
+        return "u11"
+    if age == 12:
         return "u12"
-    if age <= 14:
+    if age == 13:
+        return "u13"
+    if age == 14:
         return "u14"
+    if age == 15:
+        return "u15"
     return "u16_plus"

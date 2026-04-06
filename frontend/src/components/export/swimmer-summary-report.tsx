@@ -15,12 +15,20 @@ function ageBucketLabel(ageBucket: string) {
   switch (ageBucket) {
     case "u8":
       return "U8";
+    case "u9":
+      return "U9";
     case "u10":
       return "U10";
+    case "u11":
+      return "U11";
     case "u12":
       return "U12";
+    case "u13":
+      return "U13";
     case "u14":
       return "U14";
+    case "u15":
+      return "U15";
     case "u16_plus":
       return "U16+";
     default:
