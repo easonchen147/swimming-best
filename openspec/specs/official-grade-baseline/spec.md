@@ -8,7 +8,8 @@ without requiring administrators to manually maintain the official standard.
 The built-in official baseline SHALL be the default benchmark source for the
 product and SHALL match swimmers to applicable standards by gender and the
 selected structured event. Event definitions themselves remain gender-neutral;
-gender only affects which threshold row is selected.
+gender only affects which threshold row is selected. Official grade summaries
+SHALL also be reusable in swimmer summary export templates.
 
 #### Scenario: Official baseline is loaded
 - **WHEN** the application starts and official grade data is needed
@@ -31,3 +32,8 @@ gender only affects which threshold row is selected.
 - **WHEN** an administrator manages swimmers, goals, records, or public views
 - **THEN** the built-in official baseline is available without requiring any
   manual benchmark entry in the admin workflow
+
+#### Scenario: Administrator opens a swimmer summary export
+- **WHEN** an administrator opens the summary export for one swimmer
+- **THEN** the export includes the swimmer's current official grade and next
+  official grade gap when the required data exists

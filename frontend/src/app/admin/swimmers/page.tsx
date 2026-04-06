@@ -9,6 +9,7 @@ import {
   Filter, 
   Download, 
   Edit3, 
+  FileText,
   Users, 
   Save,
   X
@@ -39,6 +40,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   createAdminSwimmer,
   getSwimmerExportUrl,
+  getSwimmerSummaryExportUrl,
   listAdminTeams,
   listAdminSwimmers,
   updateAdminSwimmer,
@@ -440,6 +442,14 @@ export default function AdminSwimmersPage() {
                                className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary"
                              >
                                <Edit3 className="h-4 w-4" />
+                             </Button>
+                             <Button
+                               onClick={() => window.open(getSwimmerSummaryExportUrl(swimmer.id), "_blank")}
+                               size="icon"
+                               variant="ghost"
+                               className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary"
+                             >
+                               <FileText className="h-4 w-4" />
                              </Button>
                              <Button
                                onClick={() => window.open(getSwimmerExportUrl(swimmer.id), "_blank")}

@@ -28,7 +28,7 @@ describe("public api client", () => {
     await listPublicSwimmerEvents("alice");
     await getPublicEventAnalytics("alice", "event-1");
     await getPublicArena();
-    await getPublicArena({ gender: "female", poolLengthM: 25, teamId: "team-1" });
+    await getPublicArena({ gender: "female", poolLengthM: 25, teamId: "team-1", ageBucket: "u12" });
     await comparePublicEvent("event-1", ["swimmer-a", "swimmer-b"]);
 
     expect(apiGet).toHaveBeenNthCalledWith(1, "/api/public/swimmers");
@@ -46,7 +46,7 @@ describe("public api client", () => {
     );
     expect(apiGet).toHaveBeenNthCalledWith(
       8,
-      "/api/public/arena?gender=female&poolLengthM=25&teamId=team-1",
+      "/api/public/arena?gender=female&poolLengthM=25&teamId=team-1&ageBucket=u12",
     );
     expect(apiGet).toHaveBeenNthCalledWith(
       9,

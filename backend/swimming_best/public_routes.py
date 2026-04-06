@@ -52,6 +52,7 @@ def create_public_blueprint(
             gender=request.args.get("gender") or None,
             pool_length_m=int(pool_length_param) if pool_length_param else None,
             team_id=request.args.get("teamId") or None,
+            age_bucket=request.args.get("ageBucket") or None,
         )
         return jsonify(payload)
 

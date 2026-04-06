@@ -157,6 +157,7 @@ export type ArenaLeaderboardEntry = {
   displayName: string;
   teamId: string;
   team: TeamSummary;
+  ageBucket: string;
   bestTimeMs: number;
   gapFromLeaderMs: number;
 };
@@ -171,7 +172,8 @@ export type ArenaLeader = {
 
 export type ArenaGroup = {
   groupKey: string;
-  gender: "male" | "female";
+  gender: "male" | "female" | "all";
+  ageBucket: string;
   event: EventDefinition;
   competitorCount: number;
   heatScore: number;
@@ -187,12 +189,43 @@ export type ArenaPayload = {
     gender: "male" | "female" | "all";
     poolLengthM?: number;
     teamId: string;
+    ageBucket: string;
   };
   summary: {
-    arenaCount: number;
+    groupCount: number;
     competitorCount: number;
   };
   groups: ArenaGroup[];
+};
+
+export type SwimmerSummaryHighlight = {
+  eventId: string;
+  eventDisplayName: string;
+  bestTimeMs: number;
+  officialGradeLabel: string | null;
+  nextOfficialGradeLabel: string | null;
+  nextOfficialGradeGapMs: number | null;
+  progress30dMs: number;
+  progress90dMs: number;
+};
+
+export type SwimmerSummaryExport = {
+  swimmer: Pick<
+    AdminSwimmer,
+    "id" | "realName" | "nickname" | "gender" | "birthYear" | "teamId" | "team"
+  > & {
+    displayName: string;
+    ageBucket: string;
+  };
+  summary: {
+    strongestEventCount: number;
+    achievedGoalCount: number;
+    activeGoalCount: number;
+    standoutProgress30dMs: number;
+    standoutProgress90dMs: number;
+  };
+  highlights: SwimmerSummaryHighlight[];
+  goals: GoalProgress[];
 };
 
 export type AdminSwimmer = {

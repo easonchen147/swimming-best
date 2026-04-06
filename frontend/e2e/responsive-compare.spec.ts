@@ -32,8 +32,9 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
     const gender = url.searchParams.get("gender");
     const allGroups = [
       {
-        groupKey: "event-1:male",
+        groupKey: "event-1:male:all",
         gender: "male",
+        ageBucket: "all",
         event: {
           id: "event-1",
           poolLengthM: 25,
@@ -63,6 +64,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
             displayName: "男A",
             teamId: "team-a",
             team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+            ageBucket: "all",
             bestTimeMs: 32000,
             gapFromLeaderMs: 0,
           },
@@ -72,14 +74,16 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
             displayName: "男B",
             teamId: "team-b",
             team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
+            ageBucket: "all",
             bestTimeMs: 32500,
             gapFromLeaderMs: 500,
           },
         ],
       },
       {
-        groupKey: "event-2:female",
+        groupKey: "event-2:female:u12",
         gender: "female",
+        ageBucket: "u12",
         event: {
           id: "event-2",
           poolLengthM: 50,
@@ -109,6 +113,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
             displayName: "女A",
             teamId: "team-a",
             team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+            ageBucket: "u12",
             bestTimeMs: 71500,
             gapFromLeaderMs: 0,
           },
@@ -116,15 +121,19 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
       },
     ];
     const groups = gender ? allGroups.filter((group) => group.gender === gender) : allGroups;
+    const ageBucket = url.searchParams.get("ageBucket");
+    const filteredGroups = ageBucket
+      ? groups.filter((group) => group.ageBucket === ageBucket)
+      : groups;
 
     await route.fulfill({
       body: JSON.stringify({
-        filters: { gender: gender ?? "all", poolLengthM: undefined, teamId: "" },
+        filters: { gender: gender ?? "all", poolLengthM: undefined, teamId: "", ageBucket: ageBucket ?? "all" },
         summary: {
-          arenaCount: groups.length,
-          competitorCount: groups.reduce((sum, group) => sum + group.competitorCount, 0),
+          groupCount: filteredGroups.length,
+          competitorCount: filteredGroups.reduce((sum, group) => sum + group.competitorCount, 0),
         },
-        groups,
+        groups: filteredGroups,
       }),
       contentType: "application/json",
     });
@@ -134,16 +143,19 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
 async function openArena(page: import("@playwright/test").Page) {
   await page.goto("/arena");
   await expect(page.getByRole("heading", { name: "竞技场" })).toBeVisible();
-  await expect(page.getByText("赛道热力板")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "赛道排行榜" })).toBeVisible();
 }
 
 test("arena board supports filter-driven drill-down", async ({ page }) => {
   await mockArenaRoutes(page);
   await openArena(page);
 
-  await expect(page.getByText("男A", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "女子" }).click();
-  await expect(page.getByText("女A", { exact: true })).toBeVisible();
+  await expect(page.getByText(/当前头名 男A/)).toBeVisible();
+  await page.getByRole("button", { name: "女子", exact: true }).click();
+  await expect(page.getByText(/当前头名 女A/)).toBeVisible();
+  await page.getByRole("combobox", { name: "年龄维度" }).click();
+  await page.getByRole("option", { name: "U12" }).click();
+  await expect(page.getByRole("combobox", { name: "年龄维度" })).toContainText("U12");
 });
 
 test("arena page stays within mobile and tablet viewport bounds", async ({ page }) => {

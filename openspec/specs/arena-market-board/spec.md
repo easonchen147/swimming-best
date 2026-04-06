@@ -1,35 +1,36 @@
 # arena-market-board Specification
 
 ## Purpose
-Define the public arena market board that exposes race-scoped competition
-groups for visible swimmers.
+Define the public arena competition surfaces that expose race-scoped
+leaderboard groups for visible swimmers.
 
 ## Requirements
 
-### Requirement: Public arena SHALL expose race-scoped market groups
-The system SHALL provide a public arena market board built from public swimmers'
-best valid performances, grouped strictly by the same structured event and the
-same swimmer gender.
+### Requirement: Public arena SHALL expose race-scoped leaderboard groups
+The system SHALL provide public arena leaderboard groups built from public
+swimmers' best valid performances, grouped strictly by the same structured
+event and the selected ranking scope.
 
-#### Scenario: Visitor loads the arena board
+#### Scenario: Visitor loads the arena page
 - **WHEN** a visitor opens the public arena page
-- **THEN** the system returns race arena groups built from public swimmers'
-  best valid performances, where each group corresponds to one structured event
-  and one gender only
+- **THEN** the system returns race leaderboard groups built from public
+  swimmers' best valid performances, where each group corresponds to one
+  structured event and one selected ranking scope only
 
 #### Scenario: Unknown-gender swimmer exists
 - **WHEN** a public swimmer has `gender = unknown`
 - **THEN** that swimmer does not appear in the main arena groups
 
-### Requirement: Arena groups SHALL expose leader and heat metadata
-Each arena group SHALL expose enough metadata for a heatmap-like market board,
-including leader identity, leader best time, competitor count, a normalized
-heat score, and a leaderboard for that exact arena.
+### Requirement: Arena groups SHALL expose leaderboard metadata
+Each arena group SHALL expose enough metadata for a leaderboard-first arena
+experience, including leader identity, leader best time, competitor count,
+leader gap, relative advantage, and a ranking list for that exact arena.
 
-#### Scenario: Visitor inspects one arena tile
-- **WHEN** a visitor inspects an arena group on the board
+#### Scenario: Visitor inspects one arena leaderboard card
+- **WHEN** a visitor inspects an arena group on the page
 - **THEN** the system provides the leader swimmer, leader best time,
-  competitor count, heat score, and ranking list for that exact arena
+  competitor count, relative leader advantage, and ranking list for that exact
+  arena
 
 ### Requirement: Arena filters SHALL preserve race boundaries
 The public arena API SHALL support filtering by pool length, gender, and team

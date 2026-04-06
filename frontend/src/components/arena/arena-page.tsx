@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import {
   Flame,
-  Swords,
+  Medal,
   Users,
   Waves,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { ArenaHeatmap } from "@/components/arena/arena-heatmap";
+import { ArenaLeaderboards } from "@/components/arena/arena-leaderboards";
 import { PublicShell } from "@/components/layout/public-shell";
 import { LoadingState } from "@/components/shared/loading-state";
 import { SelectField } from "@/components/shared/form-field";
@@ -41,10 +41,12 @@ export function ArenaPage() {
     gender: "male" | "female" | "all";
     poolLengthM: "all" | "25" | "50";
     teamId: string;
+    ageBucket: string;
   }>({
     gender: "all",
     poolLengthM: "all",
     teamId: "all",
+    ageBucket: "all",
   });
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export function ArenaPage() {
       gender: filters.gender === "all" ? undefined : filters.gender,
       poolLengthM: filters.poolLengthM === "all" ? undefined : Number(filters.poolLengthM),
       teamId: filters.teamId === "all" ? undefined : filters.teamId,
+      ageBucket: filters.ageBucket === "all" ? undefined : filters.ageBucket,
     })
       .then((response) => {
         if (cancelled) {
@@ -114,8 +117,8 @@ export function ArenaPage() {
           <div className="space-y-2">
             <h1 className="text-4xl font-black tracking-tight text-foreground">竞技场</h1>
             <p className="max-w-3xl text-sm font-medium text-muted">
-              像看市场热力图一样看公开赛道竞争。每一个热力块都只代表一个
-              同项目、同池长、同性别的真实竞技场。
+              直接看同项目、同池长、同性别边界内的赛道排行榜。支持总榜、
+              性别榜和年龄段榜，帮助家长和教练从多个维度判断谁最有竞争力。
             </p>
           </div>
         </div>
@@ -158,9 +161,9 @@ export function ArenaPage() {
         <div className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
-              icon={<Swords className="h-5 w-5" />}
-              label="赛道数量"
-              value={arenaPayload ? `${arenaPayload.summary.arenaCount}` : "--"}
+              icon={<Medal className="h-5 w-5" />}
+              label="榜单分组"
+              value={arenaPayload ? `${arenaPayload.summary.groupCount}` : "--"}
             />
             <SummaryCard
               icon={<Users className="h-5 w-5" />}
@@ -174,34 +177,53 @@ export function ArenaPage() {
             />
             <SummaryCard
               icon={<Flame className="h-5 w-5" />}
-              label="最热赛道"
+              label="焦点赛道"
               value={hottestGroup ? hottestGroup.event.displayName : "暂无"}
             />
           </div>
 
           <Card className="overflow-hidden border-border/40 shadow-sm">
             <CardHeader className="border-b border-border/40 bg-surface/30">
-              <CardTitle className="text-xl">赛道热力板</CardTitle>
+              <CardTitle className="text-xl">赛道排行榜</CardTitle>
               <CardDescription>
-                面积表示有效竞争人数，颜色表示赛道热度。点击任一赛道查看详细榜单。
+                每张卡片都是一个严格对齐边界的赛道榜单。点击卡片查看完整详情。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 p-6">
-              <SelectField
-                className="max-w-xs"
-                label="队伍筛选"
-                onChange={(teamId) => {
-                  setLoading(true);
-                  setFilters((current) => ({ ...current, teamId }));
-                }}
-                options={teams}
-                value={filters.teamId}
-              />
+              <div className="grid gap-4 md:grid-cols-2">
+                <SelectField
+                  className="max-w-xs"
+                  label="队伍筛选"
+                  onChange={(teamId) => {
+                    setLoading(true);
+                    setFilters((current) => ({ ...current, teamId }));
+                  }}
+                  options={teams}
+                  value={filters.teamId}
+                />
+                <SelectField
+                  className="max-w-xs"
+                  label="年龄维度"
+                  onChange={(ageBucket) => {
+                    setLoading(true);
+                    setFilters((current) => ({ ...current, ageBucket }));
+                  }}
+                  options={[
+                    { value: "all", label: "不分年龄" },
+                    { value: "u8", label: "U8" },
+                    { value: "u10", label: "U10" },
+                    { value: "u12", label: "U12" },
+                    { value: "u14", label: "U14" },
+                    { value: "u16_plus", label: "U16+" },
+                  ]}
+                  value={filters.ageBucket}
+                />
+              </div>
 
               {loading ? (
-                <LoadingState label="竞技场热力板加载中" />
+                <LoadingState label="竞技场排行榜加载中" />
               ) : (
-                <ArenaHeatmap
+                <ArenaLeaderboards
                   groups={arenaPayload?.groups ?? []}
                   onSelectGroup={setSelectedGroupKey}
                   selectedGroupKey={selectedGroupKey}
@@ -216,7 +238,7 @@ export function ArenaPage() {
             <CardHeader className="border-b border-border/40 bg-surface/30">
               <CardTitle className="text-xl">赛道详情</CardTitle>
               <CardDescription>
-                点击热力板中的赛道后，在这里查看当前赛道的头名和排行榜。
+                点击左侧榜单卡片后，在这里查看当前赛道的头名和完整排行。
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
@@ -226,6 +248,11 @@ export function ArenaPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
                         {arenaGenderLabel(selectedGroup.gender)}
+                      </Badge>
+                      <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
+                        {selectedGroup.ageBucket === "all"
+                          ? "不分年龄"
+                          : selectedGroup.ageBucket.toUpperCase().replace("_PLUS", "+")}
                       </Badge>
                       <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
                         {selectedGroup.heatLabel}
@@ -296,7 +323,7 @@ export function ArenaPage() {
                   <div className="space-y-2 px-6">
                     <div className="text-xl font-black text-foreground">暂无赛道详情</div>
                     <p className="text-sm text-muted">
-                      当前筛选条件下没有可展示的竞技场赛道，请切换筛选条件后再查看。
+                      当前筛选条件下没有可展示的竞技场榜单，请切换筛选条件后再查看。
                     </p>
                   </div>
                 </div>

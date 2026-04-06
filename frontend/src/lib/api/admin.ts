@@ -3,6 +3,7 @@ import type {
   AdminGoal,
   AdminPerformance,
   AdminSwimmer,
+  SwimmerSummaryExport,
   EventDefinition,
   Gender,
   StandardEntry,
@@ -300,6 +301,14 @@ export function getImportTemplateUrl() {
 
 export function getSwimmerExportUrl(swimmerId: string) {
   return `/api/admin/export/swimmers/${swimmerId}/performances.csv`;
+}
+
+export function getSwimmerSummaryExport(swimmerId: string) {
+  return apiGet<SwimmerSummaryExport>(`/api/admin/export/swimmers/${swimmerId}/summary`);
+}
+
+export function getSwimmerSummaryExportUrl(swimmerId: string) {
+  return `/admin/export/swimmers/${swimmerId}/summary`;
 }
 
 export function getTeamExportUrl(teamId: string) {

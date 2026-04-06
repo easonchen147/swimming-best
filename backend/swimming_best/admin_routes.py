@@ -219,6 +219,12 @@ def create_admin_blueprint(
             headers={"Content-Disposition": "attachment; filename=swimmer-performances.csv"},
         )
 
+    @admin.get("/export/swimmers/<swimmer_id>/summary")
+    @admin_required
+    def export_swimmer_summary(swimmer_id: str):
+        admin_service = get_admin_service()
+        return jsonify(admin_service.swimmer_export_summary(swimmer_id))
+
     @admin.get("/export/teams/<team_id>/performances.csv")
     @admin_required
     def export_team(team_id: str):

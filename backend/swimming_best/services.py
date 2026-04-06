@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import date, timedelta
 from typing import Any
 
 from swimming_best.analytics import build_series, goal_progress
@@ -136,6 +137,145 @@ class AdminService:
 
     def delete_standard_entry(self, entry_id: str) -> None:
         self.repository.delete_standard_entry(entry_id)
+
+    def swimmer_export_summary(self, swimmer_id: str) -> dict[str, Any]:
+        swimmer = self.repository.get_swimmer(swimmer_id)
+        events = self.repository.list_events_for_swimmer(swimmer_id)
+        all_goals = [
+            goal for goal in self.repository.list_goals() if goal["swimmerId"] == swimmer_id
+        ]
+
+        highlights = []
+        achieved_goal_count = 0
+        active_goal_count = 0
+
+        for goal in all_goals:
+            if goal["status"] == "active":
+                active_goal_count += 1
+            current_best = self.repository.best_time_ms(swimmer_id, goal["eventId"])
+            if current_best > 0 and current_best <= goal["targetTimeMs"]:
+                achieved_goal_count += 1
+
+        for event in events:
+            performances = self.repository.list_performances_for_swimmer_event(
+                swimmer_id,
+                event["id"],
+            )
+            series = build_series(performances)
+            current_best_time_ms = series["currentBestTimeMs"]
+            if current_best_time_ms <= 0:
+                continue
+
+            official_grade = evaluate_official_grade(
+                gender=swimmer["gender"],
+                event=event,
+                current_best_time_ms=current_best_time_ms,
+            )
+            progress_30 = recent_window_progress_ms(performances, 30)
+            progress_90 = recent_window_progress_ms(performances, 90)
+
+            highlights.append(
+                {
+                    "eventId": event["id"],
+                    "eventDisplayName": event["displayName"],
+                    "bestTimeMs": current_best_time_ms,
+                    "officialGradeLabel": (
+                        official_grade.official_grade["label"]
+                        if official_grade.official_grade
+                        else None
+                    ),
+                    "nextOfficialGradeLabel": (
+                        official_grade.next_official_grade["label"]
+                        if official_grade.next_official_grade
+                        else None
+                    ),
+                    "nextOfficialGradeGapMs": (
+                        official_grade.next_official_grade["gapMs"]
+                        if official_grade.next_official_grade
+                        else None
+                    ),
+                    "progress30dMs": progress_30,
+                    "progress90dMs": progress_90,
+                    "_gradeOrder": (
+                        official_grade.official_grade["order"]
+                        if official_grade.official_grade
+                        else 0
+                    ),
+                }
+            )
+
+        highlights.sort(
+            key=lambda item: (
+                -item["_gradeOrder"],
+                -item["progress30dMs"],
+                -item["progress90dMs"],
+                item["bestTimeMs"],
+            )
+        )
+
+        strongest_highlights = [
+            {k: v for k, v in item.items() if not k.startswith("_")}
+            for item in highlights[:3]
+        ]
+
+        goal_payload = []
+        for goal in all_goals:
+            current_best = self.repository.best_time_ms(swimmer_id, goal["eventId"])
+            gap_ms = (
+                max(current_best - goal["targetTimeMs"], 0)
+                if current_best > 0 and goal["targetTimeMs"] > 0
+                else 0
+            )
+            goal_payload.append(
+                {
+                    "id": goal["id"],
+                    "title": goal["title"],
+                    "horizon": goal["horizon"],
+                    "targetTimeMs": goal["targetTimeMs"],
+                    "targetDate": goal["targetDate"],
+                    "baselineTimeMs": goal["baselineTimeMs"],
+                    "currentBestTimeMs": current_best,
+                    "progress": goal_progress(
+                        goal["baselineTimeMs"],
+                        current_best,
+                        goal["targetTimeMs"],
+                    ),
+                    "gapMs": gap_ms,
+                    "isAchieved": current_best > 0 and current_best <= goal["targetTimeMs"],
+                }
+            )
+
+        standout_progress_30 = max(
+            (item["progress30dMs"] for item in strongest_highlights),
+            default=0,
+        )
+        standout_progress_90 = max(
+            (item["progress90dMs"] for item in strongest_highlights),
+            default=0,
+        )
+
+        return {
+            "swimmer": {
+                "id": swimmer["id"],
+                "realName": swimmer["realName"],
+                "nickname": swimmer["nickname"],
+                "displayName": public_display_name(swimmer),
+                "gender": swimmer["gender"],
+                "birthYear": swimmer["birthYear"],
+                "ageBucket": swimmer.get("ageBucket", "unknown"),
+                "teamId": swimmer["teamId"],
+                "team": swimmer["team"],
+            },
+            "summary": {
+                "strongestEventCount": len(strongest_highlights),
+                "achievedGoalCount": achieved_goal_count,
+                "activeGoalCount": active_goal_count,
+                "standoutProgress30dMs": standout_progress_30,
+                "standoutProgress90dMs": standout_progress_90,
+            },
+            "highlights": strongest_highlights,
+            "goals": goal_payload,
+        }
 
 
 class PublicService:
@@ -323,21 +463,30 @@ class PublicService:
         gender: str | None = None,
         pool_length_m: int | None = None,
         team_id: str | None = None,
+        age_bucket: str | None = None,
     ) -> dict[str, Any]:
         rows = self.repository.list_public_best_performances_for_arena(
             team_id=team_id,
             gender=gender,
             pool_length_m=pool_length_m,
+            age_bucket=age_bucket,
         )
 
+        ranking_gender = gender or "all"
         grouped: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
         for row in rows:
-            grouped[(row["event"]["id"], row["swimmer"]["gender"])].append(row)
+            group_gender = (
+                ranking_gender if ranking_gender == "all" else row["swimmer"]["gender"]
+            )
+            group_age_bucket = row["swimmer"]["ageBucket"] if age_bucket else "all"
+            group_key = (row["event"]["id"], f"{group_gender}:{group_age_bucket}")
+            grouped[group_key].append(row)
 
         groups = []
-        for (event_id, arena_gender), ranks in grouped.items():
+        for (event_id, gender_and_age), ranks in grouped.items():
             ranks.sort(key=lambda item: item["bestTimeMs"])
             event = ranks[0]["event"]
+            arena_gender, arena_age_bucket = gender_and_age.split(":", 1)
             competitor_count = len(ranks)
             leader = ranks[0]
             second = ranks[1] if competitor_count > 1 else None
@@ -354,8 +503,9 @@ class PublicService:
             heat_score = calculate_arena_heat_score(ranks)
             groups.append(
                 {
-                    "groupKey": f"{event_id}:{arena_gender}",
+                    "groupKey": f"{event_id}:{arena_gender}:{arena_age_bucket}",
                     "gender": arena_gender,
+                    "ageBucket": arena_age_bucket,
                     "event": event,
                     "competitorCount": competitor_count,
                     "heatScore": heat_score,
@@ -376,6 +526,7 @@ class PublicService:
                             "displayName": public_display_name(item["swimmer"]),
                             "teamId": item["swimmer"]["teamId"],
                             "team": item["swimmer"]["team"],
+                            "ageBucket": item["swimmer"]["ageBucket"],
                             "bestTimeMs": item["bestTimeMs"],
                             "gapFromLeaderMs": item["bestTimeMs"] - leader["bestTimeMs"],
                         }
@@ -391,6 +542,7 @@ class PublicService:
                 item["event"]["sortOrder"],
                 item["event"]["displayName"],
                 item["gender"],
+                item["ageBucket"],
             )
         )
 
@@ -399,9 +551,10 @@ class PublicService:
                 "gender": gender or "all",
                 "poolLengthM": pool_length_m,
                 "teamId": team_id or "",
+                "ageBucket": age_bucket or "all",
             },
             "summary": {
-                "arenaCount": len(groups),
+                "groupCount": len(groups),
                 "competitorCount": sum(item["competitorCount"] for item in groups),
             },
             "groups": groups,
@@ -466,3 +619,27 @@ def arena_heat_label(heat_score: int) -> str:
     if heat_score >= 40:
         return "活跃"
     return "观察"
+
+
+def recent_window_progress_ms(performances: list[dict[str, Any]], days: int) -> int:
+    valid = [
+        performance
+        for performance in performances
+        if performance["resultStatus"] == "valid"
+    ]
+    if len(valid) < 2:
+        return 0
+
+    valid.sort(key=lambda item: (item["performedOn"], item["createdAt"]))
+    latest_date = date.fromisoformat(valid[-1]["performedOn"])
+    cutoff = latest_date - timedelta(days=days)
+    window = [
+        performance
+        for performance in valid
+        if date.fromisoformat(performance["performedOn"]) >= cutoff
+    ]
+    if len(window) < 2:
+        return 0
+    first_time = window[0]["timeMs"]
+    best_time = min(item["timeMs"] for item in window)
+    return max(first_time - best_time, 0)

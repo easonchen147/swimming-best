@@ -26,7 +26,8 @@ The system SHALL let administrators create short-, mid-, and long-horizon goals
 for a swimmer and event, including milestone relationships and operator-facing
 metadata that should survive round-trips through the admin API. Goals SHALL
 default to `isPublic: true` when created. Goal creation and user-facing goal
-views SHALL use seconds-based target and baseline values.
+views SHALL use seconds-based target and baseline values. Goal-derived progress
+summaries SHALL also be reusable in swimmer summary export templates.
 
 #### Scenario: Administrator creates a short-term goal
 - **WHEN** an administrator stores a goal with swimmer, event, target time in
@@ -48,3 +49,8 @@ views SHALL use seconds-based target and baseline values.
 - **WHEN** a public swimmer event analytics payload is requested
 - **THEN** the system includes only goals marked as public for the matching
   swimmer and event
+
+#### Scenario: Administrator opens a swimmer summary export
+- **WHEN** an administrator opens the summary export for one swimmer
+- **THEN** the export includes achieved goals, active milestone context, and
+  the next meaningful goal gap when that data exists

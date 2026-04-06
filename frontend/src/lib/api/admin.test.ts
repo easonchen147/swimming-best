@@ -12,6 +12,8 @@ import {
   deleteAdminStandard,
   deleteAdminStandardEntry,
   getAdminMe,
+  getSwimmerSummaryExport,
+  getSwimmerSummaryExportUrl,
   listAdminEvents,
   listAdminGoals,
   listAdminPerformances,
@@ -51,6 +53,7 @@ describe("admin api client", () => {
     await listAdminPerformances();
     await listAdminStandards();
     await listAdminStandardEntries("standard-1");
+    await getSwimmerSummaryExport("swimmer-1");
 
     expect(apiGet).toHaveBeenNthCalledWith(1, "/api/admin/me");
     expect(apiGet).toHaveBeenNthCalledWith(2, "/api/admin/teams");
@@ -61,6 +64,7 @@ describe("admin api client", () => {
     expect(apiGet).toHaveBeenNthCalledWith(7, "/api/admin/performances");
     expect(apiGet).toHaveBeenNthCalledWith(8, "/api/admin/standards");
     expect(apiGet).toHaveBeenNthCalledWith(9, "/api/admin/standards/standard-1/entries");
+    expect(apiGet).toHaveBeenNthCalledWith(10, "/api/admin/export/swimmers/swimmer-1/summary");
   });
 
   it("routes admin writes through /api/admin", async () => {
@@ -236,5 +240,11 @@ describe("admin api client", () => {
     });
     expect(apiDelete).toHaveBeenNthCalledWith(1, "/api/admin/standards/entries/entry-1");
     expect(apiDelete).toHaveBeenNthCalledWith(2, "/api/admin/standards/standard-1");
+  });
+
+  it("builds swimmer summary export urls", () => {
+    expect(getSwimmerSummaryExportUrl("swimmer-1")).toBe(
+      "/admin/export/swimmers/swimmer-1/summary",
+    );
   });
 });

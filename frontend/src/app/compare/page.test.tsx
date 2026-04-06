@@ -17,8 +17,8 @@ vi.mock("@/components/layout/public-shell", () => ({
   PublicShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock("@/components/arena/arena-heatmap", () => ({
-  ArenaHeatmap: ({
+vi.mock("@/components/arena/arena-leaderboards", () => ({
+  ArenaLeaderboards: ({
     groups,
     selectedGroupKey,
     onSelectGroup,
@@ -59,12 +59,13 @@ describe("ArenaPage through compare compatibility route", () => {
       ],
     });
     getPublicArena.mockResolvedValue({
-      filters: { gender: "all", poolLengthM: undefined, teamId: "" },
-      summary: { arenaCount: 2, competitorCount: 3 },
+      filters: { gender: "all", poolLengthM: undefined, teamId: "", ageBucket: "all" },
+      summary: { groupCount: 2, competitorCount: 3 },
       groups: [
         {
-          groupKey: "event-1:male",
+          groupKey: "event-1:male:all",
           gender: "male",
+          ageBucket: "all",
           event: {
             id: "event-1",
             poolLengthM: 25,
@@ -94,6 +95,7 @@ describe("ArenaPage through compare compatibility route", () => {
               displayName: "男A",
               teamId: "team-a",
               team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              ageBucket: "all",
               bestTimeMs: 32000,
               gapFromLeaderMs: 0,
             },
@@ -103,14 +105,16 @@ describe("ArenaPage through compare compatibility route", () => {
               displayName: "男B",
               teamId: "team-a",
               team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              ageBucket: "all",
               bestTimeMs: 32500,
               gapFromLeaderMs: 500,
             },
           ],
         },
         {
-          groupKey: "event-2:female",
+          groupKey: "event-2:female:u12",
           gender: "female",
+          ageBucket: "u12",
           event: {
             id: "event-2",
             poolLengthM: 50,
@@ -140,6 +144,7 @@ describe("ArenaPage through compare compatibility route", () => {
               displayName: "女A",
               teamId: "team-a",
               team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
+              ageBucket: "u12",
               bestTimeMs: 71500,
               gapFromLeaderMs: 0,
             },
@@ -153,7 +158,7 @@ describe("ArenaPage through compare compatibility route", () => {
     render(<ComparePage />);
 
     expect(await screen.findByText("竞技场")).toBeInTheDocument();
-    expect(screen.getByText("赛道热力板")).toBeInTheDocument();
+    expect(screen.getByText("赛道排行榜")).toBeInTheDocument();
     expect(screen.getAllByText("50米 自由泳（短池）").length).toBeGreaterThan(0);
     expect(screen.getByText("男A")).toBeInTheDocument();
 
@@ -171,6 +176,7 @@ describe("ArenaPage through compare compatibility route", () => {
         gender: "female",
         poolLengthM: undefined,
         teamId: undefined,
+        ageBucket: undefined,
       });
     });
   });

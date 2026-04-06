@@ -52,6 +52,7 @@ export function getPublicArena(input?: {
   gender?: "male" | "female";
   poolLengthM?: number;
   teamId?: string;
+  ageBucket?: string;
 }) {
   const params = new URLSearchParams();
   if (input?.gender) {
@@ -62,6 +63,9 @@ export function getPublicArena(input?: {
   }
   if (input?.teamId) {
     params.set("teamId", input.teamId);
+  }
+  if (input?.ageBucket) {
+    params.set("ageBucket", input.ageBucket);
   }
 
   return apiGet<ArenaPayload>(

@@ -889,6 +889,7 @@ class Repository:
         team_id: str | None = None,
         gender: str | None = None,
         pool_length_m: int | None = None,
+        age_bucket: str | None = None,
     ) -> list[dict[str, Any]]:
         clauses = [
             "s.is_public = 1",
@@ -901,7 +902,7 @@ class Repository:
         if team_id:
             clauses.append("s.team_id = ?")
             params.append(team_id)
-        if gender:
+        if gender and gender != "all":
             clauses.append("s.gender = ?")
             params.append(gender)
         if pool_length_m is not None:
@@ -916,6 +917,7 @@ class Repository:
             s.nickname,
             s.public_name_mode,
             s.gender,
+            s.birth_year,
             s.team_id,
             t.name AS team_name,
             t.sort_order AS team_sort_order,
@@ -940,7 +942,14 @@ class Repository:
         ORDER BY e.sort_order ASC, s.gender ASC, best_time_ms ASC
         """
         rows = self.connection.execute(query, params).fetchall()
-        return [self._row_to_public_arena_rank(row) for row in rows]
+        rankings = [self._row_to_public_arena_rank(row) for row in rows]
+        if age_bucket:
+            rankings = [
+                ranking
+                for ranking in rankings
+                if ranking["swimmer"]["ageBucket"] == age_bucket
+            ]
+        return rankings
 
     def _unique_slug(self, base: str) -> str:
         candidate = base or str(uuid4())[:8]
@@ -1065,6 +1074,7 @@ class Repository:
             "isPublic": bool(row["is_public"]),
             "avatarUrl": row["avatar_url"],
             "birthYear": row["birth_year"],
+            "ageBucket": age_bucket_label(row["birth_year"]),
             "gender": row["gender"],
             "teamId": row["team_id"],
             "team": self._team_from_swimmer_row(row),
@@ -1185,6 +1195,8 @@ class Repository:
             "nickname": row["nickname"],
             "publicNameMode": row["public_name_mode"],
             "gender": row["gender"],
+            "birthYear": row["birth_year"],
+            "ageBucket": age_bucket_label(row["birth_year"]),
             "teamId": row["team_id"],
             "team": {
                 "id": row["team_id"],
@@ -1303,3 +1315,23 @@ def normalize_standard_gender(value: Any) -> str:
     if gender not in {"male", "female", "all"}:
         raise ValidationError("invalid standard gender")
     return gender
+
+
+def age_bucket_label(birth_year: Any) -> str:
+    try:
+        year = int(birth_year or 0)
+    except (TypeError, ValueError):
+        year = 0
+    if year <= 0:
+        return "unknown"
+
+    age = datetime.now(UTC).year - year
+    if age <= 8:
+        return "u8"
+    if age <= 10:
+        return "u10"
+    if age <= 12:
+        return "u12"
+    if age <= 14:
+        return "u14"
+    return "u16_plus"

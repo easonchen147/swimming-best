@@ -163,6 +163,7 @@ def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
             "isPublic": True,
             "gender": "male",
             "teamId": team_alpha["id"],
+            "birthYear": 2014,
         },
     ).get_json()
     swimmer_male_b = admin_client.post(
@@ -174,6 +175,7 @@ def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
             "isPublic": True,
             "gender": "male",
             "teamId": team_beta["id"],
+            "birthYear": 2015,
         },
     ).get_json()
     swimmer_female = admin_client.post(
@@ -185,6 +187,7 @@ def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
             "isPublic": True,
             "gender": "female",
             "teamId": team_alpha["id"],
+            "birthYear": 2014,
         },
     ).get_json()
     swimmer_unknown = admin_client.post(
@@ -263,22 +266,23 @@ def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
     arena_response = client.get("/api/public/arena")
     assert arena_response.status_code == 200
     payload = arena_response.get_json()
-    assert payload["summary"]["arenaCount"] == 3
+    assert payload["summary"]["groupCount"] == 2
 
     male_short = next(
         item
         for item in payload["groups"]
-        if item["event"]["id"] == short_event["id"] and item["gender"] == "male"
+        if item["event"]["id"] == short_event["id"] and item["gender"] == "all"
     )
-    assert male_short["competitorCount"] == 2
+    assert male_short["competitorCount"] == 3
+    assert male_short["ageBucket"] == "all"
     assert male_short["leader"]["displayName"] == "男A"
     assert male_short["leaderGapMs"] == 500
-    assert [entry["displayName"] for entry in male_short["rankings"]] == ["男A", "男B"]
+    assert [entry["displayName"] for entry in male_short["rankings"]] == ["男A", "男B", "女A"]
 
     female_short = next(
         item
         for item in payload["groups"]
-        if item["event"]["id"] == short_event["id"] and item["gender"] == "female"
+        if item["event"]["id"] == long_event["id"] and item["gender"] == "all"
     )
     assert female_short["competitorCount"] == 1
 
@@ -288,3 +292,11 @@ def test_public_arena_groups_race_markets_by_event_and_gender(admin_client):
     assert len(filtered_payload["groups"]) == 1
     assert filtered_payload["groups"][0]["gender"] == "male"
     assert filtered_payload["groups"][0]["event"]["poolLengthM"] == 25
+    assert filtered_payload["groups"][0]["competitorCount"] == 2
+
+    grouped_age_response = client.get("/api/public/arena?gender=female&ageBucket=u12")
+    assert grouped_age_response.status_code == 200
+    grouped_age_payload = grouped_age_response.get_json()
+    assert grouped_age_payload["filters"]["ageBucket"] == "u12"
+    assert len(grouped_age_payload["groups"]) == 1
+    assert grouped_age_payload["groups"][0]["gender"] == "female"
