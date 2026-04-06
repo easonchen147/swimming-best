@@ -17,7 +17,7 @@ export function PublicEventAnalyticsView({
   analytics: PublicEventAnalytics;
 }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <ImprovementChart
         goals={analytics.goals}
         officialBenchmarks={analytics.officialBenchmarks}
@@ -30,7 +30,7 @@ export function PublicEventAnalyticsView({
         officialBenchmarks={analytics.officialBenchmarks}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
         <Card className="space-y-4 border-border/40 p-5 shadow-xl shadow-primary/5 md:p-6">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/5 text-primary">

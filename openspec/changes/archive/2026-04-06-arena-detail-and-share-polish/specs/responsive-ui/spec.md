@@ -1,33 +1,4 @@
-# responsive-ui Specification
-
-## Purpose
-Ensure the product remains usable on desktop and mobile for both public
-browsing and admin workflows.
-
-## Requirements
-
-### Requirement: Primary pages SHALL support desktop and mobile layouts
-The system SHALL render all primary admin and public pages in layouts that
-remain usable on desktop browsers and mobile phone browsers. Layout
-transitions between viewports SHALL be fluid using responsive design
-principles and `motion` layout adjustments. The shared component layer SHALL
-remain responsive on both viewport classes, and primary action groups in page
-headers or dashboard action areas SHALL wrap or reflow without hiding key
-actions.
-
-#### Scenario: Visitor opens a public page on a mobile device
-- **WHEN** a public swimmer, compare, event-detail, or share page is rendered
-  on a phone-sized viewport
-- **THEN** the page stacks content vertically, preserves readable text, keeps
-  primary actions reachable with touch-optimized targets, and keeps header
-  navigation buttons visible in a compact responsive arrangement
-
-#### Scenario: Administrator opens a management page on a desktop browser
-- **WHEN** an admin dashboard or management page is rendered on a desktop-sized
-  viewport
-- **THEN** the page presents dense navigation, summary cards, forms, and data
-  views optimized for large screens without breaking the shared component
-  states
+## MODIFIED Requirements
 
 ### Requirement: Responsive interactions SHALL preserve core workflows
 The system SHALL keep core workflows functional across viewport sizes,

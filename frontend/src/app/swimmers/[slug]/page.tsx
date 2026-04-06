@@ -26,6 +26,10 @@ import type {
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+function exportFilter(node: HTMLElement | SVGElement) {
+  return !(node instanceof HTMLElement && node.dataset.exportIgnore === "true");
+}
+
 export default function SwimmerDetailPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
@@ -60,13 +64,18 @@ export default function SwimmerDetailPage() {
   }, [selectedEventId, slug]);
 
   async function exportCard() {
-    if (!shareRef.current) {
+    if (!shareRef.current || !analytics) {
       return;
     }
 
     setExporting(true);
     try {
-      const dataUrl = await toPng(shareRef.current, { cacheBust: true, pixelRatio: 2 });
+      const dataUrl = await toPng(shareRef.current, {
+        backgroundColor: "#f8fafc",
+        cacheBust: true,
+        filter: exportFilter,
+        pixelRatio: 2.5,
+      });
       const link = document.createElement("a");
       link.download = `${slug}-performance.png`;
       link.href = dataUrl;
@@ -93,95 +102,115 @@ export default function SwimmerDetailPage() {
   const primaryGoal = analytics?.goals[0];
 
   return (
-    <PublicShell className="gap-8">
-      <section ref={shareRef}>
-        <Card className="relative overflow-hidden border-border/40 p-6 shadow-2xl shadow-primary/10 md:p-10">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/6 blur-[80px]" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-primary/5 to-transparent" />
+    <PublicShell className="gap-10 lg:gap-12">
+      <div
+        className="flex flex-col gap-10 lg:gap-12"
+        data-testid="swimmer-detail-export"
+        ref={shareRef}
+      >
+        <section>
+          <Card className="relative overflow-hidden border-border/40 p-6 shadow-2xl shadow-primary/10 md:p-10">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-primary/6 blur-[80px]" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-primary/5 to-transparent" />
 
-          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <div className="space-y-4">
-              <Badge className="rounded-full px-4 py-1 text-xs font-bold uppercase tracking-[0.2em]" variant="outline">
-                Performance Profile
-              </Badge>
+            <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+              <div className="space-y-4">
+                <Badge
+                  className="rounded-full px-4 py-1 text-xs font-bold uppercase tracking-[0.2em]"
+                  variant="outline"
+                >
+                  Performance Profile
+                </Badge>
 
-              <div className="space-y-2">
-                <h1 className="text-4xl font-black tracking-tight text-foreground md:text-6xl">
-                  {swimmer.displayName}
-                </h1>
-                <p className="flex items-center gap-2 text-base font-semibold text-muted/70 md:text-lg">
-                  <Users className="h-5 w-5" />
-                  {swimmer.team?.name || "Independent Swimmer"}
+                <div className="space-y-2">
+                  <h1 className="text-4xl font-black tracking-tight text-foreground md:text-6xl">
+                    {swimmer.displayName}
+                  </h1>
+                  <p className="flex items-center gap-2 text-base font-semibold text-muted/70 md:text-lg">
+                    <Users className="h-5 w-5" />
+                    {swimmer.team?.name || "Independent Swimmer"}
+                  </p>
+                </div>
+
+                <p className="max-w-2xl text-sm leading-6 text-muted md:text-base">
+                  从单次冲刺到长期目标，把每个项目的 PB、国家达级和阶段目标放进同一套成长视图里。
                 </p>
               </div>
 
-              <p className="max-w-2xl text-sm leading-6 text-muted md:text-base">
-                从单次冲刺到长期目标，把每个项目的 PB、国家达级和阶段目标放进同一套成长视图里。
-              </p>
+              <Button
+                className="rounded-full px-7"
+                data-export-ignore="true"
+                disabled={exporting || !analytics}
+                onClick={exportCard}
+                variant="primary"
+              >
+                <Share2 className="h-4 w-4" />
+                {exporting
+                  ? "正在保存..."
+                  : analytics
+                    ? "保存分享海报"
+                    : "分析加载中"}
+              </Button>
             </div>
 
-            <Button
-              className="rounded-full px-7"
-              disabled={exporting}
-              onClick={exportCard}
-              variant="primary"
-            >
-              <Share2 className="h-4 w-4" />
-              {exporting ? "正在保存..." : "保存分享海报"}
-            </Button>
-          </div>
-
-          <div className="relative z-10 mt-8 space-y-3 border-t border-border/40 pt-6">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
-              <Waves className="h-4 w-4 text-primary" />
-              选择项目
+            <div className="relative z-10 mt-8 space-y-3 border-t border-border/40 pt-6">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
+                <Waves className="h-4 w-4 text-primary" />
+                选择项目
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {events.map((item) => (
+                  <Button
+                    className={cn(
+                      "rounded-full",
+                      item.event.id === selectedEventId
+                        ? "shadow-lg shadow-primary/20"
+                        : "",
+                    )}
+                    key={item.event.id}
+                    onClick={() => setSelectedEventId(item.event.id)}
+                    size="sm"
+                    type="button"
+                    variant={
+                      item.event.id === selectedEventId ? "primary" : "outline"
+                    }
+                  >
+                    {item.event.displayName}
+                  </Button>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {events.map((item) => (
-                <Button
-                  className={cn(
-                    "rounded-full",
-                    item.event.id === selectedEventId ? "shadow-lg shadow-primary/20" : "",
-                  )}
-                  key={item.event.id}
-                  onClick={() => setSelectedEventId(item.event.id)}
-                  size="sm"
-                  type="button"
-                  variant={item.event.id === selectedEventId ? "primary" : "outline"}
-                >
-                  {item.event.displayName}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </Card>
-      </section>
+          </Card>
+        </section>
 
-      {!analytics ? (
-        <LoadingState label="深度项目分析中" />
-      ) : (
-        <>
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <MetricCard
-              caption={`${analytics.event.displayName} 历史最佳`}
-              label="PB"
-              value={formatTimeMS(analytics.series.currentBestTimeMs)}
-            />
-            <MetricCard
-              caption="有效成绩记录数量"
-              label="记录数"
-              value={`${analytics.series.raw.length}`}
-            />
-            <MetricCard
-              caption={primaryGoal?.title || "暂未设定当前项目目标"}
-              label="目标进度"
-              value={primaryGoal ? formatProgress(primaryGoal.progress) : "--"}
-            />
-          </section>
+        {!analytics ? (
+          <LoadingState label="深度项目分析中" />
+        ) : (
+          <>
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <MetricCard
+                caption={`${analytics.event.displayName} 历史最佳`}
+                label="PB"
+                value={formatTimeMS(analytics.series.currentBestTimeMs)}
+              />
+              <MetricCard
+                caption="有效成绩记录数量"
+                label="记录数"
+                value={`${analytics.series.raw.length}`}
+              />
+              <MetricCard
+                caption={primaryGoal?.title || "暂未设定当前项目目标"}
+                label="目标进度"
+                value={primaryGoal ? formatProgress(primaryGoal.progress) : "--"}
+              />
+            </section>
 
-          <PublicEventAnalyticsView analytics={analytics} />
-        </>
-      )}
+            <section>
+              <PublicEventAnalyticsView analytics={analytics} />
+            </section>
+          </>
+        )}
+      </div>
     </PublicShell>
   );
 }

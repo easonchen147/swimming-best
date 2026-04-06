@@ -2,24 +2,24 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import {
-  Flame,
-  Medal,
-  Users,
-  Waves,
-} from "lucide-react";
+import { Flame, Medal, Waves, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { ArenaLeaderboards } from "@/components/arena/arena-leaderboards";
 import { PublicShell } from "@/components/layout/public-shell";
-import { LoadingState } from "@/components/shared/loading-state";
 import { SelectField } from "@/components/shared/form-field";
+import { LoadingState } from "@/components/shared/loading-state";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getPublicArena, listPublicSwimmers } from "@/lib/api/public";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getPublicArena } from "@/lib/api/public";
 import { formatTimeMS } from "@/lib/format";
-import type { ArenaGroup, ArenaPayload, PublicSwimmerSummary } from "@/lib/types";
+import type { ArenaGroup, ArenaPayload } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function genderLabel(gender: "male" | "female" | "all") {
@@ -29,45 +29,82 @@ function genderLabel(gender: "male" | "female" | "all") {
 }
 
 function arenaGenderLabel(gender: ArenaGroup["gender"]) {
-  return gender === "male" ? "男子" : "女子";
+  if (gender === "male") return "男子";
+  if (gender === "female") return "女子";
+  return "男女混合";
+}
+
+function strokeLabel(stroke: string) {
+  switch (stroke) {
+    case "freestyle":
+      return "自由泳";
+    case "backstroke":
+      return "仰泳";
+    case "breaststroke":
+      return "蛙泳";
+    case "butterfly":
+      return "蝶泳";
+    case "medley":
+      return "混合泳";
+    default:
+      return "未知泳姿";
+  }
+}
+
+function ageBucketLabel(ageBucket?: string) {
+  switch (ageBucket) {
+    case "all":
+      return "不分年龄";
+    case "u8":
+      return "U8";
+    case "u9":
+      return "U9";
+    case "u10":
+      return "U10";
+    case "u11":
+      return "U11";
+    case "u12":
+      return "U12";
+    case "u13":
+      return "U13";
+    case "u14":
+      return "U14";
+    case "u15":
+      return "U15";
+    case "u16_plus":
+      return "U16+";
+    default:
+      return "未知年龄";
+  }
 }
 
 export function ArenaPage() {
-  const [swimmers, setSwimmers] = useState<PublicSwimmerSummary[]>([]);
   const [arenaPayload, setArenaPayload] = useState<ArenaPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedGroupKey, setSelectedGroupKey] = useState("");
   const [filters, setFilters] = useState<{
     gender: "male" | "female" | "all";
     poolLengthM: "all" | "25" | "50";
-    teamId: string;
-    ageBucket: string;
+    projectKey: string;
   }>({
     gender: "all",
     poolLengthM: "all",
-    teamId: "all",
-    ageBucket: "all",
+    projectKey: "all",
   });
-
-  useEffect(() => {
-    listPublicSwimmers()
-      .then((response) => setSwimmers(response.swimmers))
-      .catch((error: Error) => toast.error(error.message));
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
 
     void getPublicArena({
       gender: filters.gender === "all" ? undefined : filters.gender,
-      poolLengthM: filters.poolLengthM === "all" ? undefined : Number(filters.poolLengthM),
-      teamId: filters.teamId === "all" ? undefined : filters.teamId,
-      ageBucket: filters.ageBucket === "all" ? undefined : filters.ageBucket,
+      poolLengthM:
+        filters.poolLengthM === "all" ? undefined : Number(filters.poolLengthM),
     })
       .then((response) => {
         if (cancelled) {
           return;
         }
+
         setArenaPayload(response);
         setSelectedGroupKey((current) => {
           if (response.groups.some((group) => group.groupKey === current)) {
@@ -90,171 +127,218 @@ export function ArenaPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters]);
+  }, [filters.gender, filters.poolLengthM]);
 
-  const teams = useMemo(() => {
+  const projectOptions = useMemo(() => {
+    const groups = arenaPayload?.groups ?? [];
     const map = new Map<string, { value: string; label: string }>();
-    swimmers.forEach((swimmer) => {
-      map.set(swimmer.teamId, { value: swimmer.teamId, label: swimmer.team.name });
+    groups.forEach((group) => {
+      const key = `${group.event.distanceM}:${group.event.stroke}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          value: key,
+          label: `${group.event.distanceM}米 ${strokeLabel(group.event.stroke)}`,
+        });
+      }
     });
-    return [{ value: "all", label: "全部队伍" }, ...Array.from(map.values())];
-  }, [swimmers]);
+    return [{ value: "all", label: "全部项目" }, ...Array.from(map.values())];
+  }, [arenaPayload]);
+
+  const filteredGroups = useMemo(() => {
+    const groups = arenaPayload?.groups ?? [];
+    if (filters.projectKey === "all") {
+      return groups;
+    }
+
+    return groups.filter((group) => {
+      const projectKey = `${group.event.distanceM}:${group.event.stroke}`;
+      return projectKey === filters.projectKey;
+    });
+  }, [arenaPayload, filters.projectKey]);
+
+  const effectiveSelectedGroupKey = useMemo(() => {
+    if (filteredGroups.some((group) => group.groupKey === selectedGroupKey)) {
+      return selectedGroupKey;
+    }
+
+    return filteredGroups[0]?.groupKey ?? "";
+  }, [filteredGroups, selectedGroupKey]);
 
   const selectedGroup = useMemo(
-    () => arenaPayload?.groups.find((group) => group.groupKey === selectedGroupKey) ?? null,
-    [arenaPayload, selectedGroupKey],
+    () =>
+      filteredGroups.find((group) => group.groupKey === effectiveSelectedGroupKey)
+      ?? null,
+    [effectiveSelectedGroupKey, filteredGroups],
   );
 
-  const hottestGroup = arenaPayload?.groups[0] ?? null;
+  const selectedProjectLabel = useMemo(
+    () =>
+      projectOptions.find((option) => option.value === filters.projectKey)?.label
+      ?? "全部项目",
+    [filters.projectKey, projectOptions],
+  );
+
+  const filteredCompetitorCount = useMemo(
+    () => filteredGroups.reduce((sum, group) => sum + group.competitorCount, 0),
+    [filteredGroups],
+  );
 
   return (
     <PublicShell className="gap-8">
-      <section className="flex flex-col gap-4 border-b border-border/40 pb-8 md:flex-row md:items-end md:justify-between">
+      <section className="space-y-6 border-b border-border/40 pb-8">
         <div className="space-y-3">
-          <Badge className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider" variant="solid">
+          <Badge
+            className="rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+            variant="solid"
+          >
             Arena Market
           </Badge>
           <div className="space-y-2">
-            <h1 className="text-4xl font-black tracking-tight text-foreground">竞技场</h1>
+            <h1 className="text-4xl font-black tracking-tight text-foreground">
+              竞技场
+            </h1>
             <p className="max-w-3xl text-sm font-medium text-muted">
-              直接看同项目、同池长、同性别边界内的赛道排行榜。支持总榜、
-              性别榜和年龄段榜，帮助家长和教练从多个维度判断谁最有竞争力。
+              直接看同项目、同池长、同性别边界内的赛道竞争。三项筛选共同作用在赛道切换区与主详情面板，
+              让家长和教练更快锁定当前最值得看的分组。
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {(["all", "male", "female"] as const).map((gender) => (
-            <Button
-              className="rounded-full"
-              key={gender}
-              onClick={() => {
+        <Card className="border-border/40 bg-surface/40 shadow-sm">
+          <CardHeader className="gap-1 border-b border-border/40 bg-surface/20 pb-4">
+            <CardTitle className="text-base font-black tracking-tight">
+              筛选竞技维度
+            </CardTitle>
+            <CardDescription>
+              按性别、池长、项目三项共同筛选，赛道切换区和详情区会同步刷新。
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4 p-5 md:grid-cols-3">
+            <SelectField
+              label="性别筛选"
+              onChange={(gender) => {
                 setLoading(true);
-                setFilters((current) => ({ ...current, gender }));
+                setFilters((current) => ({
+                  ...current,
+                  gender: gender as "male" | "female" | "all",
+                  projectKey: "all",
+                }));
               }}
-              size="sm"
-              type="button"
-              variant={filters.gender === gender ? "primary" : "outline"}
-            >
-              {genderLabel(gender)}
-            </Button>
-          ))}
-          {(["all", "25", "50"] as const).map((poolLengthM) => (
-            <Button
-              className="rounded-full"
-              key={poolLengthM}
-              onClick={() => {
+              options={[
+                { value: "all", label: "全部性别" },
+                { value: "male", label: "男子" },
+                { value: "female", label: "女子" },
+              ]}
+              value={filters.gender}
+            />
+            <SelectField
+              label="池长筛选"
+              onChange={(poolLengthM) => {
                 setLoading(true);
-                setFilters((current) => ({ ...current, poolLengthM }));
+                setFilters((current) => ({
+                  ...current,
+                  poolLengthM: poolLengthM as "all" | "25" | "50",
+                  projectKey: "all",
+                }));
               }}
-              size="sm"
-              type="button"
-              variant={filters.poolLengthM === poolLengthM ? "secondary" : "outline"}
-            >
-              {poolLengthM === "all" ? "全部池长" : `${poolLengthM}m`}
-            </Button>
-          ))}
-        </div>
+              options={[
+                { value: "all", label: "全部池长" },
+                { value: "25", label: "25米短池" },
+                { value: "50", label: "50米长池" },
+              ]}
+              value={filters.poolLengthM}
+            />
+            <SelectField
+              label="项目筛选"
+              onChange={(projectKey) =>
+                setFilters((current) => ({ ...current, projectKey }))
+              }
+              options={projectOptions}
+              value={filters.projectKey}
+            />
+          </CardContent>
+        </Card>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_360px]">
-        <div className="space-y-6">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <SummaryCard
-              icon={<Medal className="h-5 w-5" />}
-              label="榜单分组"
-              value={arenaPayload ? `${arenaPayload.summary.groupCount}` : "--"}
-            />
-            <SummaryCard
-              icon={<Users className="h-5 w-5" />}
-              label="有效竞争人数"
-              value={arenaPayload ? `${arenaPayload.summary.competitorCount}` : "--"}
-            />
-            <SummaryCard
-              icon={<Waves className="h-5 w-5" />}
-              label="当前筛选"
-              value={`${genderLabel(filters.gender)} · ${filters.poolLengthM === "all" ? "全部池长" : `${filters.poolLengthM}m`}`}
-            />
-            <SummaryCard
-              icon={<Flame className="h-5 w-5" />}
-              label="焦点赛道"
-              value={hottestGroup ? hottestGroup.event.displayName : "暂无"}
-            />
-          </div>
+      <section className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <SummaryCard
+            icon={<Medal className="h-5 w-5" />}
+            label="榜单分组"
+            value={arenaPayload ? `${filteredGroups.length}` : "--"}
+          />
+          <SummaryCard
+            icon={<Users className="h-5 w-5" />}
+            label="有效竞争人数"
+            value={arenaPayload ? `${filteredCompetitorCount}` : "--"}
+          />
+          <SummaryCard
+            icon={<Waves className="h-5 w-5" />}
+            label="当前筛选"
+            value={`${genderLabel(filters.gender)} · ${filters.poolLengthM === "all" ? "全部池长" : `${filters.poolLengthM}米`} · ${selectedProjectLabel}`}
+          />
+          <SummaryCard
+            icon={<Flame className="h-5 w-5" />}
+            label="当前赛道热度"
+            value={
+              selectedGroup
+                ? `${selectedGroup.heatLabel} · ${selectedGroup.heatScore}分`
+                : "暂无"
+            }
+          />
+        </div>
 
+        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
           <Card className="overflow-hidden border-border/40 shadow-sm">
             <CardHeader className="border-b border-border/40 bg-surface/30">
-              <CardTitle className="text-xl">赛道排行榜</CardTitle>
+              <CardTitle className="text-xl">赛道切换</CardTitle>
               <CardDescription>
-                每张卡片都是一个严格对齐边界的赛道榜单。点击卡片查看完整详情。
+                这里负责切换当前要看的赛道分组，详细竞争信息统一在右侧展开。
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-5 p-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <SelectField
-                  className="max-w-xs"
-                  label="队伍筛选"
-                  onChange={(teamId) => {
-                    setLoading(true);
-                    setFilters((current) => ({ ...current, teamId }));
-                  }}
-                  options={teams}
-                  value={filters.teamId}
-                />
-                <SelectField
-                  className="max-w-xs"
-                  label="年龄维度"
-                  onChange={(ageBucket) => {
-                    setLoading(true);
-                    setFilters((current) => ({ ...current, ageBucket }));
-                  }}
-                  options={[
-                    { value: "all", label: "不分年龄" },
-                    { value: "u8", label: "U8" },
-                    { value: "u10", label: "U10" },
-                    { value: "u12", label: "U12" },
-                    { value: "u14", label: "U14" },
-                    { value: "u16_plus", label: "U16+" },
-                  ]}
-                  value={filters.ageBucket}
-                />
-              </div>
-
+            <CardContent className="p-4">
               {loading ? (
-                <LoadingState label="竞技场排行榜加载中" />
+                <LoadingState label="赛道分组加载中" />
               ) : (
                 <ArenaLeaderboards
-                  groups={arenaPayload?.groups ?? []}
+                  groups={filteredGroups}
                   onSelectGroup={setSelectedGroupKey}
-                  selectedGroupKey={selectedGroupKey}
+                  selectedGroupKey={effectiveSelectedGroupKey}
                 />
               )}
             </CardContent>
           </Card>
-        </div>
 
-        <div className="space-y-6">
-          <Card className="sticky top-24 overflow-hidden border-border/40 shadow-sm">
+          <Card className="overflow-hidden border-border/40 shadow-sm">
             <CardHeader className="border-b border-border/40 bg-surface/30">
               <CardTitle className="text-xl">赛道详情</CardTitle>
               <CardDescription>
-                点击左侧榜单卡片后，在这里查看当前赛道的头名和完整排行。
+                当前选中赛道的头名、热度、优势差距与完整排行都集中展示在这里。
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-6">
-              {selectedGroup ? (
+            <CardContent className="space-y-5 p-6">
+              {loading ? (
+                <LoadingState label="赛道详情加载中" />
+              ) : selectedGroup ? (
                 <div className="space-y-6">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
+                      <Badge
+                        className="rounded-full px-3 py-1 text-[10px] font-bold"
+                        variant="outline"
+                      >
                         {arenaGenderLabel(selectedGroup.gender)}
                       </Badge>
-                      <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
-                        {selectedGroup.ageBucket === "all"
-                          ? "不分年龄"
-                          : selectedGroup.ageBucket.toUpperCase().replace("_PLUS", "+")}
+                      <Badge
+                        className="rounded-full px-3 py-1 text-[10px] font-bold"
+                        variant="outline"
+                      >
+                        {ageBucketLabel(selectedGroup.ageBucket)}
                       </Badge>
-                      <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
+                      <Badge
+                        className="rounded-full px-3 py-1 text-[10px] font-bold"
+                        variant="outline"
+                      >
                         {selectedGroup.heatLabel}
                       </Badge>
                     </div>
@@ -263,23 +347,57 @@ export function ArenaPage() {
                     </div>
                     <p className="text-sm text-muted">
                       当前头名 {selectedGroup.leader.displayName}，最佳成绩{" "}
-                      {formatTimeMS(selectedGroup.leader.bestTimeMs)}。
+                      {formatTimeMS(selectedGroup.leader.bestTimeMs)}，这条赛道当前共有{" "}
+                      {selectedGroup.competitorCount} 位公开选手进入榜单。
                     </p>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <DetailMetric
                       label="竞争人数"
                       value={`${selectedGroup.competitorCount}`}
                     />
                     <DetailMetric
+                      label="热度等级"
+                      value={selectedGroup.heatLabel}
+                    />
+                    <DetailMetric
+                      label="热度分数"
+                      value={`${selectedGroup.heatScore}`}
+                    />
+                    <DetailMetric
                       label="头名优势"
                       value={formatTimeMS(selectedGroup.leaderGapMs)}
                     />
-                    <DetailMetric
-                      label="优势比例"
-                      value={`${(selectedGroup.leaderGapPercent * 100).toFixed(1)}%`}
-                    />
+                  </div>
+
+                  <div className="rounded-[28px] border border-border/40 bg-surface/30 p-5">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                      <div className="space-y-1">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                          当前头名
+                        </div>
+                        <div className="text-2xl font-black tracking-tight text-foreground">
+                          {selectedGroup.leader.displayName}
+                        </div>
+                        <div className="text-sm font-semibold text-muted">
+                          {selectedGroup.leader.team.name}
+                        </div>
+                      </div>
+
+                      <div className="text-left md:text-right">
+                        <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                          最佳成绩
+                        </div>
+                        <div className="text-3xl font-black tracking-tight text-primary">
+                          {formatTimeMS(selectedGroup.leader.bestTimeMs)}
+                        </div>
+                        <div className="text-sm font-semibold text-muted">
+                          领先比例{" "}
+                          {(selectedGroup.leaderGapPercent * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-3">
@@ -306,6 +424,7 @@ export function ArenaPage() {
                             </div>
                           </div>
                         </div>
+
                         <div className="text-right">
                           <div className="text-lg font-black text-primary">
                             {formatTimeMS(entry.bestTimeMs)}
@@ -321,7 +440,9 @@ export function ArenaPage() {
               ) : (
                 <div className="flex min-h-[320px] items-center justify-center rounded-[28px] border border-dashed border-border/60 bg-surface/30 text-center">
                   <div className="space-y-2 px-6">
-                    <div className="text-xl font-black text-foreground">暂无赛道详情</div>
+                    <div className="text-xl font-black text-foreground">
+                      暂无赛道详情
+                    </div>
                     <p className="text-sm text-muted">
                       当前筛选条件下没有可展示的竞技场榜单，请切换筛选条件后再查看。
                     </p>
@@ -331,7 +452,7 @@ export function ArenaPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </section>
     </PublicShell>
   );
 }

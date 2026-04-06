@@ -1,35 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 async function mockArenaRoutes(page: import("@playwright/test").Page) {
-  await page.route("**/api/public/swimmers", async (route) => {
-    await route.fulfill({
-      body: JSON.stringify({
-        swimmers: [
-          {
-            id: "swimmer-a",
-            slug: "alice",
-            displayName: "Alice",
-            strongestEventId: "event-1",
-            teamId: "team-a",
-            team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
-          },
-          {
-            id: "swimmer-b",
-            slug: "bella",
-            displayName: "Bella",
-            strongestEventId: "event-1",
-            teamId: "team-b",
-            team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
-          },
-        ],
-      }),
-      contentType: "application/json",
-    });
-  });
-
   await page.route("**/api/public/arena*", async (route) => {
     const url = new URL(route.request().url());
     const gender = url.searchParams.get("gender");
+    const poolLengthM = url.searchParams.get("poolLengthM");
+
     const allGroups = [
       {
         groupKey: "event-1:male:all",
@@ -52,7 +28,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
         leaderGapPercent: 0.015,
         leader: {
           swimmerId: "swimmer-a",
-          displayName: "男A",
+          displayName: "男甲",
           teamId: "team-a",
           team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
           bestTimeMs: 32000,
@@ -61,7 +37,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
           {
             rank: 1,
             swimmerId: "swimmer-a",
-            displayName: "男A",
+            displayName: "男甲",
             teamId: "team-a",
             team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
             ageBucket: "all",
@@ -71,7 +47,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
           {
             rank: 2,
             swimmerId: "swimmer-b",
-            displayName: "男B",
+            displayName: "男乙",
             teamId: "team-b",
             team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
             ageBucket: "all",
@@ -101,7 +77,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
         leaderGapPercent: 0,
         leader: {
           swimmerId: "swimmer-c",
-          displayName: "女A",
+          displayName: "女乙",
           teamId: "team-a",
           team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
           bestTimeMs: 71500,
@@ -110,7 +86,7 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
           {
             rank: 1,
             swimmerId: "swimmer-c",
-            displayName: "女A",
+            displayName: "女乙",
             teamId: "team-a",
             team: { id: "team-a", name: "海豚预备队", sortOrder: 1, isActive: true },
             ageBucket: "u12",
@@ -119,21 +95,66 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
           },
         ],
       },
+      {
+        groupKey: "event-3:male:u11",
+        gender: "male",
+        ageBucket: "u11",
+        event: {
+          id: "event-3",
+          poolLengthM: 50,
+          distanceM: 100,
+          stroke: "backstroke",
+          effortType: "standard",
+          displayName: "100米 仰泳（长池）",
+          sortOrder: 3,
+          isActive: true,
+        },
+        competitorCount: 1,
+        heatScore: 24,
+        heatLabel: "观察",
+        leaderGapMs: 0,
+        leaderGapPercent: 0,
+        leader: {
+          swimmerId: "swimmer-d",
+          displayName: "男丙",
+          teamId: "team-b",
+          team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
+          bestTimeMs: 70500,
+        },
+        rankings: [
+          {
+            rank: 1,
+            swimmerId: "swimmer-d",
+            displayName: "男丙",
+            teamId: "team-b",
+            team: { id: "team-b", name: "浪花竞速队", sortOrder: 2, isActive: true },
+            ageBucket: "u11",
+            bestTimeMs: 70500,
+            gapFromLeaderMs: 0,
+          },
+        ],
+      },
     ];
-    const groups = gender ? allGroups.filter((group) => group.gender === gender) : allGroups;
-    const ageBucket = url.searchParams.get("ageBucket");
-    const filteredGroups = ageBucket
-      ? groups.filter((group) => group.ageBucket === ageBucket)
-      : groups;
+
+    const groups = allGroups.filter((group) => {
+      const genderMatched = !gender || group.gender === gender;
+      const poolMatched = !poolLengthM || String(group.event.poolLengthM) === poolLengthM;
+      return genderMatched && poolMatched;
+    });
 
     await route.fulfill({
       body: JSON.stringify({
-        filters: { gender: gender ?? "all", poolLengthM: undefined, teamId: "", ageBucket: ageBucket ?? "all" },
-        summary: {
-          groupCount: filteredGroups.length,
-          competitorCount: filteredGroups.reduce((sum, group) => sum + group.competitorCount, 0),
+        filters: {
+          gender: gender ?? "all",
+          poolLengthM: poolLengthM ? Number(poolLengthM) : undefined,
+          teamId: "",
+          ageBucket: "all",
         },
-        groups: filteredGroups,
+        summary: {
+          groupCount: groups.length,
+          competitorCount: groups.reduce((sum, group) => sum + group.competitorCount, 0),
+        },
+        groups,
       }),
       contentType: "application/json",
     });
@@ -143,19 +164,35 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
 async function openArena(page: import("@playwright/test").Page) {
   await page.goto("/arena");
   await expect(page.getByRole("heading", { name: "竞技场" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "赛道排行榜" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "赛道切换" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "赛道详情" })).toBeVisible();
 }
 
-test("arena board supports filter-driven drill-down", async ({ page }) => {
+async function selectOption(
+  page: import("@playwright/test").Page,
+  label: string,
+  option: string,
+) {
+  await page.getByRole("combobox", { name: label }).click();
+  await page.getByRole("option", { name: option, exact: true }).click();
+}
+
+test("arena board supports the new three-dropdown filter flow", async ({ page }) => {
   await mockArenaRoutes(page);
   await openArena(page);
 
-  await expect(page.getByText(/当前头名 男A/)).toBeVisible();
-  await page.getByRole("button", { name: "女子", exact: true }).click();
-  await expect(page.getByText(/当前头名 女A/)).toBeVisible();
-  await page.getByRole("combobox", { name: "年龄维度" }).click();
-  await page.getByRole("option", { name: "U12" }).click();
-  await expect(page.getByRole("combobox", { name: "年龄维度" })).toContainText("U12");
+  await expect(page.getByText(/当前头名 男甲/)).toBeVisible();
+  await expect(page.getByText("当前赛道热度")).toBeVisible();
+
+  await selectOption(page, "性别筛选", "女子");
+  await expect(page.getByText(/当前头名 女乙/)).toBeVisible();
+
+  await selectOption(page, "池长筛选", "50米长池");
+  await expect(page.getByRole("combobox", { name: "池长筛选" })).toContainText("50米长池");
+
+  await selectOption(page, "项目筛选", "100米 仰泳");
+  await expect(page.getByRole("combobox", { name: "项目筛选" })).toContainText("100米 仰泳");
+  await expect(page.getByText("女乙")).toBeVisible();
 });
 
 test("arena page stays within mobile and tablet viewport bounds", async ({ page }) => {
