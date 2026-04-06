@@ -1,18 +1,25 @@
 "use client";
 
 import {
-  ResponsiveContainer,
   Tooltip,
   Treemap,
 } from "recharts";
 
 import { Badge } from "@/components/ui/badge";
+import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
 import type { ArenaGroup } from "@/lib/types";
 import { formatTimeMS } from "@/lib/format";
 
 type ArenaTreemapNode = ArenaGroup & {
   size: number;
 };
+
+const chartConfig = {
+  heat: {
+    label: "竞技热度",
+    color: "#4f46e5",
+  },
+} satisfies ChartConfig;
 
 function arenaGenderLabel(gender: ArenaGroup["gender"]) {
   return gender === "male" ? "男子" : "女子";
@@ -106,6 +113,7 @@ function ArenaTile({
 
   return (
     <g onClick={() => onSelectGroup(payload.groupKey)} style={{ cursor: "pointer" }}>
+      <title>{`${payload.event.displayName} ${arenaGenderLabel(payload.gender)} 赛道`}</title>
       <rect
         fill={palette.fill}
         height={height}
@@ -117,47 +125,71 @@ function ArenaTile({
         x={x}
         y={y}
       />
-      <foreignObject height={height} width={width} x={x} y={y}>
-        <button
-          aria-label={`${payload.event.displayName} ${arenaGenderLabel(payload.gender)} 赛道`}
-          className="flex h-full w-full flex-col justify-between p-3 text-left"
-          onClick={() => onSelectGroup(payload.groupKey)}
-          type="button"
+      <text
+        fill={palette.text}
+        fontSize={10}
+        fontWeight={800}
+        letterSpacing="0.18em"
+        opacity={0.85}
+        x={x + 14}
+        y={y + 20}
+      >
+        {arenaGenderLabel(payload.gender)}
+      </text>
+      <text
+        fill={palette.text}
+        fontSize={compact ? 12 : 14}
+        fontWeight={900}
+        x={x + 14}
+        y={y + 42}
+      >
+        {payload.event.displayName}
+      </text>
+      {!compact ? (
+        <>
+          <text
+            fill={palette.text}
+            fontSize={10}
+            fontWeight={700}
+            opacity={0.82}
+            x={x + 14}
+            y={y + height - 36}
+          >
+            {`头名 ${payload.leader.displayName}`}
+          </text>
+          <text
+            fill={palette.text}
+            fontSize={18}
+            fontWeight={900}
+            x={x + 14}
+            y={y + height - 14}
+          >
+            {formatTimeMS(payload.leader.bestTimeMs)}
+          </text>
+          <text
+            fill={palette.text}
+            fontSize={10}
+            fontWeight={700}
+            opacity={0.78}
+            textAnchor="end"
+            x={x + width - 14}
+            y={y + height - 14}
+          >
+            {`${payload.competitorCount}人 · ${payload.heatLabel}`}
+          </text>
+        </>
+      ) : (
+        <text
+          fill={palette.text}
+          fontSize={10}
+          fontWeight={700}
+          opacity={0.8}
+          x={x + 14}
+          y={y + height - 12}
         >
-          <div className="space-y-1">
-            <div
-              className="text-[10px] font-black uppercase tracking-[0.18em]"
-              style={{ color: palette.text, opacity: 0.85 }}
-            >
-              {arenaGenderLabel(payload.gender)}
-            </div>
-            <div
-              className="line-clamp-2 text-sm font-black leading-tight"
-              style={{ color: palette.text }}
-            >
-              {payload.event.displayName}
-            </div>
-          </div>
-
-          {!compact ? (
-            <div className="space-y-1">
-              <div className="text-[10px] font-bold" style={{ color: palette.text, opacity: 0.8 }}>
-                头名 {payload.leader.displayName}
-              </div>
-              <div className="text-lg font-black tracking-tight" style={{ color: palette.text }}>
-                {formatTimeMS(payload.leader.bestTimeMs)}
-              </div>
-              <div className="text-[10px] font-bold" style={{ color: palette.text, opacity: 0.8 }}>
-                {payload.competitorCount} 人参赛 · {payload.heatLabel}
-              </div>
-            </div>
-          ) : (
-            <div className="text-[10px] font-bold" style={{ color: palette.text, opacity: 0.8 }}>
-              {payload.leader.displayName}
-            </div>
-          )}
-        </button>
-      </foreignObject>
+          {payload.leader.displayName}
+        </text>
+      )}
     </g>
   );
 }
@@ -185,8 +217,11 @@ export function ArenaHeatmap({
   }
 
   return (
-    <div className="h-[420px] w-full min-w-0 md:h-[520px]">
-      <ResponsiveContainer height="100%" minHeight={360} width="100%">
+    <ChartContainer
+      className="aspect-auto min-h-[420px] w-full min-w-0 md:min-h-[520px]"
+      config={chartConfig}
+      initialDimension={{ width: 960, height: 520 }}
+    >
         <Treemap
           animationDuration={500}
           content={(props) => (
@@ -203,7 +238,6 @@ export function ArenaHeatmap({
         >
           <Tooltip content={<ArenaTooltip />} />
         </Treemap>
-      </ResponsiveContainer>
-    </div>
+    </ChartContainer>
   );
 }
