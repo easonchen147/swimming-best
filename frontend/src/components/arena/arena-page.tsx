@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Flame, Medal, Waves, Users } from "lucide-react";
+import { Crown, Flame, Medal, Sparkles, Waves, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import { ArenaLeaderboards } from "@/components/arena/arena-leaderboards";
@@ -76,6 +76,40 @@ function ageBucketLabel(ageBucket?: string) {
     default:
       return "未知年龄";
   }
+}
+
+function podiumMeta(rank: number) {
+  if (rank === 1) {
+    return {
+      badge: "TOP 1",
+      badgeClass: "bg-amber-500/12 text-amber-700 border-amber-200",
+      cardClass: "border-amber-300/60 bg-[linear-gradient(135deg,rgba(251,191,36,0.16),rgba(255,255,255,0.96))]",
+      icon: Crown,
+      iconClass: "text-amber-500",
+      animate: true,
+    };
+  }
+  if (rank === 2) {
+    return {
+      badge: "TOP 2",
+      badgeClass: "bg-slate-300/20 text-slate-700 border-slate-300",
+      cardClass: "border-slate-300/60 bg-[linear-gradient(135deg,rgba(203,213,225,0.22),rgba(255,255,255,0.98))]",
+      icon: Medal,
+      iconClass: "text-slate-500",
+      animate: true,
+    };
+  }
+  if (rank === 3) {
+    return {
+      badge: "TOP 3",
+      badgeClass: "bg-orange-200/30 text-orange-700 border-orange-200",
+      cardClass: "border-orange-300/60 bg-[linear-gradient(135deg,rgba(251,146,60,0.14),rgba(255,255,255,0.98))]",
+      icon: Medal,
+      iconClass: "text-orange-500",
+      animate: true,
+    };
+  }
+  return null;
 }
 
 export function ArenaPage() {
@@ -198,8 +232,8 @@ export function ArenaPage() {
               竞技场
             </h1>
             <p className="max-w-3xl text-sm font-medium text-muted">
-              直接看同项目、同池长、同性别边界内的赛道竞争。三项筛选共同作用在赛道切换区与主详情面板，
-              让家长和教练更快锁定当前最值得看的分组。
+              直接看同项目、同池长、同性别边界内的赛道竞争。筛选维度会直接驱动当前详情主视图，
+              让家长和教练更快锁定最值得看的分组与头部竞争关系。
             </p>
           </div>
         </div>
@@ -210,7 +244,7 @@ export function ArenaPage() {
               筛选竞技维度
             </CardTitle>
             <CardDescription>
-              按性别、池长、项目三项共同筛选，赛道切换区和详情区会同步刷新。
+              按性别、池长、项目三项共同筛选，当前赛道详情会同步刷新。
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 p-5 md:grid-cols-3">
@@ -288,32 +322,12 @@ export function ArenaPage() {
           />
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-          <Card className="overflow-hidden border-border/40 shadow-sm">
-            <CardHeader className="border-b border-border/40 bg-surface/30">
-              <CardTitle className="text-xl">赛道切换</CardTitle>
-              <CardDescription>
-                这里负责切换当前要看的赛道分组，详细竞争信息统一在右侧展开。
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4">
-              {loading ? (
-                <LoadingState label="赛道分组加载中" />
-              ) : (
-                <ArenaLeaderboards
-                  groups={filteredGroups}
-                  onSelectGroup={setSelectedGroupKey}
-                  selectedGroupKey={effectiveSelectedGroupKey}
-                />
-              )}
-            </CardContent>
-          </Card>
-
+        <div className="grid gap-6">
           <Card className="overflow-hidden border-border/40 shadow-sm">
             <CardHeader className="border-b border-border/40 bg-surface/30">
               <CardTitle className="text-xl">赛道详情</CardTitle>
               <CardDescription>
-                当前选中赛道的头名、热度、优势差距与完整排行都集中展示在这里。
+                当前赛道的切换、热度、优势差距与完整排行都集中展示在这里。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-5 p-6">
@@ -321,6 +335,18 @@ export function ArenaPage() {
                 <LoadingState label="赛道详情加载中" />
               ) : selectedGroup ? (
                 <div className="space-y-6">
+                  <div className="space-y-3 rounded-[28px] border border-border/40 bg-surface/20 p-4">
+                    <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted/50">
+                      <Sparkles className="h-3.5 w-3.5 text-primary" />
+                      当前可看赛道
+                    </div>
+                    <ArenaLeaderboards
+                      groups={filteredGroups}
+                      onSelectGroup={setSelectedGroupKey}
+                      selectedGroupKey={effectiveSelectedGroupKey}
+                    />
+                  </div>
+
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge
@@ -403,17 +429,51 @@ export function ArenaPage() {
                   <div className="space-y-3">
                     {selectedGroup.rankings.map((entry) => (
                       <motion.div
-                        animate={{ opacity: 1, y: 0 }}
+                        animate={
+                          podiumMeta(entry.rank)?.animate
+                            ? { opacity: 1, y: [0, -2, 0] }
+                            : { opacity: 1, y: 0 }
+                        }
                         className={cn(
                           "flex items-center justify-between gap-4 rounded-[24px] border border-border/40 bg-white p-4 transition-all",
-                          entry.rank === 1 && "border-primary/30 bg-primary/5",
+                          podiumMeta(entry.rank)?.cardClass,
                         )}
                         initial={{ opacity: 0, y: 8 }}
                         key={entry.swimmerId}
+                        transition={
+                          podiumMeta(entry.rank)?.animate
+                            ? {
+                                duration: 2.2,
+                                ease: "easeInOut",
+                                repeat: Infinity,
+                                repeatType: "mirror",
+                              }
+                            : { duration: 0.2 }
+                        }
                       >
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface text-sm font-black text-foreground">
-                            {entry.rank}
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-surface text-sm font-black text-foreground">
+                              {entry.rank}
+                            </div>
+                            {podiumMeta(entry.rank) ? (
+                              <div
+                                className={cn(
+                                  "flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em]",
+                                  podiumMeta(entry.rank)?.badgeClass,
+                                )}
+                              >
+                                {podiumMeta(entry.rank)?.icon ? (
+                                  <span className={cn(podiumMeta(entry.rank)?.iconClass)}>
+                                    {(() => {
+                                      const Icon = podiumMeta(entry.rank)?.icon;
+                                      return Icon ? <Icon className="h-3.5 w-3.5" /> : null;
+                                    })()}
+                                  </span>
+                                ) : null}
+                                <span>{podiumMeta(entry.rank)?.badge}</span>
+                              </div>
+                            ) : null}
                           </div>
                           <div>
                             <div className="text-sm font-black text-foreground">

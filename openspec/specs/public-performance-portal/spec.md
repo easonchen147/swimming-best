@@ -136,3 +136,12 @@ modules for the selected event.
   have loaded
 - **THEN** the exported image captures the full growth-page container instead of
   only a local card fragment
+
+### Requirement: Public swimmer detail pages SHALL retire the old poster-save action
+The public swimmer detail page MUST NOT continue exposing the old
+“保存分享海报” behavior once the full-page export flow replaces it.
+
+#### Scenario: Visitor opens a swimmer detail page
+- **WHEN** the public swimmer detail page is rendered
+- **THEN** the page exposes only the new full-page export action and no longer
+  presents the legacy poster-save wording or flow

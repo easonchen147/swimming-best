@@ -164,7 +164,6 @@ async function mockArenaRoutes(page: import("@playwright/test").Page) {
 async function openArena(page: import("@playwright/test").Page) {
   await page.goto("/arena");
   await expect(page.getByRole("heading", { name: "竞技场" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "赛道切换" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "赛道详情" })).toBeVisible();
 }
 
@@ -183,6 +182,7 @@ test("arena board supports the new three-dropdown filter flow", async ({ page })
 
   await expect(page.getByText(/当前头名 男甲/)).toBeVisible();
   await expect(page.getByText("当前赛道热度")).toBeVisible();
+  await expect(page.getByText("TOP 1")).toBeVisible();
 
   await selectOption(page, "性别筛选", "女子");
   await expect(page.getByText(/当前头名 女乙/)).toBeVisible();

@@ -127,12 +127,12 @@ describe("SwimmerDetailPage", () => {
     toPng.mockResolvedValue("data:image/png;base64,aaa");
   });
 
-  it("exports a full growth poster instead of only the hero card", async () => {
+  it("downloads a full-page long image instead of the legacy poster export", async () => {
     render(<SwimmerDetailPage />);
 
-    expect(await screen.findByText("成长曲线模块")).toBeInTheDocument();
+    expect((await screen.findAllByText("成长曲线模块")).length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "保存分享海报" }));
+    fireEvent.click(screen.getByRole("button", { name: "下载整页长图" }));
 
     await waitFor(() => {
       expect(toPng).toHaveBeenCalledTimes(1);
@@ -144,14 +144,13 @@ describe("SwimmerDetailPage", () => {
         backgroundColor: string;
         canvasHeight: number;
         canvasWidth: number;
-        filter: (node: HTMLElement | SVGElement) => boolean;
         height: number;
         skipAutoScale: boolean;
         width: number;
       },
     ];
 
-    expect(target.dataset.testid).toBe("swimmer-detail-export");
+    expect(target.dataset.testid).toBe("swimmer-detail-capture");
     expect(target.textContent).toContain("测试队员");
     expect(target.textContent).toContain("PB");
     expect(target.textContent).toContain("成长曲线模块");
@@ -161,12 +160,5 @@ describe("SwimmerDetailPage", () => {
     expect(options.canvasWidth).toBe(options.width * 2);
     expect(options.canvasHeight).toBe(options.height * 2);
     expect(options.skipAutoScale).toBe(true);
-
-    const ignored = document.createElement("button");
-    ignored.dataset.exportIgnore = "true";
-    const kept = document.createElement("div");
-
-    expect(options.filter(ignored)).toBe(false);
-    expect(options.filter(kept)).toBe(true);
   });
 });

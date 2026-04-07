@@ -221,12 +221,12 @@ describe("ArenaPage through compare compatibility route", () => {
     render(<ComparePage />);
 
     expect(await screen.findByRole("heading", { name: "竞技场" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "赛道切换" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "赛道详情" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "性别筛选" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "池长筛选" })).toBeInTheDocument();
     expect(screen.getByRole("combobox", { name: "项目筛选" })).toBeInTheDocument();
     expect(screen.getByText("当前赛道热度")).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "赛道切换" })).not.toBeInTheDocument();
 
     await waitFor(() => {
       expect(getPublicArena).toHaveBeenCalledWith({
@@ -267,6 +267,7 @@ describe("ArenaPage through compare compatibility route", () => {
     expect(screen.getByRole("combobox", { name: "项目筛选" })).toHaveTextContent("100米 仰泳");
     expect(screen.queryByText("50米 自由泳（短池）")).not.toBeInTheDocument();
     expect(screen.getByText("观察 · 28分")).toBeInTheDocument();
+    expect(screen.getByText("TOP 1")).toBeInTheDocument();
     expect(getPublicArena).toHaveBeenCalledTimes(1);
   });
 });

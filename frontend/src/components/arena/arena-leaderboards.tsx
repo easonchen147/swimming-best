@@ -55,7 +55,7 @@ export function ArenaLeaderboards({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="grid gap-3 md:grid-cols-2">
       {groups.map((group) => {
         const selected = selectedGroupKey === group.groupKey;
         return (
@@ -69,10 +69,10 @@ export function ArenaLeaderboards({
             <Card
               className={cn(
                 "overflow-hidden border-border/40 transition-all hover:border-primary/25 hover:bg-primary/5 hover:shadow-lg hover:shadow-primary/5",
-                selected && "border-primary/30 shadow-lg shadow-primary/10",
+                selected && "border-primary/30 bg-primary/5 shadow-lg shadow-primary/10",
               )}
             >
-              <CardContent className="space-y-4 p-4">
+              <CardContent className="space-y-3 p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge className="rounded-full px-3 py-1 text-[10px] font-bold" variant="outline">
                     {genderLabel(group.gender)}
@@ -89,29 +89,13 @@ export function ArenaLeaderboards({
                   <div className="text-base font-black tracking-tight text-foreground">
                     {group.event.displayName}
                   </div>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-border/40 bg-surface/40 px-3 py-2">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
-                        当前头名
-                      </div>
-                      <div className="mt-1 text-sm font-black text-foreground">
-                        {group.leader.displayName}
-                      </div>
-                      <div className="text-xs font-semibold text-primary">
-                        {formatTimeMS(group.leader.bestTimeMs)}
-                      </div>
-                    </div>
-                    <div className="rounded-2xl border border-border/40 bg-surface/40 px-3 py-2">
-                      <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
-                        赛道概况
-                      </div>
-                      <div className="mt-1 text-sm font-black text-foreground">
-                        {group.competitorCount} 人上榜
-                      </div>
-                      <div className="text-xs font-semibold text-muted">
-                        头名优势 {formatTimeMS(group.leaderGapMs)}
-                      </div>
-                    </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold">
+                    <span className="text-primary">
+                      头名 {group.leader.displayName} · {formatTimeMS(group.leader.bestTimeMs)}
+                    </span>
+                    <span className="text-muted">
+                      {group.competitorCount} 人上榜 · 优势 {formatTimeMS(group.leaderGapMs)}
+                    </span>
                   </div>
                 </div>
               </CardContent>
