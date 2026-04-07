@@ -90,17 +90,6 @@ arena experience.
 - **THEN** the system renders a share-friendly public presentation without
   admin-only controls
 
-### Requirement: Public swimmer detail pages SHALL support full-growth poster export
-The public swimmer detail page MUST provide a save/share export that captures
-the swimmer hero, current metric cards, and the visible growth-analysis content
-for the selected event, instead of exporting only the top hero block.
-
-#### Scenario: Visitor saves a public swimmer growth poster
-- **WHEN** a visitor clicks the save/share action on a public swimmer detail
-  page after analytics have loaded
-- **THEN** the generated poster includes the swimmer header, current event
-  summary cards, and the main growth-analysis modules for that selected event
-
 ### Requirement: Public swimmer detail pages SHALL maintain consistent vertical section rhythm
 The public swimmer detail page MUST keep the hero area, summary metric cards,
 and growth-analysis modules separated by a consistent vertical spacing system so
@@ -125,23 +114,3 @@ than decorative-only client-side inputs.
 #### Scenario: Visitor combines search and team filter on the public roster
 - **WHEN** a visitor selects a managed team and also enters a search term
 - **THEN** the rendered public roster reflects the combined filter result
-
-### Requirement: Public swimmer detail export SHALL capture a full growth poster
-The public swimmer detail page MUST export the visible growth page as one long
-poster that includes the hero section, summary metrics, and the growth-analysis
-modules for the selected event.
-
-#### Scenario: Visitor saves a growth poster
-- **WHEN** a visitor clicks the save/share action after the swimmer analytics
-  have loaded
-- **THEN** the exported image captures the full growth-page container instead of
-  only a local card fragment
-
-### Requirement: Public swimmer detail pages SHALL retire the old poster-save action
-The public swimmer detail page MUST NOT continue exposing the old
-“保存分享海报” behavior once the full-page export flow replaces it.
-
-#### Scenario: Visitor opens a swimmer detail page
-- **WHEN** the public swimmer detail page is rendered
-- **THEN** the page exposes only the new full-page export action and no longer
-  presents the legacy poster-save wording or flow

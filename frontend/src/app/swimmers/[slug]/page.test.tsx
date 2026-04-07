@@ -1,16 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 import SwimmerDetailPage from "@/app/swimmers/[slug]/page";
 
-const toPng = vi.fn();
 const getPublicSwimmer = vi.fn();
 const listPublicSwimmerEvents = vi.fn();
 const getPublicEventAnalytics = vi.fn();
-
-vi.mock("html-to-image", () => ({
-  toPng: (...args: unknown[]) => toPng(...args),
-}));
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ slug: "tester" }),
@@ -44,10 +39,6 @@ vi.mock("@/lib/api/public", () => ({
 }));
 
 describe("SwimmerDetailPage", () => {
-  beforeAll(() => {
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-  });
-
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -123,42 +114,13 @@ describe("SwimmerDetailPage", () => {
       nextCustomStandard: null,
       benchmarkLines: [],
     });
-
-    toPng.mockResolvedValue("data:image/png;base64,aaa");
   });
 
-  it("downloads a full-page long image instead of the legacy poster export", async () => {
+  it("renders analytics content and no longer exposes the long-image download action", async () => {
     render(<SwimmerDetailPage />);
 
-    expect((await screen.findAllByText("成长曲线模块")).length).toBeGreaterThan(0);
-
-    fireEvent.click(screen.getByRole("button", { name: "下载整页长图" }));
-
-    await waitFor(() => {
-      expect(toPng).toHaveBeenCalledTimes(1);
-    });
-
-    const [target, options] = toPng.mock.calls[0] as [
-      HTMLDivElement,
-      {
-        backgroundColor: string;
-        canvasHeight: number;
-        canvasWidth: number;
-        height: number;
-        skipAutoScale: boolean;
-        width: number;
-      },
-    ];
-
-    expect(target.dataset.testid).toBe("swimmer-detail-capture");
-    expect(target.textContent).toContain("测试队员");
-    expect(target.textContent).toContain("PB");
-    expect(target.textContent).toContain("成长曲线模块");
-    expect(options.backgroundColor).toBe("#f8fafc");
-    expect(typeof options.width).toBe("number");
-    expect(typeof options.height).toBe("number");
-    expect(options.canvasWidth).toBe(options.width * 2);
-    expect(options.canvasHeight).toBe(options.height * 2);
-    expect(options.skipAutoScale).toBe(true);
+    expect(await screen.findByText("成长曲线模块")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "下载整页长图" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "保存分享海报" })).not.toBeInTheDocument();
   });
 });

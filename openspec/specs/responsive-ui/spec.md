@@ -39,7 +39,7 @@ distinguish empty states from loading states so that users do not see false
 loading feedback before required inputs are chosen. Public arena pages SHALL
 keep the race-group selector and primary race-detail surface readable and
 tappable on phone-sized viewports. Public swimmer detail pages SHALL preserve a
-stable section rhythm and export-ready content grouping on mobile and desktop.
+stable section rhythm on mobile and desktop.
 
 #### Scenario: Visitor reads analytics on mobile
 - **WHEN** a visitor views chart-heavy analytics pages on a phone-sized viewport
@@ -66,8 +66,7 @@ stable section rhythm and export-ready content grouping on mobile and desktop.
 #### Scenario: Visitor opens a public swimmer detail page on mobile
 - **WHEN** a visitor opens a public swimmer detail page on a phone-sized viewport
 - **THEN** the hero section, metric summary cards, and growth-analysis sections
-  remain stacked with consistent spacing and stay inside the exportable content
-  flow without clipping or overlap
+  remain stacked with consistent spacing without clipping or overlap
 
 ### Requirement: Public growth pages SHALL preserve consistent vertical rhythm
 The public swimmer detail page MUST keep its hero block, metric row, and
@@ -79,20 +78,9 @@ desktop and mobile layouts.
 - **THEN** the major rows of content use consistent vertical spacing rather than
   visibly different gaps between earlier and later sections
 
-#### Scenario: Visitor exports a long growth poster on mobile
-- **WHEN** a visitor uses the share export on a phone-sized viewport
-- **THEN** the exportable content container remains vertically coherent and does
-  not clip or overlap its stacked sections
-
-### Requirement: Full-page profile export and focused arena detail SHALL remain responsive
-The public swimmer full-page export composition and the focused arena detail
-layout SHALL remain readable and stable on both desktop and phone-sized
-viewports.
-
-#### Scenario: Visitor uses the profile export on mobile
-- **WHEN** a visitor loads a public swimmer detail page on a phone-sized viewport
-- **THEN** the exportable long-image composition remains vertically complete and
-  does not clip or collapse key sections
+### Requirement: Focused arena detail SHALL remain responsive
+The focused arena detail layout SHALL remain readable and stable on both
+desktop and phone-sized viewports.
 
 #### Scenario: Visitor opens the focused arena detail on mobile
 - **WHEN** a visitor opens the arena page on a phone-sized viewport
