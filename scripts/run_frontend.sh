@@ -2,26 +2,41 @@
 
 set -euo pipefail
 
-APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -f "$SCRIPT_DIR/server.js" ]]; then
+  APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  FRONTEND_ROOT="$SCRIPT_DIR"
+  COMMAND_HINT="./run_frontend.sh"
+elif [[ -f "$SCRIPT_DIR/../frontend/.next/standalone/server.js" ]]; then
+  APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  FRONTEND_ROOT="$APP_ROOT/frontend/.next/standalone"
+  COMMAND_HINT="./scripts/run_frontend.sh"
+else
+  APP_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+  FRONTEND_ROOT="$APP_ROOT/frontend/.next/standalone"
+  COMMAND_HINT="./scripts/run_frontend.sh"
+fi
+
 RUNTIME_DIR="${FRONTEND_RUNTIME_DIR:-$APP_ROOT/runtime}"
 PID_FILE="${FRONTEND_PID_FILE:-$RUNTIME_DIR/frontend.pid}"
 LOG_FILE="${FRONTEND_LOG_FILE:-$RUNTIME_DIR/frontend.log}"
 ENV_FILE="${FRONTEND_ENV_FILE:-$RUNTIME_DIR/frontend.env}"
-SERVER_FILE="${FRONTEND_SERVER_FILE:-$APP_ROOT/server.js}"
+SERVER_FILE="${FRONTEND_SERVER_FILE:-$FRONTEND_ROOT/server.js}"
 NODE_BIN="${FRONTEND_NODE_BIN:-node}"
 HOST_VALUE="0.0.0.0"
 PORT_VALUE="${PORT:-3000}"
 NODE_ENV_VALUE="${NODE_ENV:-production}"
 
 print_usage() {
-  cat <<'EOF'
+  cat <<EOF
 用法：
-  ./run_frontend.sh start [--nohup]
-  ./run_frontend.sh start-bg
-  ./run_frontend.sh stop
-  ./run_frontend.sh restart [--nohup]
-  ./run_frontend.sh status
-  ./run_frontend.sh logs [行数]
+  ${COMMAND_HINT} start [--nohup]
+  ${COMMAND_HINT} start-bg
+  ${COMMAND_HINT} stop
+  ${COMMAND_HINT} restart [--nohup]
+  ${COMMAND_HINT} status
+  ${COMMAND_HINT} logs [行数]
 
 说明：
   start           前台启动 Next standalone，日志直接输出到当前终端
@@ -36,11 +51,13 @@ print_usage() {
   HOSTNAME              监听地址，默认 0.0.0.0
   PORT                  监听端口，默认 3000
   NODE_ENV              默认 production
-  FRONTEND_RUNTIME_DIR  运行时目录，默认 ./runtime
+  FRONTEND_RUNTIME_DIR  运行时目录，默认应用根 ./runtime
   FRONTEND_PID_FILE     pid 文件路径
   FRONTEND_LOG_FILE     日志文件路径
   FRONTEND_ENV_FILE     运行参数记录文件路径
-  FRONTEND_SERVER_FILE  server.js 路径，默认 ./server.js
+  FRONTEND_SERVER_FILE  server.js 路径，默认自动识别：
+                        - 仓库内: ./frontend/.next/standalone/server.js
+                        - 部署后: ./frontend/server.js
   FRONTEND_NODE_BIN     node 可执行文件路径，默认 node
 EOF
 }
@@ -139,7 +156,7 @@ start_foreground() {
 
   echo "[frontend] 前台启动：$node_bin $SERVER_FILE"
   echo "[frontend] HOSTNAME=$HOST_VALUE PORT=$PORT_VALUE NODE_ENV=$NODE_ENV_VALUE"
-  cd "$APP_ROOT"
+  cd "$FRONTEND_ROOT"
   exec env \
     HOSTNAME="$HOST_VALUE" \
     PORT="$PORT_VALUE" \
@@ -163,7 +180,7 @@ start_background() {
 
   echo "[frontend] 后台启动中，日志输出到 $LOG_FILE"
   (
-    cd "$APP_ROOT"
+    cd "$FRONTEND_ROOT"
     exec nohup env \
       HOSTNAME="$HOST_VALUE" \
       PORT="$PORT_VALUE" \
@@ -176,7 +193,7 @@ start_background() {
   sleep 1
   if kill -0 "$pid" 2>/dev/null; then
     echo "[frontend] 启动成功，PID=$pid"
-    echo "[frontend] 查看状态：./run_frontend.sh status"
+    echo "[frontend] 查看状态：${COMMAND_HINT} status"
     echo "[frontend] 日志文件：$LOG_FILE"
     return 0
   fi
