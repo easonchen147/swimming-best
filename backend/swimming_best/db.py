@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS swimmers (
   is_public INTEGER NOT NULL,
   avatar_url TEXT NOT NULL DEFAULT '',
   birth_year INTEGER NOT NULL DEFAULT 0,
+  birth_date TEXT NOT NULL DEFAULT '',
   gender TEXT NOT NULL DEFAULT 'unknown',
   team_id TEXT NOT NULL,
   notes TEXT NOT NULL DEFAULT '',
@@ -177,6 +178,7 @@ def init_db(connection: sqlite3.Connection) -> None:
     connection.executescript(SCHEMA_SQL)
     migrate_legacy_team_model(connection)
     migrate_swimmer_gender(connection)
+    migrate_swimmer_birth_date(connection)
     seed_builtin_events(connection)
     connection.execute(
         """
@@ -206,11 +208,14 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
         raise RuntimeError("swimmers table is missing both team_id and team_name")
 
     has_team_id = "team_id" in swimmer_columns
+    has_birth_date = "birth_date" in swimmer_columns
     team_id_select = ", team_id" if has_team_id else ""
+    birth_date_select = ", birth_date" if has_birth_date else ""
     legacy_rows = connection.execute(
         f"""
         SELECT id, slug, real_name, nickname, public_name_mode, is_public, avatar_url,
-               birth_year, team_name, notes, created_at, updated_at{team_id_select}
+               birth_year{birth_date_select}, team_name, notes, created_at,
+               updated_at{team_id_select}
         FROM swimmers
         ORDER BY created_at ASC
         """
@@ -235,6 +240,7 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
               is_public INTEGER NOT NULL,
               avatar_url TEXT NOT NULL DEFAULT '',
               birth_year INTEGER NOT NULL DEFAULT 0,
+              birth_date TEXT NOT NULL DEFAULT '',
               gender TEXT NOT NULL DEFAULT 'unknown',
               team_id TEXT NOT NULL,
               notes TEXT NOT NULL DEFAULT '',
@@ -250,8 +256,8 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
                 """
                 INSERT INTO swimmers_managed (
                   id, slug, real_name, nickname, public_name_mode, is_public,
-                  avatar_url, birth_year, gender, team_id, notes, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                  avatar_url, birth_year, birth_date, gender, team_id, notes, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     row["id"],
@@ -262,6 +268,7 @@ def migrate_legacy_team_model(connection: sqlite3.Connection) -> None:
                     row["is_public"],
                     row["avatar_url"],
                     row["birth_year"],
+                    row["birth_date"] if has_birth_date else "",
                     "unknown",
                     team_assignments[row["id"]],
                     row["notes"],
@@ -376,6 +383,27 @@ def migrate_swimmer_gender(connection: sqlite3.Connection) -> None:
         UPDATE swimmers
         SET gender = 'unknown'
         WHERE gender IS NULL OR TRIM(gender) = ''
+        """
+    )
+    connection.commit()
+
+
+def migrate_swimmer_birth_date(connection: sqlite3.Connection) -> None:
+    swimmer_columns = {row["name"] for row in connection.execute("PRAGMA table_info(swimmers)")}
+    if "birth_date" in swimmer_columns:
+        return
+
+    connection.execute(
+        """
+        ALTER TABLE swimmers
+        ADD COLUMN birth_date TEXT NOT NULL DEFAULT ''
+        """
+    )
+    connection.execute(
+        """
+        UPDATE swimmers
+        SET birth_date = ''
+        WHERE birth_date IS NULL
         """
     )
     connection.commit()

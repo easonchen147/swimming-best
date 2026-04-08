@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { format } from "date-fns";
 import { vi } from "vitest";
 
 import { DatePickerInput, YearPickerInput } from "@/components/shared/date-picker";
@@ -9,11 +10,22 @@ describe("DatePickerInput", () => {
     render(<DatePickerInput ariaLabel="发生日期" onChange={onChange} value="2026-04-05" />);
 
     fireEvent.click(screen.getByRole("button", { name: "发生日期" }));
-    fireEvent.change(screen.getByDisplayValue("2026-04-05"), {
-      target: { value: "2026-04-06" },
-    });
+    fireEvent.click(screen.getByRole("button", { name: "今天" }));
 
-    expect(onChange).toHaveBeenCalledWith("2026-04-06");
+    expect(onChange).toHaveBeenCalledWith(format(new Date(), "yyyy-MM-dd"));
+  });
+
+  it("shows the provided placeholder text", () => {
+    render(
+      <DatePickerInput
+        ariaLabel="出生日期"
+        onChange={vi.fn()}
+        placeholder="请选择"
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "出生日期" })).toHaveTextContent("请选择");
   });
 });
 

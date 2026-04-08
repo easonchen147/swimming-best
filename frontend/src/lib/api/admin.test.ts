@@ -85,6 +85,7 @@ describe("admin api client", () => {
       isPublic: true,
       gender: "male",
       teamId: "team-1",
+      birthDate: "2016-05-12",
     });
     await updateAdminSwimmer("swimmer-1", {
       realName: "Alice Wang",
@@ -93,6 +94,7 @@ describe("admin api client", () => {
       isPublic: true,
       gender: "female",
       teamId: "team-2",
+      birthDate: "2016-05-13",
     });
     await createAdminEvent({
       poolLengthM: 25,
@@ -176,6 +178,7 @@ describe("admin api client", () => {
       isPublic: true,
       gender: "male",
       teamId: "team-1",
+      birthDate: "2016-05-12",
     });
     expect(apiPatch).toHaveBeenNthCalledWith(2, "/api/admin/swimmers/swimmer-1", {
       realName: "Alice Wang",
@@ -184,6 +187,7 @@ describe("admin api client", () => {
       isPublic: true,
       gender: "female",
       teamId: "team-2",
+      birthDate: "2016-05-13",
     });
     expect(apiPost).toHaveBeenNthCalledWith(5, "/api/admin/events", {
       poolLengthM: 25,

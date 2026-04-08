@@ -2,19 +2,33 @@
 
 import * as Popover from "@radix-ui/react-popover";
 import { format, parseISO } from "date-fns";
+import { zhCN } from "date-fns/locale";
 import { CalendarDays, ChevronDown } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 
 const triggerClassName =
   "flex h-11 w-full items-center justify-between rounded-2xl border border-border/60 bg-surface-strong/90 px-4 text-sm font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-200 hover:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/10";
 
 function formatDateLabel(value: string) {
-  if (!value) {
+  const parsed = parseDateValue(value);
+  if (!parsed) {
     return "请选择日期";
   }
-  return format(parseISO(value), "yyyy年MM月dd日");
+  return format(parsed, "yyyy年MM月dd日", { locale: zhCN });
+}
+
+function parseDateValue(value: string) {
+  if (!value) {
+    return undefined;
+  }
+  const parsed = parseISO(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+  return parsed;
 }
 
 export function DatePickerInput({
@@ -23,13 +37,19 @@ export function DatePickerInput({
   placeholder = "请选择日期",
   className,
   ariaLabel,
+  startMonth,
+  endMonth,
 }: {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   className?: string;
   ariaLabel?: string;
+  startMonth?: Date;
+  endMonth?: Date;
 }) {
+  const selectedDate = parseDateValue(value);
+
   return (
     <Popover.Root>
       <Popover.Trigger asChild>
@@ -50,34 +70,41 @@ export function DatePickerInput({
       <Popover.Portal>
         <Popover.Content
           align="start"
-          className="z-50 w-80 rounded-3xl border border-border/60 bg-surface-strong p-4 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
+          className="z-50 rounded-3xl border border-border/60 bg-surface-strong p-3 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
           sideOffset={8}
         >
           <div className="space-y-4">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
               选择日期
             </div>
-            <Input
-              className="h-11 rounded-2xl"
-              onChange={(event) => onChange(event.target.value)}
-              type="date"
-              value={value}
+            <Calendar
+              captionLayout="dropdown"
+              endMonth={endMonth}
+              locale={zhCN}
+              mode="single"
+              onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+              selected={selectedDate}
+              startMonth={startMonth}
             />
             <div className="flex gap-2">
-              <button
-                className="rounded-full border border-border/60 px-4 py-2 text-xs font-bold text-foreground transition-colors hover:border-primary/20 hover:bg-primary/5 hover:text-primary"
-                onClick={() => onChange(new Date().toISOString().split("T")[0])}
+              <Button
+                className="rounded-full"
+                onClick={() => onChange(format(new Date(), "yyyy-MM-dd"))}
+                size="sm"
                 type="button"
+                variant="outline"
               >
                 今天
-              </button>
-              <button
-                className="rounded-full border border-border/60 px-4 py-2 text-xs font-bold text-muted transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
+              </Button>
+              <Button
+                className="rounded-full"
                 onClick={() => onChange("")}
+                size="sm"
                 type="button"
+                variant="outline"
               >
                 清空
-              </button>
+              </Button>
             </div>
           </div>
         </Popover.Content>

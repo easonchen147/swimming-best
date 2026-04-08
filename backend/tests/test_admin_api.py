@@ -42,6 +42,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     assert swimmer["teamId"] == team["id"]
     assert swimmer["team"]["name"] == "海星提升队"
     assert swimmer["birthYear"] == 2016
+    assert swimmer["birthDate"] == ""
     assert swimmer["notes"] == "主项偏自由泳"
 
     update_response = admin_client.patch(
@@ -51,7 +52,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
             "nickname": "小海豚",
             "publicNameMode": "nickname",
             "isPublic": True,
-            "birthYear": 2015,
+            "birthDate": "2015-09-03",
             "notes": "改练 50 自冲刺",
             "teamId": second_team["id"],
         },
@@ -60,6 +61,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     assert update_response.get_json()["teamId"] == second_team["id"]
     assert update_response.get_json()["team"]["name"] == "海豚冲刺队"
     assert update_response.get_json()["birthYear"] == 2015
+    assert update_response.get_json()["birthDate"] == "2015-09-03"
     assert update_response.get_json()["notes"] == "改练 50 自冲刺"
 
     team_update_response = admin_client.patch(
@@ -177,6 +179,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     swimmers = swimmers_response.get_json()["swimmers"]
     assert len(swimmers) == 1
     assert swimmers[0]["team"]["name"] == "海豚冲刺一队"
+    assert swimmers[0]["birthDate"] == "2015-09-03"
 
     searched_swimmers_response = admin_client.get(
         f"/api/admin/swimmers?teamId={second_team['id']}&search=%E5%B0%8F%E6%B5%B7%E8%B1%9A"
@@ -186,7 +189,9 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     assert len(searched_swimmers) == 1
     assert searched_swimmers[0]["nickname"] == "小海豚"
 
-    searched_events_response = admin_client.get("/api/admin/events?search=%E8%87%AA%E7%94%B1%E6%B3%B3")
+    searched_events_response = admin_client.get(
+        "/api/admin/events?search=%E8%87%AA%E7%94%B1%E6%B3%B3"
+    )
     assert searched_events_response.status_code == 200
     searched_events = searched_events_response.get_json()["events"]
     assert len(searched_events) >= 1
@@ -223,6 +228,34 @@ def test_admin_api_rejects_unknown_team_assignment(admin_client):
 
     assert response.status_code == 400
     assert response.get_json()["error"] == "team not found"
+
+
+def test_admin_api_accepts_exact_birth_date_and_keeps_compatible_birth_year(admin_client):
+    team = admin_client.post(
+        "/api/admin/teams",
+        json={
+            "name": "生日测试队",
+            "sortOrder": 1,
+            "isActive": True,
+        },
+    ).get_json()
+
+    response = admin_client.post(
+        "/api/admin/swimmers",
+        json={
+            "realName": "Birth Date Swimmer",
+            "nickname": "生日选手",
+            "publicNameMode": "nickname",
+            "isPublic": True,
+            "birthDate": "2014-07-21",
+            "teamId": team["id"],
+        },
+    )
+
+    assert response.status_code == 201
+    swimmer = response.get_json()
+    assert swimmer["birthDate"] == "2014-07-21"
+    assert swimmer["birthYear"] == 2014
 
 
 def test_admin_api_rejects_inactive_team_assignment(admin_client):

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { format } from "date-fns";
 import { vi } from "vitest";
 
 import AdminSwimmersPage from "@/app/admin/swimmers/page";
@@ -61,6 +62,7 @@ describe("AdminSwimmersPage", () => {
       publicNameMode: "nickname",
       isPublic: true,
       gender: "female",
+      birthDate: "2016-05-12",
       teamId: "team-a",
       team: {
         id: "team-a",
@@ -71,8 +73,9 @@ describe("AdminSwimmersPage", () => {
     });
   });
 
-  it("submits swimmer gender and selected birth year to the admin api", async () => {
+  it("submits swimmer gender and selected birth date to the admin api", async () => {
     render(<AdminSwimmersPage />);
+    const today = format(new Date(), "yyyy-MM-dd");
 
     const inputs = await screen.findAllByRole("textbox");
 
@@ -85,8 +88,8 @@ describe("AdminSwimmersPage", () => {
     fireEvent.click(screen.getByRole("combobox", { name: "性别" }));
     fireEvent.click(await screen.findByRole("option", { name: "女" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "出生年份" }));
-    fireEvent.click(screen.getByRole("button", { name: "2016" }));
+    fireEvent.click(screen.getByRole("button", { name: "出生日期" }));
+    fireEvent.click(screen.getByRole("button", { name: "今天" }));
 
     fireEvent.click(screen.getByRole("button", { name: "创建档案" }));
 
@@ -98,7 +101,7 @@ describe("AdminSwimmersPage", () => {
         isPublic: true,
         gender: "female",
         teamId: "team-a",
-        birthYear: 2016,
+        birthDate: today,
         notes: "",
       });
     });
@@ -115,6 +118,7 @@ describe("AdminSwimmersPage", () => {
           publicNameMode: "nickname",
           isPublic: true,
           gender: "female",
+          birthDate: "2016-05-12",
           teamId: "team-a",
           team: {
             id: "team-a",
@@ -128,7 +132,7 @@ describe("AdminSwimmersPage", () => {
 
     render(<AdminSwimmersPage />);
 
-    expect(await screen.findByText("小海豚 · 海豚预备队")).toBeInTheDocument();
+    expect(await screen.findByText("真实姓名：Alice Wang")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("搜索姓名或昵称..."), {
       target: { value: "海豚" },
@@ -136,6 +140,71 @@ describe("AdminSwimmersPage", () => {
 
     await waitFor(() => {
       expect(listAdminSwimmers).toHaveBeenLastCalledWith(undefined, "海豚");
+    });
+  });
+
+  it("restores public visibility when switching a hidden swimmer back to a visible mode", async () => {
+    listAdminSwimmers.mockResolvedValue({
+      swimmers: [
+        {
+          id: "swimmer-hidden",
+          slug: "mi-mi-xuan-shou",
+          realName: "Cara Li",
+          nickname: "秘密选手",
+          publicNameMode: "hidden",
+          isPublic: false,
+          gender: "female",
+          birthDate: "",
+          birthYear: 2015,
+          teamId: "team-a",
+          team: {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+          notes: "",
+        },
+      ],
+    });
+    updateAdminSwimmer.mockResolvedValue({
+      id: "swimmer-hidden",
+      slug: "mi-mi-xuan-shou",
+      realName: "Cara Li",
+      nickname: "秘密选手",
+      publicNameMode: "nickname",
+      isPublic: true,
+      gender: "female",
+      birthDate: "",
+      birthYear: 2015,
+      teamId: "team-a",
+      team: {
+        id: "team-a",
+        name: "海豚预备队",
+        sortOrder: 1,
+        isActive: true,
+      },
+      notes: "",
+    });
+
+    render(<AdminSwimmersPage />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "编辑队员" }));
+    fireEvent.click(screen.getByRole("combobox", { name: "展示姓名模式" }));
+    fireEvent.click(await screen.findByRole("option", { name: "展示昵称" }));
+    fireEvent.click(screen.getByRole("button", { name: "更新档案" }));
+
+    await waitFor(() => {
+      expect(updateAdminSwimmer).toHaveBeenCalledWith("swimmer-hidden", {
+        realName: "Cara Li",
+        nickname: "秘密选手",
+        publicNameMode: "nickname",
+        isPublic: true,
+        gender: "female",
+        teamId: "team-a",
+        birthDate: "",
+        notes: "",
+      });
     });
   });
 });

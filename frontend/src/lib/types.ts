@@ -236,6 +236,7 @@ export type AdminSwimmer = {
   publicNameMode: string;
   isPublic: boolean;
   gender: Gender;
+  birthDate?: string;
   birthYear?: number;
   avatarUrl?: string;
   notes?: string;

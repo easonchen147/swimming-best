@@ -74,6 +74,7 @@ export function createAdminSwimmer(input: {
   isPublic: boolean;
   gender: Gender;
   teamId: string;
+  birthDate?: string;
   birthYear?: number;
   notes?: string;
 }) {
@@ -89,6 +90,7 @@ export function updateAdminSwimmer(
     isPublic: boolean;
     gender: Gender;
     teamId: string;
+    birthDate?: string;
     birthYear?: number;
     notes?: string;
   },

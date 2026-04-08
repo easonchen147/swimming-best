@@ -7,7 +7,6 @@ import {
   Plus, 
   Search, 
   Filter, 
-  Download, 
   Edit3, 
   FileText,
   Users, 
@@ -16,7 +15,7 @@ import {
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
-import { YearPickerInput } from "@/components/shared/date-picker";
+import { DatePickerInput } from "@/components/shared/date-picker";
 import { Field } from "@/components/shared/form-field";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,13 +40,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   createAdminSwimmer,
-  getSwimmerExportUrl,
   getSwimmerSummaryExportUrl,
   listAdminTeams,
   listAdminSwimmers,
   updateAdminSwimmer,
 } from "@/lib/api/admin";
-import { describeSwimmer, listTeams } from "@/lib/swimmer-label";
+import { listTeams } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
 import { FADE_IN_UP } from "@/lib/animations";
 import type { AdminSwimmer, Gender, TeamSummary } from "@/lib/types";
@@ -66,7 +64,7 @@ export default function AdminSwimmersPage() {
     isPublic: true,
     gender: "unknown" as "male" | "female" | "unknown",
     teamId: "",
-    birthYear: "",
+    birthDate: "",
     notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
@@ -74,6 +72,9 @@ export default function AdminSwimmersPage() {
   const teamSelectId = "swimmer-team";
   const genderSelectId = "swimmer-gender";
   const publicNameModeSelectId = "swimmer-public-name-mode";
+  const currentYear = new Date().getFullYear();
+  const earliestBirthMonth = new Date(currentYear - 25, 0);
+  const latestBirthMonth = new Date();
   useEffect(() => {
     listAdminTeams().then((teamResponse) => {
       setTeams(teamResponse.teams);
@@ -112,8 +113,29 @@ export default function AdminSwimmersPage() {
       isPublic: true,
       gender: "unknown",
       teamId: teams[0]?.id || "",
-      birthYear: "",
+      birthDate: "",
       notes: "",
+    });
+  }
+
+  function updatePublicNameMode(nextMode: string) {
+    setForm((current) => {
+      if (nextMode === "hidden") {
+        return {
+          ...current,
+          publicNameMode: nextMode,
+          isPublic: false,
+        };
+      }
+
+      const shouldRestorePublic =
+        current.publicNameMode === "hidden" && current.isPublic === false;
+
+      return {
+        ...current,
+        publicNameMode: nextMode,
+        isPublic: shouldRestorePublic ? true : current.isPublic,
+      };
     });
   }
 
@@ -121,10 +143,7 @@ export default function AdminSwimmersPage() {
     event.preventDefault();
     setSubmitting(true);
     setSuccess(false);
-    const payload = {
-      ...form,
-      birthYear: form.birthYear ? Number(form.birthYear) : undefined,
-    };
+    const payload = { ...form };
     try {
       if (editingId) {
         await updateAdminSwimmer(editingId, payload);
@@ -159,13 +178,15 @@ export default function AdminSwimmersPage() {
       isPublic: swimmer.isPublic,
       gender: swimmer.gender,
       teamId: swimmer.teamId,
-      birthYear: swimmer.birthYear ? String(swimmer.birthYear) : "",
+      birthDate: swimmer.birthDate ?? "",
       notes: swimmer.notes ?? "",
     });
     if (window.innerWidth < 1024) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
+
+  const isHiddenMode = form.publicNameMode === "hidden";
 
   return (
     <AdminShell 
@@ -215,13 +236,16 @@ export default function AdminSwimmersPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="出生年份">
-                    <YearPickerInput
-                      ariaLabel="出生年份"
+                  <Field label="出生日期">
+                    <DatePickerInput
+                      ariaLabel="出生日期"
+                      endMonth={latestBirthMonth}
                       onChange={(value) =>
-                        setForm((current) => ({ ...current, birthYear: value }))
+                        setForm((current) => ({ ...current, birthDate: value }))
                       }
-                      value={form.birthYear}
+                      placeholder="请选择"
+                      startMonth={earliestBirthMonth}
+                      value={form.birthDate}
                     />
                   </Field>
                   <Field label="备注">
@@ -285,9 +309,7 @@ export default function AdminSwimmersPage() {
                   </Field>
                   <Field label="展示姓名模式" labelFor={publicNameModeSelectId}>
                     <Select
-                      onValueChange={(value) =>
-                        setForm((current) => ({ ...current, publicNameMode: value }))
-                      }
+                      onValueChange={updatePublicNameMode}
                       value={form.publicNameMode}
                     >
                       <SelectTrigger id={publicNameModeSelectId}>
@@ -306,6 +328,7 @@ export default function AdminSwimmersPage() {
 
                 <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-surface/40 p-4 transition-colors hover:border-primary/20">
                   <Checkbox
+                    disabled={isHiddenMode}
                     id="isPublic"
                     checked={form.isPublic}
                     onCheckedChange={(checked) =>
@@ -314,7 +337,11 @@ export default function AdminSwimmersPage() {
                   />
                   <label htmlFor="isPublic" className="flex flex-col cursor-pointer">
                     <span className="text-sm font-bold text-foreground">公开展示该队员</span>
-                    <span className="text-xs text-muted/80">允许在公共门户页面搜索和查看该队员。</span>
+                    <span className="text-xs text-muted/80">
+                      {isHiddenMode
+                        ? "完全隐藏模式下会自动关闭公开展示。"
+                        : "允许在公共门户页面搜索和查看该队员。"}
+                    </span>
                   </label>
                 </div>
               </CardContent>
@@ -394,10 +421,17 @@ export default function AdminSwimmersPage() {
             </CardHeader>
             
             <CardContent className="p-0">
-               <Table>
+               <Table className="min-w-[760px] table-fixed">
+                 <colgroup>
+                   <col className="w-[280px]" />
+                   <col className="w-[180px]" />
+                   <col className="w-[110px]" />
+                   <col className="w-[140px]" />
+                   <col className="w-[120px]" />
+                 </colgroup>
                  <TableHeader>
                    <TableRow className="hover:bg-transparent">
-                     <TableHead className="w-[200px]">姓名 / 昵称</TableHead>
+                     <TableHead>公开展示 / 真实姓名</TableHead>
                      <TableHead>所属队伍</TableHead>
                      <TableHead>性别</TableHead>
                      <TableHead>公开状态</TableHead>
@@ -418,8 +452,23 @@ export default function AdminSwimmersPage() {
                                {swimmer.nickname.slice(0, 1)}
                              </div>
                              <div className="flex flex-col">
-                               <span className="font-bold text-foreground">{describeSwimmer(swimmer)}</span>
-                               <span className="text-[10px] text-muted uppercase tracking-wider">{swimmer.realName}</span>
+                               <div className="flex items-center gap-2">
+                                 <span className="font-bold text-foreground">
+                                   {swimmer.publicNameMode === "real_name"
+                                     ? swimmer.realName
+                                     : swimmer.nickname || swimmer.realName}
+                                 </span>
+                                 <span className="rounded-full bg-primary/6 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary/70">
+                                   {swimmer.publicNameMode === "hidden"
+                                     ? "完全隐藏"
+                                     : swimmer.publicNameMode === "real_name"
+                                       ? "公开真名"
+                                       : "公开昵称"}
+                                 </span>
+                               </div>
+                               <span className="text-[11px] text-muted">
+                                 真实姓名：{swimmer.realName}
+                               </span>
                              </div>
                            </div>
                          </TableCell>
@@ -450,7 +499,8 @@ export default function AdminSwimmersPage() {
                          </TableCell>
                          <TableCell className="text-right">
                            <div className="flex items-center justify-end gap-1">
-                             <Button
+                              <Button
+                               aria-label="编辑队员"
                                onClick={() => startEdit(swimmer)}
                                size="icon"
                                variant="ghost"
@@ -459,20 +509,13 @@ export default function AdminSwimmersPage() {
                                <Edit3 className="h-4 w-4" />
                              </Button>
                              <Button
+                               aria-label="打开队员摘要"
                                onClick={() => window.open(getSwimmerSummaryExportUrl(swimmer.id), "_blank")}
                                size="icon"
                                variant="ghost"
                                className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary"
                              >
                                <FileText className="h-4 w-4" />
-                             </Button>
-                             <Button
-                               onClick={() => window.open(getSwimmerExportUrl(swimmer.id), "_blank")}
-                               size="icon"
-                               variant="ghost"
-                               className="h-9 w-9 rounded-xl hover:bg-secondary/10 hover:text-secondary"
-                             >
-                               <Download className="h-4 w-4" />
                              </Button>
                            </div>
                          </TableCell>

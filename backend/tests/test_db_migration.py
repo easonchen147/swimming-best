@@ -43,6 +43,7 @@ def test_init_db_migrates_legacy_team_name_schema(tmp_path: Path):
     }
     assert "team_id" in swimmer_columns
     assert "team_name" not in swimmer_columns
+    assert "birth_date" in swimmer_columns
 
     repository = Repository(connection)
     teams = repository.list_teams()
@@ -52,3 +53,5 @@ def test_init_db_migrates_legacy_team_name_schema(tmp_path: Path):
     swimmers = repository.list_swimmers()
     assert swimmers[0]["teamId"] == teams[0]["id"]
     assert swimmers[0]["team"]["name"] == "海豚预备队"
+    assert swimmers[0]["birthYear"] == 2016
+    assert swimmers[0]["birthDate"] == ""

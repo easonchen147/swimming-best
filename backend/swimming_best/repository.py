@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import sqlite3
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -128,6 +128,7 @@ class Repository:
         if public_name_mode == "hidden":
             is_public = False
         team = self._require_team(payload.get("teamId"))
+        birth_date, birth_year = normalize_birth_fields(payload)
 
         swimmer = {
             "id": str(uuid4()),
@@ -137,7 +138,8 @@ class Repository:
             "publicNameMode": public_name_mode,
             "isPublic": is_public,
             "avatarUrl": payload.get("avatarUrl", "").strip(),
-            "birthYear": int(payload.get("birthYear") or 0),
+            "birthDate": birth_date,
+            "birthYear": birth_year,
             "gender": normalize_gender(payload.get("gender")),
             "teamId": team["id"],
             "team": team,
@@ -150,8 +152,8 @@ class Repository:
             """
             INSERT INTO swimmers (
               id, slug, real_name, nickname, public_name_mode, is_public,
-              avatar_url, birth_year, gender, team_id, notes, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              avatar_url, birth_year, birth_date, gender, team_id, notes, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 swimmer["id"],
@@ -162,6 +164,7 @@ class Repository:
                 int(swimmer["isPublic"]),
                 swimmer["avatarUrl"],
                 swimmer["birthYear"],
+                swimmer["birthDate"],
                 swimmer["gender"],
                 swimmer["teamId"],
                 swimmer["notes"],
@@ -185,6 +188,11 @@ class Repository:
             next_team_id,
             allow_inactive=str(next_team_id) == swimmer["teamId"],
         )
+        birth_date, birth_year = normalize_birth_fields(
+            payload,
+            existing_birth_date=swimmer.get("birthDate", ""),
+            existing_birth_year=swimmer["birthYear"],
+        )
 
         updated = {
             **swimmer,
@@ -193,7 +201,8 @@ class Repository:
             "publicNameMode": public_name_mode,
             "isPublic": is_public,
             "avatarUrl": payload.get("avatarUrl", swimmer["avatarUrl"]).strip(),
-            "birthYear": int(payload.get("birthYear", swimmer["birthYear"]) or 0),
+            "birthDate": birth_date,
+            "birthYear": birth_year,
             "gender": normalize_gender(payload.get("gender", swimmer["gender"])),
             "teamId": team["id"],
             "team": team,
@@ -205,7 +214,7 @@ class Repository:
             """
             UPDATE swimmers
             SET real_name = ?, nickname = ?, public_name_mode = ?, is_public = ?, avatar_url = ?,
-                birth_year = ?, gender = ?, team_id = ?, notes = ?, updated_at = ?
+                birth_year = ?, birth_date = ?, gender = ?, team_id = ?, notes = ?, updated_at = ?
             WHERE id = ?
             """,
             (
@@ -215,6 +224,7 @@ class Repository:
                 int(updated["isPublic"]),
                 updated["avatarUrl"],
                 updated["birthYear"],
+                updated["birthDate"],
                 updated["gender"],
                 updated["teamId"],
                 updated["notes"],
@@ -238,7 +248,7 @@ class Repository:
         if pattern := search_pattern(search):
             clauses.append("(LOWER(s.real_name) LIKE ? OR LOWER(s.nickname) LIKE ?)")
             params.extend([pattern, pattern])
-        return self._list_swimmers(clauses, params)
+        return self._list_swimmers(clauses, params, include_birth_date=True)
 
     def list_public_swimmers(
         self,
@@ -256,7 +266,7 @@ class Repository:
         return self._list_swimmers(clauses, params)
 
     def get_swimmer(self, swimmer_id: str) -> dict[str, Any]:
-        swimmers = self._list_swimmers(["s.id = ?"], [swimmer_id])
+        swimmers = self._list_swimmers(["s.id = ?"], [swimmer_id], include_birth_date=True)
         if not swimmers:
             raise NotFoundError("not_found")
         return swimmers[0]
@@ -1048,10 +1058,13 @@ class Repository:
         self,
         where_clauses: list[str] | None = None,
         params: list[Any] | None = None,
+        *,
+        include_birth_date: bool = False,
     ) -> list[dict[str, Any]]:
         query = """
         SELECT s.id, s.slug, s.real_name, s.nickname, s.public_name_mode, s.is_public,
-               s.avatar_url, s.birth_year, s.gender, s.team_id, s.notes, s.created_at, s.updated_at,
+               s.avatar_url, s.birth_year, s.birth_date, s.gender, s.team_id,
+               s.notes, s.created_at, s.updated_at,
                t.name AS team_name, t.sort_order AS team_sort_order,
                t.is_active AS team_is_active, t.created_at AS team_created_at,
                t.updated_at AS team_updated_at
@@ -1062,7 +1075,7 @@ class Repository:
             query += " WHERE " + " AND ".join(f"({clause})" for clause in where_clauses)
         query += " ORDER BY t.sort_order ASC, t.created_at ASC, s.created_at ASC"
         rows = self.connection.execute(query, params or []).fetchall()
-        return [self._row_to_swimmer(row) for row in rows]
+        return [self._row_to_swimmer(row, include_birth_date=include_birth_date) for row in rows]
 
     def _row_to_team(self, row: sqlite3.Row) -> dict[str, Any]:
         return {
@@ -1084,8 +1097,13 @@ class Repository:
             "updatedAt": row["team_updated_at"],
         }
 
-    def _row_to_swimmer(self, row: sqlite3.Row) -> dict[str, Any]:
-        return {
+    def _row_to_swimmer(
+        self,
+        row: sqlite3.Row,
+        *,
+        include_birth_date: bool = False,
+    ) -> dict[str, Any]:
+        swimmer = {
             "id": row["id"],
             "slug": row["slug"],
             "realName": row["real_name"],
@@ -1102,6 +1120,9 @@ class Repository:
             "createdAt": row["created_at"],
             "updatedAt": row["updated_at"],
         }
+        if include_birth_date:
+            swimmer["birthDate"] = row["birth_date"]
+        return swimmer
 
     def _row_to_event(self, row: sqlite3.Row) -> dict[str, Any]:
         return {
@@ -1342,6 +1363,69 @@ def normalize_standard_gender(value: Any) -> str:
     if gender not in {"male", "female", "all"}:
         raise ValidationError("invalid standard gender")
     return gender
+
+
+def normalize_birth_fields(
+    payload: dict[str, Any],
+    *,
+    existing_birth_date: Any = "",
+    existing_birth_year: Any = 0,
+) -> tuple[str, int]:
+    has_birth_date = "birthDate" in payload
+    has_birth_year = "birthYear" in payload
+
+    current_birth_date = normalize_birth_date(existing_birth_date, allow_blank=True)
+    current_birth_year = normalize_birth_year(existing_birth_year)
+
+    if has_birth_date:
+        birth_date = normalize_birth_date(payload.get("birthDate"), allow_blank=True)
+        if birth_date:
+            return birth_date, date.fromisoformat(birth_date).year
+        if has_birth_year:
+            return "", normalize_birth_year(payload.get("birthYear"))
+        return "", current_birth_year
+
+    if has_birth_year:
+        birth_year = normalize_birth_year(payload.get("birthYear"))
+        if current_birth_date and date.fromisoformat(current_birth_date).year == birth_year:
+            return current_birth_date, birth_year
+        return "", birth_year
+
+    return current_birth_date, current_birth_year
+
+
+def normalize_birth_date(value: Any, *, allow_blank: bool = False) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        if allow_blank:
+            return ""
+        raise ValidationError("birth date is required")
+
+    try:
+        birth_date = date.fromisoformat(raw)
+    except ValueError as exc:
+        raise ValidationError("invalid birth date") from exc
+
+    if birth_date > date.today():
+        raise ValidationError("invalid birth date")
+
+    return birth_date.isoformat()
+
+
+def normalize_birth_year(value: Any) -> int:
+    try:
+        birth_year = int(value or 0)
+    except (TypeError, ValueError) as exc:
+        raise ValidationError("invalid birth year") from exc
+
+    if birth_year == 0:
+        return 0
+
+    current_year = date.today().year
+    if birth_year < 1900 or birth_year > current_year:
+        raise ValidationError("invalid birth year")
+
+    return birth_year
 
 
 def age_bucket_label(birth_year: Any) -> str:

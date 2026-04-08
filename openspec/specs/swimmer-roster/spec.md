@@ -7,9 +7,9 @@ Define the managed swimmer roster, including visibility settings, team assignmen
 
 ### Requirement: The system SHALL manage multiple swimmer profiles
 The system SHALL allow administrators to create, update, list, and review
-swimmer profiles for multiple children. Birth year entry SHALL use a
-year-focused picker interaction rather than a free-text field or a plain
-dropdown.
+swimmer profiles for multiple children. The admin swimmer workflow SHALL accept
+an exact birth date while continuing to preserve a compatible birth year for
+legacy behavior that still depends on year-based metadata.
 
 #### Scenario: Administrator creates a swimmer with a managed team assignment
 - **WHEN** an administrator submits a valid swimmer profile with a team identifier
@@ -23,10 +23,17 @@ dropdown.
 - **WHEN** an administrator submits a swimmer profile that includes supported roster metadata such as gender or notes
 - **THEN** the system stores and returns those fields through the admin API
 
-#### Scenario: Administrator selects a birth year
-- **WHEN** an administrator edits the birth-year field in the swimmer form
-- **THEN** the UI offers a year-focused picker interaction instead of plain
-  text entry or a simple dropdown
+#### Scenario: Administrator saves a swimmer with an exact birth date
+- **WHEN** an administrator submits a swimmer profile with a valid `birthDate`
+- **THEN** the system stores that exact birth date and also maintains the
+  matching compatible `birthYear`
+
+#### Scenario: Historical swimmer data upgrades without an exact birth date
+- **WHEN** the application upgrades an older database that only contains
+  `birth_year`
+- **THEN** the system adds the new exact-date storage without fabricating month
+  or day values, and the historical swimmers remain editable with their
+  existing compatible birth year preserved
 
 ### Requirement: Swimmer profiles SHALL control public identity and visibility
 Each swimmer profile SHALL support visibility controls and identity display modes.
@@ -34,6 +41,16 @@ Each swimmer profile SHALL support visibility controls and identity display mode
 #### Scenario: Public page requests a nickname-mode swimmer with a managed team
 - **WHEN** a swimmer is public, nickname-mode, and assigned a team
 - **THEN** public payloads display the nickname and team while preserving the configured visibility mode
+
+### Requirement: Swimmer profiles SHALL keep visibility controls reversible
+Swimmer visibility and public identity settings SHALL remain fully editable,
+including transitions out of a fully hidden state.
+
+#### Scenario: Administrator restores a previously hidden swimmer to public
+- **WHEN** an administrator edits a swimmer that was set to `hidden`, changes
+  the public-name mode back to a visible mode, and re-enables public visibility
+- **THEN** the system persists the swimmer as public again instead of leaving it
+  stuck in a hidden state
 
 ### Requirement: Swimmer roster filters SHALL use backend-recognized query inputs
 The admin swimmer roster SHALL support visible search and team filters whose
