@@ -45,6 +45,7 @@ describe("AdminTeamsPage", () => {
           name: "海豚预备队",
           sortOrder: 1,
           isActive: true,
+          swimmerCount: 1,
         },
       ],
     });
@@ -53,12 +54,14 @@ describe("AdminTeamsPage", () => {
       name: "浪花竞速队",
       sortOrder: 2,
       isActive: true,
+      swimmerCount: 0,
     });
     updateAdminTeam.mockResolvedValue({
       id: "team-a",
       name: "海豚预备一队",
       sortOrder: 1,
       isActive: true,
+      swimmerCount: 1,
     });
   });
 
@@ -71,6 +74,7 @@ describe("AdminTeamsPage", () => {
             name: "海豚预备队",
             sortOrder: 1,
             isActive: true,
+            swimmerCount: 1,
           },
         ],
       })
@@ -81,12 +85,14 @@ describe("AdminTeamsPage", () => {
             name: "海豚预备队",
             sortOrder: 1,
             isActive: true,
+            swimmerCount: 1,
           },
           {
             id: "team-b",
             name: "浪花竞速队",
             sortOrder: 2,
             isActive: true,
+            swimmerCount: 0,
           },
         ],
       });
@@ -94,6 +100,9 @@ describe("AdminTeamsPage", () => {
     render(<AdminTeamsPage />);
 
     expect(await screen.findByText("海豚预备队")).toBeInTheDocument();
+    expect(screen.getByText("队员数 1")).toBeInTheDocument();
+    expect(screen.getByText("有效")).toBeInTheDocument();
+    expect(screen.queryByText(/order:/i)).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("队伍名称"), {
       target: { value: "浪花竞速队" },

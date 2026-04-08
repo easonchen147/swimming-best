@@ -17,30 +17,30 @@ export function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
-      className={cn("p-3", className)}
+      className={cn("bg-surface-strong/95 p-3", className)}
       classNames={{
         root: "w-full",
         months: "flex w-full flex-col gap-4",
-        month: "space-y-4",
-        month_caption: "relative flex items-center justify-center pt-1",
+        month: "flex w-full flex-col gap-4",
+        month_caption: "relative flex min-h-8 items-center justify-center px-8 pt-1",
         caption_label: "text-sm font-semibold text-foreground",
         nav: "absolute inset-x-0 top-1 flex items-center justify-between px-1",
         button_previous: cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-8 w-8 rounded-xl border border-border/60 bg-background/85 text-foreground hover:bg-surface",
+          "h-8 w-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
         ),
         button_next: cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-8 w-8 rounded-xl border border-border/60 bg-background/85 text-foreground hover:bg-surface",
+          "h-8 w-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
         ),
         dropdowns: "flex items-center gap-2",
         dropdown_root:
-          "relative overflow-hidden rounded-xl border border-border/60 bg-background/85 shadow-sm",
+          "relative overflow-hidden rounded-xl border border-border/50 bg-background/80",
         dropdown:
           "h-9 appearance-none bg-transparent px-3 pr-8 text-sm font-semibold text-foreground outline-none",
         chevron: "pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted",
         month_grid: "w-full border-collapse",
-        weekdays: "flex",
+        weekdays: "mt-2 flex",
         weekday:
           "w-9 rounded-md text-[10px] font-black uppercase tracking-[0.16em] text-muted/60",
         week: "mt-1 flex w-full",

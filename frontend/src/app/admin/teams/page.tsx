@@ -11,7 +11,6 @@ import {
   Save, 
   X, 
   Search,
-  Settings2
 } from "lucide-react";
 
 import { AdminShell } from "@/components/layout/admin-shell";
@@ -267,14 +266,14 @@ export default function AdminTeamsPage() {
                                       team.isActive ? "bg-emerald-500/10 text-emerald-600" : "bg-muted/10 text-muted"
                                     )}
                                   >
-                                    {team.isActive ? "Active" : "Inactive"}
+                                    {team.isActive ? "有效" : "停用"}
                                   </Badge>
                                </div>
                                
-                               <div className="flex items-center gap-4 text-xs font-bold text-muted/60 uppercase tracking-widest">
+                               <div className="flex items-center gap-4 text-xs font-bold text-muted/60 tracking-wider">
                                   <div className="flex items-center gap-1">
-                                     <Settings2 className="h-3 w-3" />
-                                     <span>Order: {team.sortOrder}</span>
+                                     <Users className="h-3 w-3" />
+                                     <span>队员数 {team.swimmerCount ?? 0}</span>
                                   </div>
                                </div>
                              </div>

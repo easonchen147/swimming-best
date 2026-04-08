@@ -63,13 +63,24 @@ class Repository:
     def list_teams(self, search: str | None = None) -> list[dict[str, Any]]:
         params: list[Any] = []
         query = """
-            SELECT id, name, sort_order, is_active, created_at, updated_at
-            FROM teams
+            SELECT
+              t.id,
+              t.name,
+              t.sort_order,
+              t.is_active,
+              t.created_at,
+              t.updated_at,
+              COUNT(s.id) AS swimmer_count
+            FROM teams t
+            LEFT JOIN swimmers s ON s.team_id = t.id
             """
         if pattern := search_pattern(search):
-            query += " WHERE LOWER(name) LIKE ?"
+            query += " WHERE LOWER(t.name) LIKE ?"
             params.append(pattern)
-        query += " ORDER BY sort_order ASC, created_at ASC"
+        query += """
+            GROUP BY t.id, t.name, t.sort_order, t.is_active, t.created_at, t.updated_at
+            ORDER BY t.sort_order ASC, t.created_at ASC
+            """
         rows = self.connection.execute(query, params).fetchall()
         return [self._row_to_team(row) for row in rows]
 
@@ -1083,6 +1094,7 @@ class Repository:
             "name": row["name"],
             "sortOrder": row["sort_order"],
             "isActive": bool(row["is_active"]),
+            "swimmerCount": row["swimmer_count"] if "swimmer_count" in row.keys() else 0,
             "createdAt": row["created_at"],
             "updatedAt": row["updated_at"],
         }

@@ -421,13 +421,13 @@ export default function AdminSwimmersPage() {
             </CardHeader>
             
             <CardContent className="p-0">
-               <Table className="min-w-[760px] table-fixed">
+               <Table className="table-fixed">
                  <colgroup>
-                   <col className="w-[280px]" />
-                   <col className="w-[180px]" />
-                   <col className="w-[110px]" />
-                   <col className="w-[140px]" />
+                   <col className="w-[240px]" />
+                   <col className="w-[160px]" />
+                   <col className="w-[90px]" />
                    <col className="w-[120px]" />
+                   <col className="w-[88px]" />
                  </colgroup>
                  <TableHeader>
                    <TableRow className="hover:bg-transparent">
@@ -451,22 +451,13 @@ export default function AdminSwimmersPage() {
                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/5 text-primary font-bold">
                                {swimmer.nickname.slice(0, 1)}
                              </div>
-                             <div className="flex flex-col">
-                               <div className="flex items-center gap-2">
-                                 <span className="font-bold text-foreground">
-                                   {swimmer.publicNameMode === "real_name"
-                                     ? swimmer.realName
-                                     : swimmer.nickname || swimmer.realName}
-                                 </span>
-                                 <span className="rounded-full bg-primary/6 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-primary/70">
-                                   {swimmer.publicNameMode === "hidden"
-                                     ? "完全隐藏"
-                                     : swimmer.publicNameMode === "real_name"
-                                       ? "公开真名"
-                                       : "公开昵称"}
-                                 </span>
+                             <div className="min-w-0 flex-1">
+                               <div className="truncate font-bold text-foreground">
+                                 {swimmer.publicNameMode === "real_name"
+                                   ? swimmer.realName
+                                   : swimmer.nickname || swimmer.realName}
                                </div>
-                               <span className="text-[11px] text-muted">
+                               <span className="block truncate text-[11px] text-muted">
                                  真实姓名：{swimmer.realName}
                                </span>
                              </div>
@@ -492,9 +483,11 @@ export default function AdminSwimmersPage() {
                               >
                                 {swimmer.isPublic ? "公开可见" : "私密隐藏"}
                               </Badge>
-                              <span className="text-[9px] font-bold text-muted/60 uppercase ml-1">
-                                {swimmer.publicNameMode.replace('_', ' ')}
-                              </span>
+                              {swimmer.publicNameMode !== "hidden" ? (
+                                <span className="ml-1 text-[10px] font-bold text-muted/70">
+                                  {swimmer.publicNameMode === "real_name" ? "真名" : "昵称"}
+                                </span>
+                              ) : null}
                            </div>
                          </TableCell>
                          <TableCell className="text-right">

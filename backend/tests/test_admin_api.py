@@ -167,6 +167,7 @@ def test_admin_api_supports_managed_team_roster_and_recording(admin_client):
     assert teams_response.status_code == 200
     teams = teams_response.get_json()["teams"]
     assert [item["name"] for item in teams] == ["海星提升队", "海豚冲刺一队"]
+    assert [item["swimmerCount"] for item in teams] == [0, 1]
 
     searched_teams_response = admin_client.get("/api/admin/teams?search=%E5%86%B2%E5%88%BA")
     assert searched_teams_response.status_code == 200

@@ -3,6 +3,7 @@ export type TeamSummary = {
   name: string;
   sortOrder: number;
   isActive: boolean;
+  swimmerCount?: number;
 };
 
 export type Gender = "male" | "female" | "unknown";

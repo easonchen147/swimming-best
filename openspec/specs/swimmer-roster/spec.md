@@ -36,11 +36,19 @@ legacy behavior that still depends on year-based metadata.
   existing compatible birth year preserved
 
 ### Requirement: Swimmer profiles SHALL control public identity and visibility
-Each swimmer profile SHALL support visibility controls and identity display modes.
+Each swimmer profile SHALL support visibility controls and identity display
+modes. Admin-facing roster summaries SHALL present those modes using product
+language rather than raw internal enum values.
 
 #### Scenario: Public page requests a nickname-mode swimmer with a managed team
 - **WHEN** a swimmer is public, nickname-mode, and assigned a team
 - **THEN** public payloads display the nickname and team while preserving the configured visibility mode
+
+#### Scenario: Administrator scans the swimmer roster
+- **WHEN** an administrator views swimmer rows in the admin roster table
+- **THEN** visible-mode labels are presented as Chinese product text such as
+  `昵称` or `真名`, and a fully hidden swimmer does not render a raw `hidden`
+  mode label in the row summary
 
 ### Requirement: Swimmer profiles SHALL keep visibility controls reversible
 Swimmer visibility and public identity settings SHALL remain fully editable,

@@ -27,6 +27,16 @@ describe("DatePickerInput", () => {
 
     expect(screen.getByRole("button", { name: "出生日期" })).toHaveTextContent("请选择");
   });
+
+  it("clears the selected value", () => {
+    const onChange = vi.fn();
+    render(<DatePickerInput ariaLabel="截止日期" onChange={onChange} value="2026-04-05" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "截止日期" }));
+    fireEvent.click(screen.getByRole("button", { name: "清空" }));
+
+    expect(onChange).toHaveBeenCalledWith("");
+  });
 });
 
 describe("YearPickerInput", () => {

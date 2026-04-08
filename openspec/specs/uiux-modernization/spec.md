@@ -46,6 +46,9 @@ prefer official shadcn/Radix component semantics at the root level, and
 project-level visual customization SHALL only build on top of those correct
 primitive semantics. The admin swimmer birth-date control SHALL use the shared
 calendar-style picker presentation rather than a raw browser date input.
+Shared date pickers in admin workflows SHALL use a clean single-surface
+popover structure rather than visually stacking multiple card layers inside the
+same picker.
 
 #### Scenario: User hovers over a primary action button
 - **WHEN** a user moves their cursor over a "Create Swimmer" button
@@ -74,6 +77,12 @@ calendar-style picker presentation rather than a raw browser date input.
 - **THEN** the control renders through the shared calendar-style picker surface
   with the same component-family styling as the rest of the application, and
   its empty placeholder reads `请选择`
+
+#### Scenario: User opens a shared admin date picker outside the swimmer form
+- **WHEN** an administrator opens a shared date picker from the swimmer,
+  record, goal, or quick-record workflows
+- **THEN** the popover appears as one coherent surface that matches the shared
+  theme without looking like multiple overlapping components
 
 ### Requirement: Shared boolean and select controls SHALL use unified Radix semantics
 High-traffic admin and public forms SHALL use shared Radix/shadcn primitives for
@@ -108,3 +117,8 @@ their entrance (e.g., staggered fade-in) when the page is loaded.
 - **THEN** the name, team, status, and action columns remain visually aligned,
   the primary name cell does not redundantly append the team name, and the
   action group omits low-value duplicate download actions
+
+#### Scenario: Administrator views the swimmer roster table on desktop
+- **WHEN** the swimmer roster table is rendered on a desktop viewport
+- **THEN** the column density remains balanced enough that the primary roster
+  view does not introduce unnecessary horizontal scrolling for standard content

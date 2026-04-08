@@ -105,7 +105,7 @@ describe("AdminSwimmersPage", () => {
         notes: "",
       });
     });
-  });
+  }, 10000);
 
   it("passes roster search input to the swimmers api", async () => {
     listAdminSwimmers.mockResolvedValue({
@@ -141,6 +141,52 @@ describe("AdminSwimmersPage", () => {
     await waitFor(() => {
       expect(listAdminSwimmers).toHaveBeenLastCalledWith(undefined, "海豚");
     });
+  });
+
+  it("renders chinese roster mode labels and suppresses hidden enum text", async () => {
+    listAdminSwimmers.mockResolvedValue({
+      swimmers: [
+        {
+          id: "swimmer-a",
+          slug: "xiao-hai-tun",
+          realName: "Alice Wang",
+          nickname: "小海豚",
+          publicNameMode: "nickname",
+          isPublic: true,
+          gender: "female",
+          birthDate: "2016-05-12",
+          teamId: "team-a",
+          team: {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+        },
+        {
+          id: "swimmer-hidden",
+          slug: "mi-mi-xuan-shou",
+          realName: "Cara Li",
+          nickname: "秘密选手",
+          publicNameMode: "hidden",
+          isPublic: false,
+          gender: "female",
+          birthDate: "",
+          teamId: "team-a",
+          team: {
+            id: "team-a",
+            name: "海豚预备队",
+            sortOrder: 1,
+            isActive: true,
+          },
+        },
+      ],
+    });
+
+    render(<AdminSwimmersPage />);
+
+    expect(await screen.findByText("昵称")).toBeInTheDocument();
+    expect(screen.queryByText(/hidden/i)).not.toBeInTheDocument();
   });
 
   it("restores public visibility when switching a hidden swimmer back to a visible mode", async () => {

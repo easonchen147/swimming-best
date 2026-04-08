@@ -70,42 +70,37 @@ export function DatePickerInput({
       <Popover.Portal>
         <Popover.Content
           align="start"
-          className="z-50 rounded-3xl border border-border/60 bg-surface-strong p-3 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
-          sideOffset={8}
+          className="z-[70] w-auto overflow-hidden rounded-3xl border border-border/60 bg-surface-strong/95 p-0 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
+          sideOffset={10}
         >
-          <div className="space-y-4">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
-              选择日期
-            </div>
-            <Calendar
-              captionLayout="dropdown"
-              endMonth={endMonth}
-              locale={zhCN}
-              mode="single"
-              onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
-              selected={selectedDate}
-              startMonth={startMonth}
-            />
-            <div className="flex gap-2">
-              <Button
-                className="rounded-full"
-                onClick={() => onChange(format(new Date(), "yyyy-MM-dd"))}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                今天
-              </Button>
-              <Button
-                className="rounded-full"
-                onClick={() => onChange("")}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                清空
-              </Button>
-            </div>
+          <Calendar
+            captionLayout="dropdown"
+            endMonth={endMonth}
+            locale={zhCN}
+            mode="single"
+            onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+            selected={selectedDate}
+            startMonth={startMonth}
+          />
+          <div className="flex items-center justify-between border-t border-border/50 bg-background/35 px-3 py-3">
+            <Button
+              className="rounded-full"
+              onClick={() => onChange(format(new Date(), "yyyy-MM-dd"))}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              今天
+            </Button>
+            <Button
+              className="rounded-full"
+              onClick={() => onChange("")}
+              size="sm"
+              type="button"
+              variant="outline"
+            >
+              清空
+            </Button>
           </div>
         </Popover.Content>
       </Popover.Portal>
@@ -156,7 +151,7 @@ export function YearPickerInput({
       <Popover.Portal>
         <Popover.Content
           align="start"
-          className="z-50 w-[320px] rounded-3xl border border-border/60 bg-surface-strong p-4 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
+          className="z-[70] w-[320px] rounded-3xl border border-border/60 bg-surface-strong p-4 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
           sideOffset={8}
         >
           <div className="space-y-4">
