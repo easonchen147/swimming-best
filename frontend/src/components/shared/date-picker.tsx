@@ -120,10 +120,8 @@ export function YearPickerInput({
   const currentYear = new Date().getFullYear();
   const maxYear = endYear ?? currentYear;
   const minYear = startYear ?? currentYear - 25;
-  const years = Array.from(
-    { length: maxYear - minYear + 1 },
-    (_, index) => String(maxYear - index),
-  );
+  const selectedDate = value ? new Date(Number(value), 0, 1) : undefined;
+  const fallbackMonth = new Date(maxYear, 0, 1);
 
   return (
     <Popover>
@@ -144,38 +142,31 @@ export function YearPickerInput({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-[320px] p-4 sm:w-[360px]"
+        className="w-auto"
         sideOffset={8}
       >
-          <div className="space-y-4">
-            <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
-              选择出生年份
-            </div>
-            <div className="grid max-h-64 grid-cols-4 gap-2 overflow-y-auto pr-1">
-              {years.map((year) => (
-                <button
-                  className={cn(
-                    "rounded-2xl border px-3 py-2 text-sm font-bold transition-all",
-                    year === value
-                      ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
-                      : "border-border/60 bg-white/70 text-foreground hover:border-primary/30 hover:bg-primary/5 hover:text-primary",
-                  )}
-                  key={year}
-                  onClick={() => onChange(year)}
-                  type="button"
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-            <button
-              className="rounded-full border border-border/60 px-4 py-2 text-xs font-bold text-muted transition-colors hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"
-              onClick={() => onChange("")}
-              type="button"
-            >
-              清空
-            </button>
-          </div>
+        <Calendar
+          captionLayout="dropdown-years"
+          className="w-[320px] sm:w-[360px]"
+          endMonth={new Date(maxYear, 11, 31)}
+          mode="single"
+          month={selectedDate ?? fallbackMonth}
+          onMonthChange={(month) => onChange(String(month.getFullYear()))}
+          onSelect={(date) => onChange(date ? String(date.getFullYear()) : "")}
+          selected={selectedDate}
+          startMonth={new Date(minYear, 0, 1)}
+        />
+        <div className="flex items-center justify-end border-t border-border/50 bg-background/35 px-3 py-3">
+          <Button
+            className="rounded-full"
+            onClick={() => onChange("")}
+            size="sm"
+            type="button"
+            variant="outline"
+          >
+            清空
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );

@@ -235,29 +235,28 @@ export default function AdminSwimmersPage() {
                   </Field>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label="出生日期">
-                    <DatePickerInput
-                      ariaLabel="出生日期"
-                      endMonth={latestBirthMonth}
-                      onChange={(value) =>
-                        setForm((current) => ({ ...current, birthDate: value }))
-                      }
-                      placeholder="请选择"
-                      startMonth={earliestBirthMonth}
-                      value={form.birthDate}
-                    />
-                  </Field>
-                  <Field label="备注">
-                    <Input
-                      placeholder="例如: 主项偏自由泳"
-                      onChange={(event) =>
-                        setForm((current) => ({ ...current, notes: event.target.value }))
-                      }
-                      value={form.notes}
-                    />
-                  </Field>
-                </div>
+                <Field label="出生日期">
+                  <DatePickerInput
+                    ariaLabel="出生日期"
+                    endMonth={latestBirthMonth}
+                    onChange={(value) =>
+                      setForm((current) => ({ ...current, birthDate: value }))
+                    }
+                    placeholder="请选择"
+                    startMonth={earliestBirthMonth}
+                    value={form.birthDate}
+                  />
+                </Field>
+
+                <Field label="备注">
+                  <Input
+                    placeholder="例如: 主项偏自由泳"
+                    onChange={(event) =>
+                      setForm((current) => ({ ...current, notes: event.target.value }))
+                    }
+                    value={form.notes}
+                  />
+                </Field>
 
                 <Field label="所属队伍" labelFor={teamSelectId}>
                   <Select

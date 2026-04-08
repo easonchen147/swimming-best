@@ -45,7 +45,8 @@ describe("YearPickerInput", () => {
     render(<YearPickerInput ariaLabel="出生年份" onChange={onChange} value="" />);
 
     fireEvent.click(screen.getByRole("button", { name: "出生年份" }));
-    fireEvent.click(screen.getByRole("button", { name: "2016" }));
+    const yearSelect = screen.getByRole("combobox", { name: /year/i });
+    fireEvent.change(yearSelect, { target: { value: "2016" } });
 
     expect(onChange).toHaveBeenCalledWith("2016");
   });
