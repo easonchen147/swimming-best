@@ -1,12 +1,12 @@
 "use client";
 
-import * as Popover from "@radix-ui/react-popover";
 import { format, parseISO } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { CalendarDays, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 const triggerClassName =
@@ -51,8 +51,8 @@ export function DatePickerInput({
   const selectedDate = parseDateValue(value);
 
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <button
           aria-label={ariaLabel ?? placeholder}
           className={cn(triggerClassName, className)}
@@ -66,13 +66,8 @@ export function DatePickerInput({
           </div>
           <ChevronDown className="h-4 w-4 text-muted" />
         </button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          align="start"
-          className="z-[70] w-auto overflow-hidden rounded-3xl border border-border/60 bg-surface-strong/95 p-0 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
-          sideOffset={10}
-        >
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-auto" sideOffset={10}>
           <Calendar
             captionLayout="dropdown"
             endMonth={endMonth}
@@ -102,9 +97,8 @@ export function DatePickerInput({
               清空
             </Button>
           </div>
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -132,8 +126,8 @@ export function YearPickerInput({
   );
 
   return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
+    <Popover>
+      <PopoverTrigger asChild>
         <button
           aria-label={ariaLabel ?? "出生年份"}
           className={cn(triggerClassName, className)}
@@ -147,13 +141,12 @@ export function YearPickerInput({
           </div>
           <ChevronDown className="h-4 w-4 text-muted" />
         </button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          align="start"
-          className="z-[70] w-[320px] rounded-3xl border border-border/60 bg-surface-strong p-4 shadow-2xl shadow-primary/10 backdrop-blur-2xl"
-          sideOffset={8}
-        >
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[320px] p-4 sm:w-[360px]"
+        sideOffset={8}
+      >
           <div className="space-y-4">
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-muted/50">
               选择出生年份
@@ -183,8 +176,7 @@ export function YearPickerInput({
               清空
             </button>
           </div>
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
+      </PopoverContent>
+    </Popover>
   );
 }

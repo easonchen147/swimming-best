@@ -17,7 +17,7 @@ export function Calendar({
 }: CalendarProps) {
   return (
     <DayPicker
-      className={cn("bg-surface-strong/95 p-3", className)}
+      className={cn("bg-transparent p-3", className)}
       classNames={{
         root: "w-full",
         months: "flex w-full flex-col gap-4",
@@ -27,11 +27,11 @@ export function Calendar({
         nav: "absolute inset-x-0 top-1 flex items-center justify-between px-1",
         button_previous: cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-8 w-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
+          "size-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
         ),
         button_next: cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-8 w-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
+          "size-8 rounded-xl border border-border/50 bg-background/80 text-foreground hover:bg-surface",
         ),
         dropdowns: "flex items-center gap-2",
         dropdown_root:
@@ -44,10 +44,10 @@ export function Calendar({
         weekday:
           "w-9 rounded-md text-[10px] font-black uppercase tracking-[0.16em] text-muted/60",
         week: "mt-1 flex w-full",
-        day: "h-9 w-9 p-0 text-center text-sm",
+        day: "size-9 p-0 text-center text-sm",
         day_button: cn(
           buttonVariants({ variant: "ghost", size: "icon" }),
-          "h-9 w-9 rounded-xl border border-transparent p-0 font-semibold text-foreground aria-selected:opacity-100",
+          "size-9 rounded-xl border border-transparent p-0 font-semibold text-foreground aria-selected:opacity-100",
         ),
         selected:
           "bg-primary text-white hover:bg-primary hover:text-white focus:bg-primary focus:text-white",

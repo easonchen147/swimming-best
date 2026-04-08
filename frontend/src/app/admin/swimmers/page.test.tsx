@@ -132,7 +132,7 @@ describe("AdminSwimmersPage", () => {
 
     render(<AdminSwimmersPage />);
 
-    expect(await screen.findByText("真实姓名：Alice Wang")).toBeInTheDocument();
+    expect((await screen.findAllByText("真实姓名：Alice Wang")).length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByPlaceholderText("搜索姓名或昵称..."), {
       target: { value: "海豚" },

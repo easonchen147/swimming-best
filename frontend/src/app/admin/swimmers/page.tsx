@@ -216,7 +216,7 @@ export default function AdminSwimmersPage() {
             
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="真实姓名">
                     <Input
                       placeholder="例如: 张小明"
@@ -235,7 +235,7 @@ export default function AdminSwimmersPage() {
                   </Field>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="出生日期">
                     <DatePickerInput
                       ariaLabel="出生日期"
@@ -284,7 +284,7 @@ export default function AdminSwimmersPage() {
                   </Select>
                 </Field>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="性别" labelFor={genderSelectId}>
                     <Select
                       onValueChange={(value) =>
@@ -421,6 +421,102 @@ export default function AdminSwimmersPage() {
             </CardHeader>
             
             <CardContent className="p-0">
+               <div className="xl:hidden p-4">
+                 <motion.div
+                   animate="animate"
+                   className="grid gap-4"
+                   initial="initial"
+                   variants={FADE_IN_UP}
+                 >
+                   <AnimatePresence mode="popLayout">
+                     {swimmers.map((swimmer) => (
+                       <motion.div key={swimmer.id} layoutId={`mobile-${swimmer.id}`}>
+                         <Card className={cn("border-border/40", editingId === swimmer.id && "bg-primary/5")}>
+                           <CardContent className="space-y-4 p-4">
+                             <div className="flex items-start justify-between gap-3">
+                               <div className="flex min-w-0 items-center gap-3">
+                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/5 text-primary font-bold">
+                                   {swimmer.nickname.slice(0, 1)}
+                                 </div>
+                                 <div className="min-w-0">
+                                   <div className="truncate font-bold text-foreground">
+                                     {swimmer.publicNameMode === "real_name"
+                                       ? swimmer.realName
+                                       : swimmer.nickname || swimmer.realName}
+                                   </div>
+                                   <div className="truncate text-[11px] text-muted">
+                                     真实姓名：{swimmer.realName}
+                                   </div>
+                                 </div>
+                               </div>
+                               <Badge
+                                 className={cn(
+                                   "w-fit rounded-full px-2 py-0 h-5 text-[10px] border-transparent shrink-0",
+                                   swimmer.isPublic ? "bg-emerald-500/10 text-emerald-600" : "bg-muted/10 text-muted",
+                                 )}
+                               >
+                                 {swimmer.isPublic ? "公开可见" : "私密隐藏"}
+                               </Badge>
+                             </div>
+
+                             <div className="grid gap-3 text-sm sm:grid-cols-2">
+                               <div className="space-y-1">
+                                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                                   所属队伍
+                                 </div>
+                                 <div className="font-medium text-foreground">
+                                   {teams.find((t) => t.id === swimmer.teamId)?.name || "未知队伍"}
+                                 </div>
+                               </div>
+                               <div className="space-y-1">
+                                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                                   性别 / 展示
+                                 </div>
+                                 <div className="font-medium text-foreground">
+                                   {swimmer.gender === "male"
+                                     ? "男生"
+                                     : swimmer.gender === "female"
+                                       ? "女生"
+                                       : "未知"}
+                                   {" · "}
+                                   {swimmer.publicNameMode === "real_name"
+                                     ? "真名"
+                                     : swimmer.publicNameMode === "nickname"
+                                       ? "昵称"
+                                       : "隐藏"}
+                                 </div>
+                               </div>
+                             </div>
+
+                             <div className="flex items-center justify-end gap-2">
+                               <Button
+                                 onClick={() => startEdit(swimmer)}
+                                 size="sm"
+                                 type="button"
+                                 variant="outline"
+                               >
+                                 <Edit3 data-icon="inline-start" />
+                                 编辑
+                               </Button>
+                               <Button
+                                 onClick={() => window.open(getSwimmerSummaryExportUrl(swimmer.id), "_blank")}
+                                 size="sm"
+                                 type="button"
+                                 variant="secondary"
+                               >
+                                 <FileText data-icon="inline-start" />
+                                 摘要
+                               </Button>
+                             </div>
+                           </CardContent>
+                         </Card>
+                       </motion.div>
+                     ))}
+                   </AnimatePresence>
+                 </motion.div>
+               </div>
+
+               <div className="hidden xl:block">
                <Table className="table-fixed">
                  <colgroup>
                    <col className="w-[240px]" />
@@ -517,6 +613,7 @@ export default function AdminSwimmersPage() {
                    </AnimatePresence>
                  </TableBody>
                </Table>
+               </div>
                
                {swimmers.length === 0 && (
                  <motion.div 
