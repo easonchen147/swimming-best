@@ -47,7 +47,7 @@ import {
 } from "@/lib/api/admin";
 import { listTeams } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
-import { FADE_IN_UP } from "@/lib/animations";
+import { FADE_IN_UP, STAGGER_CONTAINER } from "@/lib/animations";
 import type { AdminSwimmer, Gender, TeamSummary } from "@/lib/types";
 
 export default function AdminSwimmersPage() {
@@ -181,7 +181,7 @@ export default function AdminSwimmersPage() {
       birthDate: swimmer.birthDate ?? "",
       notes: swimmer.notes ?? "",
     });
-    if (window.innerWidth < 1024) {
+    if (window.innerWidth < 1280) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
@@ -420,17 +420,21 @@ export default function AdminSwimmersPage() {
             </CardHeader>
             
             <CardContent className="p-0">
-               <div className="xl:hidden p-4">
-                 <motion.div
-                   animate="animate"
-                   className="grid gap-4"
-                   initial="initial"
-                   variants={FADE_IN_UP}
-                 >
+               <motion.div
+                 animate="animate"
+                 className="grid gap-4 p-4 xl:hidden"
+                 initial="initial"
+                 variants={STAGGER_CONTAINER}
+               >
                    <AnimatePresence mode="popLayout">
                      {swimmers.map((swimmer) => (
-                       <motion.div key={swimmer.id} layoutId={`mobile-${swimmer.id}`}>
-                         <Card className={cn("border-border/40", editingId === swimmer.id && "bg-primary/5")}>
+                         <Card
+                           animate="animate"
+                           className={cn("border-border/40", editingId === swimmer.id && "bg-primary/5")}
+                           initial="initial"
+                           key={swimmer.id}
+                           layoutId={`mobile-${swimmer.id}`}
+                         >
                            <CardContent className="space-y-4 p-4">
                              <div className="flex items-start justify-between gap-3">
                                <div className="flex min-w-0 items-center gap-3">
@@ -487,6 +491,25 @@ export default function AdminSwimmersPage() {
                                </div>
                              </div>
 
+                             <div className="grid gap-3 text-sm">
+                               <div className="space-y-1">
+                                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                                   出生日期
+                                 </div>
+                                 <div className="font-medium text-foreground">
+                                   {swimmer.birthDate || "未设置"}
+                                 </div>
+                               </div>
+                               <div className="space-y-1">
+                                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted/50">
+                                   备注
+                                 </div>
+                                 <div className="font-medium text-foreground">
+                                   {swimmer.notes || "无"}
+                                 </div>
+                               </div>
+                             </div>
+
                              <div className="flex items-center justify-end gap-2">
                                <Button
                                  onClick={() => startEdit(swimmer)}
@@ -509,11 +532,9 @@ export default function AdminSwimmersPage() {
                              </div>
                            </CardContent>
                          </Card>
-                       </motion.div>
                      ))}
                    </AnimatePresence>
-                 </motion.div>
-               </div>
+               </motion.div>
 
                <div className="hidden xl:block">
                <Table className="table-fixed">

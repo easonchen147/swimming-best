@@ -1,34 +1,66 @@
 "use client";
 
+import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { CalendarDays, ChevronDown } from "lucide-react";
+import { Calendar as CalendarIcon, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-const triggerClassName =
-  "flex h-11 w-full items-center justify-between rounded-2xl border border-border/60 bg-surface-strong/90 px-4 text-sm font-semibold text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl transition-all duration-200 hover:border-primary/30 focus:outline-none focus:ring-4 focus:ring-primary/10";
+const triggerClassName = cn(
+  "h-11 w-full justify-start rounded-2xl border-border/60 bg-surface-strong/90 text-left font-normal",
+  "shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_30px_rgba(15,23,42,0.06)]",
+  "hover:border-primary/30 hover:bg-surface-strong/90",
+);
+
+function parseDateValue(value: string) {
+  if (!value) {
+    return undefined;
+  }
+
+  const parsed = parseISO(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return undefined;
+  }
+
+  return parsed;
+}
 
 function formatDateLabel(value: string) {
   const parsed = parseDateValue(value);
   if (!parsed) {
     return "请选择日期";
   }
-  return format(parsed, "yyyy年MM月dd日", { locale: zhCN });
+
+  return format(parsed, "yyyy年M月d日", { locale: zhCN });
 }
 
-function parseDateValue(value: string) {
-  if (!value) {
-    return undefined;
-  }
-  const parsed = parseISO(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return undefined;
-  }
-  return parsed;
+function formatYearLabel(value: string) {
+  return value ? `${value} 年` : "请选择年份";
+}
+
+function ClearButton({
+  ariaLabel,
+  onClick,
+}: {
+  ariaLabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <Button
+      aria-label={ariaLabel}
+      className="h-11 w-11 shrink-0 rounded-2xl border-border/60 bg-surface/80"
+      onClick={onClick}
+      size="icon"
+      type="button"
+      variant="outline"
+    >
+      <X className="h-4 w-4" />
+    </Button>
+  );
 }
 
 export function DatePickerInput({
@@ -48,57 +80,47 @@ export function DatePickerInput({
   startMonth?: Date;
   endMonth?: Date;
 }) {
+  const [open, setOpen] = useState(false);
   const selectedDate = parseDateValue(value);
+  const label = ariaLabel ?? placeholder;
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          aria-label={ariaLabel ?? placeholder}
-          className={cn(triggerClassName, className)}
-          type="button"
-        >
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" />
-            <span className={cn(!value && "text-muted")}>
-              {value ? formatDateLabel(value) : placeholder}
+    <div className={cn("flex items-center gap-2", className)}>
+      <Popover onOpenChange={setOpen} open={open}>
+        <PopoverTrigger asChild>
+          <Button
+            aria-label={label}
+            className={cn(triggerClassName, !selectedDate && "text-muted")}
+            type="button"
+            variant="outline"
+          >
+            <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">
+              {selectedDate ? formatDateLabel(value) : placeholder}
             </span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-muted" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto" sideOffset={10}>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-auto p-0" sideOffset={8}>
           <Calendar
             captionLayout="dropdown"
             endMonth={endMonth}
+            hideNavigation
+            initialFocus
             locale={zhCN}
             mode="single"
-            onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+            onSelect={(date) => {
+              onChange(date ? format(date, "yyyy-MM-dd") : "");
+              setOpen(false);
+            }}
             selected={selectedDate}
             startMonth={startMonth}
           />
-          <div className="flex items-center justify-between border-t border-border/50 bg-background/35 px-3 py-3">
-            <Button
-              className="rounded-full"
-              onClick={() => onChange(format(new Date(), "yyyy-MM-dd"))}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
-              今天
-            </Button>
-            <Button
-              className="rounded-full"
-              onClick={() => onChange("")}
-              size="sm"
-              type="button"
-              variant="outline"
-            >
-              清空
-            </Button>
-          </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverContent>
+      </Popover>
+      {selectedDate ? (
+        <ClearButton ariaLabel={`清空${label}`} onClick={() => onChange("")} />
+      ) : null}
+    </div>
   );
 }
 
@@ -117,57 +139,53 @@ export function YearPickerInput({
   startYear?: number;
   endYear?: number;
 }) {
+  const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
   const maxYear = endYear ?? currentYear;
   const minYear = startYear ?? currentYear - 25;
   const selectedDate = value ? new Date(Number(value), 0, 1) : undefined;
-  const fallbackMonth = new Date(maxYear, 0, 1);
+  const displayMonth = selectedDate ?? new Date(maxYear, 0, 1);
+  const label = ariaLabel ?? "出生年份";
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button
-          aria-label={ariaLabel ?? "出生年份"}
-          className={cn(triggerClassName, className)}
-          type="button"
-        >
-          <div className="flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-primary" />
-            <span className={cn(!value && "text-muted")}>
-              {value ? `${value} 年` : "请选择年份"}
-            </span>
-          </div>
-          <ChevronDown className="h-4 w-4 text-muted" />
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-auto"
-        sideOffset={8}
-      >
-        <Calendar
-          captionLayout="dropdown-years"
-          className="w-[320px] sm:w-[360px]"
-          endMonth={new Date(maxYear, 11, 31)}
-          mode="single"
-          month={selectedDate ?? fallbackMonth}
-          onMonthChange={(month) => onChange(String(month.getFullYear()))}
-          onSelect={(date) => onChange(date ? String(date.getFullYear()) : "")}
-          selected={selectedDate}
-          startMonth={new Date(minYear, 0, 1)}
-        />
-        <div className="flex items-center justify-end border-t border-border/50 bg-background/35 px-3 py-3">
+    <div className={cn("flex items-center gap-2", className)}>
+      <Popover onOpenChange={setOpen} open={open}>
+        <PopoverTrigger asChild>
           <Button
-            className="rounded-full"
-            onClick={() => onChange("")}
-            size="sm"
+            aria-label={label}
+            className={cn(triggerClassName, !value && "text-muted")}
             type="button"
             variant="outline"
           >
-            清空
+            <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{formatYearLabel(value)}</span>
           </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-auto p-0" sideOffset={8}>
+          <Calendar
+            captionLayout="dropdown-years"
+            className="w-[320px] sm:w-[360px]"
+            endMonth={new Date(maxYear, 11, 31)}
+            hideNavigation
+            initialFocus
+            mode="single"
+            month={displayMonth}
+            onMonthChange={(month) => {
+              onChange(String(month.getFullYear()));
+              setOpen(false);
+            }}
+            onSelect={(date) => {
+              onChange(date ? String(date.getFullYear()) : "");
+              setOpen(false);
+            }}
+            selected={selectedDate}
+            startMonth={new Date(minYear, 0, 1)}
+          />
+        </PopoverContent>
+      </Popover>
+      {value ? (
+        <ClearButton ariaLabel={`清空${label}`} onClick={() => onChange("")} />
+      ) : null}
+    </div>
   );
 }

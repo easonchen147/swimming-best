@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { format } from "date-fns";
 import { vi } from "vitest";
 
 import AdminSwimmersPage from "@/app/admin/swimmers/page";
@@ -31,6 +30,24 @@ vi.mock("@/components/layout/admin-shell", () => ({
   ),
 }));
 
+vi.mock("@/components/shared/date-picker", () => ({
+  DatePickerInput: ({
+    ariaLabel,
+    onChange,
+    value,
+  }: {
+    ariaLabel?: string;
+    onChange: (value: string) => void;
+    value: string;
+  }) => (
+    <input
+      aria-label={ariaLabel ?? "date-picker"}
+      onChange={(event) => onChange(event.target.value)}
+      value={value}
+    />
+  ),
+}));
+
 vi.mock("@/lib/api/admin", () => ({
   listAdminSwimmers: (...args: unknown[]) => listAdminSwimmers(...args),
   listAdminTeams: (...args: unknown[]) => listAdminTeams(...args),
@@ -38,9 +55,38 @@ vi.mock("@/lib/api/admin", () => ({
   updateAdminSwimmer: (...args: unknown[]) => updateAdminSwimmer(...args),
 }));
 
+function createSwimmer(overrides?: Record<string, unknown>) {
+  return {
+    id: "swimmer-a",
+    slug: "xiao-hai-tun",
+    realName: "Alice Wang",
+    nickname: "小海豚",
+    publicNameMode: "nickname",
+    isPublic: true,
+    gender: "female",
+    birthDate: "2016-05-12",
+    teamId: "team-a",
+    team: {
+      id: "team-a",
+      name: "海豚预备队",
+      sortOrder: 1,
+      isActive: true,
+    },
+    notes: "",
+    ...overrides,
+  };
+}
+
 describe("AdminSwimmersPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.scrollTo = vi.fn();
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 390,
+      writable: true,
+    });
+
     listAdminTeams.mockResolvedValue({
       teams: [
         {
@@ -54,28 +100,11 @@ describe("AdminSwimmersPage", () => {
     listAdminSwimmers.mockResolvedValue({
       swimmers: [],
     });
-    createAdminSwimmer.mockResolvedValue({
-      id: "swimmer-a",
-      slug: "xiao-hai-tun",
-      realName: "Alice Wang",
-      nickname: "小海豚",
-      publicNameMode: "nickname",
-      isPublic: true,
-      gender: "female",
-      birthDate: "2016-05-12",
-      teamId: "team-a",
-      team: {
-        id: "team-a",
-        name: "海豚预备队",
-        sortOrder: 1,
-        isActive: true,
-      },
-    });
+    createAdminSwimmer.mockResolvedValue(createSwimmer());
   });
 
   it("submits swimmer gender and selected birth date to the admin api", async () => {
     render(<AdminSwimmersPage />);
-    const today = format(new Date(), "yyyy-MM-dd");
 
     const inputs = await screen.findAllByRole("textbox");
 
@@ -88,8 +117,9 @@ describe("AdminSwimmersPage", () => {
     fireEvent.click(screen.getByRole("combobox", { name: "性别" }));
     fireEvent.click(await screen.findByRole("option", { name: "女" }));
 
-    fireEvent.click(screen.getByRole("button", { name: "出生日期" }));
-    fireEvent.click(screen.getByRole("button", { name: "今天" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "出生日期" }), {
+      target: { value: "2026-04-05" },
+    });
 
     fireEvent.click(screen.getByRole("button", { name: "创建档案" }));
 
@@ -101,38 +131,20 @@ describe("AdminSwimmersPage", () => {
         isPublic: true,
         gender: "female",
         teamId: "team-a",
-        birthDate: today,
+        birthDate: "2026-04-05",
         notes: "",
       });
     });
-  }, 10000);
+  });
 
   it("passes roster search input to the swimmers api", async () => {
     listAdminSwimmers.mockResolvedValue({
-      swimmers: [
-        {
-          id: "swimmer-a",
-          slug: "xiao-hai-tun",
-          realName: "Alice Wang",
-          nickname: "小海豚",
-          publicNameMode: "nickname",
-          isPublic: true,
-          gender: "female",
-          birthDate: "2016-05-12",
-          teamId: "team-a",
-          team: {
-            id: "team-a",
-            name: "海豚预备队",
-            sortOrder: 1,
-            isActive: true,
-          },
-        },
-      ],
+      swimmers: [createSwimmer()],
     });
 
     render(<AdminSwimmersPage />);
 
-    expect((await screen.findAllByText("真实姓名：Alice Wang")).length).toBeGreaterThan(0);
+    expect((await screen.findAllByText(/Alice Wang/)).length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByPlaceholderText("搜索姓名或昵称..."), {
       target: { value: "海豚" },
@@ -146,40 +158,16 @@ describe("AdminSwimmersPage", () => {
   it("renders chinese roster mode labels and suppresses hidden enum text", async () => {
     listAdminSwimmers.mockResolvedValue({
       swimmers: [
-        {
-          id: "swimmer-a",
-          slug: "xiao-hai-tun",
-          realName: "Alice Wang",
-          nickname: "小海豚",
-          publicNameMode: "nickname",
-          isPublic: true,
-          gender: "female",
-          birthDate: "2016-05-12",
-          teamId: "team-a",
-          team: {
-            id: "team-a",
-            name: "海豚预备队",
-            sortOrder: 1,
-            isActive: true,
-          },
-        },
-        {
+        createSwimmer(),
+        createSwimmer({
           id: "swimmer-hidden",
           slug: "mi-mi-xuan-shou",
           realName: "Cara Li",
           nickname: "秘密选手",
           publicNameMode: "hidden",
           isPublic: false,
-          gender: "female",
           birthDate: "",
-          teamId: "team-a",
-          team: {
-            id: "team-a",
-            name: "海豚预备队",
-            sortOrder: 1,
-            isActive: true,
-          },
-        },
+        }),
       ],
     });
 
@@ -189,55 +177,51 @@ describe("AdminSwimmersPage", () => {
     expect(screen.queryByText(/hidden/i)).not.toBeInTheDocument();
   });
 
+  it("renders visible mobile swimmer cards when data exists", async () => {
+    listAdminSwimmers.mockResolvedValue({
+      swimmers: [
+        createSwimmer({
+          notes: "Freestyle sprinter",
+        }),
+      ],
+    });
+
+    render(<AdminSwimmersPage />);
+
+    expect(await screen.findByRole("button", { name: "编辑" })).toBeVisible();
+    expect(screen.getByText("2016-05-12")).toBeVisible();
+    expect(screen.getByText("Freestyle sprinter")).toBeVisible();
+  });
+
   it("restores public visibility when switching a hidden swimmer back to a visible mode", async () => {
     listAdminSwimmers.mockResolvedValue({
       swimmers: [
-        {
+        createSwimmer({
           id: "swimmer-hidden",
           slug: "mi-mi-xuan-shou",
           realName: "Cara Li",
           nickname: "秘密选手",
           publicNameMode: "hidden",
           isPublic: false,
-          gender: "female",
           birthDate: "",
           birthYear: 2015,
-          teamId: "team-a",
-          team: {
-            id: "team-a",
-            name: "海豚预备队",
-            sortOrder: 1,
-            isActive: true,
-          },
-          notes: "",
-        },
+        }),
       ],
     });
-    updateAdminSwimmer.mockResolvedValue({
-      id: "swimmer-hidden",
-      slug: "mi-mi-xuan-shou",
-      realName: "Cara Li",
-      nickname: "秘密选手",
-      publicNameMode: "nickname",
-      isPublic: true,
-      gender: "female",
-      birthDate: "",
-      birthYear: 2015,
-      teamId: "team-a",
-      team: {
-        id: "team-a",
-        name: "海豚预备队",
-        sortOrder: 1,
-        isActive: true,
-      },
-      notes: "",
-    });
+    updateAdminSwimmer.mockResolvedValue(
+      createSwimmer({
+        id: "swimmer-hidden",
+        slug: "mi-mi-xuan-shou",
+        realName: "Cara Li",
+        nickname: "秘密选手",
+      }),
+    );
 
     render(<AdminSwimmersPage />);
 
     fireEvent.click(await screen.findByRole("button", { name: "编辑队员" }));
     fireEvent.click(screen.getByRole("combobox", { name: "展示姓名模式" }));
-    fireEvent.click(await screen.findByRole("option", { name: "展示昵称" }));
+    fireEvent.click((await screen.findAllByRole("option"))[0]);
     fireEvent.click(screen.getByRole("button", { name: "更新档案" }));
 
     await waitFor(() => {
