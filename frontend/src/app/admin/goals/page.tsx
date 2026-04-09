@@ -40,6 +40,16 @@ import { describeSwimmer } from "@/lib/swimmer-label";
 import { cn } from "@/lib/utils";
 import type { AdminGoal, AdminSwimmer, EventDefinition } from "@/lib/types";
 
+const HORIZON_LABELS: Record<string, string> = {
+  short: "短期",
+  mid: "中期",
+  long: "长期",
+};
+
+function getGoalHorizonLabel(horizon: string) {
+  return HORIZON_LABELS[horizon] ?? horizon;
+}
+
 export default function AdminGoalsPage() {
   const [swimmers, setSwimmers] = useState<AdminSwimmer[]>([]);
   const [events, setEvents] = useState<EventDefinition[]>([]);
@@ -237,7 +247,7 @@ export default function AdminGoalsPage() {
                           <div className="flex items-start justify-between gap-3">
                             <Badge
                               className={cn(
-                                "rounded-full border-transparent px-2 py-0 text-[9px] font-bold uppercase tracking-wider",
+                                "rounded-full border-transparent px-2 py-0 text-[11px] font-bold",
                                 goal.horizon === "short"
                                   ? "bg-blue-500/10 text-blue-600"
                                   : goal.horizon === "mid"
@@ -245,7 +255,7 @@ export default function AdminGoalsPage() {
                                     : "bg-purple-500/10 text-purple-600",
                               )}
                             >
-                              {goal.horizon}
+                              {getGoalHorizonLabel(goal.horizon)}
                             </Badge>
                             <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-muted/60">
                               <Calendar className="h-3 w-3" />
@@ -259,8 +269,8 @@ export default function AdminGoalsPage() {
                             </h3>
                             <div className="flex items-center gap-4">
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-muted/40">
-                                  Baseline
+                                <span className="text-[10px] font-bold text-muted/50">
+                                  基线成绩
                                 </span>
                                 <span className="text-sm font-black text-muted/80">
                                   {formatTimeMS(goal.baselineTimeMs)}
@@ -268,8 +278,8 @@ export default function AdminGoalsPage() {
                               </div>
                               <TrendingUp className="h-4 w-4 text-muted/30" />
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-primary/60">
-                                  Target
+                                <span className="text-[10px] font-bold text-primary/70">
+                                  目标成绩
                                 </span>
                                 <span className="text-sm font-black text-primary">
                                   {formatTimeMS(goal.targetTimeMs)}

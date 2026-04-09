@@ -45,4 +45,24 @@ describe("TimeInput conversion", () => {
       screen.getByText("请输入合法时间，例如 32.15 或 1:05.23"),
     ).toBeInTheDocument();
   });
+
+  it("uses chinese unit labels for seconds and milliseconds toggle", () => {
+    let currentValue = 15000;
+    render(
+      React.createElement(TimeInput, {
+        onChange: (value: number) => {
+          currentValue = value;
+        },
+        value: currentValue,
+      }),
+    );
+
+    const toggleButton = screen.getByRole("button", { name: "秒" });
+
+    expect(toggleButton).toBeInTheDocument();
+
+    fireEvent.click(toggleButton);
+
+    expect(screen.getByRole("button", { name: "毫秒" })).toBeInTheDocument();
+  });
 });

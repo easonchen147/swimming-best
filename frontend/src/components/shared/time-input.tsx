@@ -195,7 +195,7 @@ export function TimeInput({
         </div>
         <button
           className={cn(
-            "shrink-0 rounded-2xl border px-4 py-2 text-xs font-black uppercase tracking-widest transition-all",
+            "min-w-[4.5rem] shrink-0 rounded-2xl border px-4 py-2 text-xs font-black transition-all",
             unit === "seconds"
               ? "border-primary bg-primary text-white shadow-lg shadow-primary/20"
               : "border-border bg-surface text-muted hover:border-primary/20 hover:bg-primary/5 hover:text-primary",
@@ -203,7 +203,7 @@ export function TimeInput({
           onClick={toggleUnit}
           type="button"
         >
-          {unit === "seconds" ? "SEC" : "MS"}
+          {unit === "seconds" ? "秒" : "毫秒"}
         </button>
       </div>
       {error ? (

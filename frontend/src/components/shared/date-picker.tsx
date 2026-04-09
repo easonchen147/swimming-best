@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { format, parseISO } from "date-fns";
 import { zhCN } from "date-fns/locale";
-import { Calendar as CalendarIcon, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -11,9 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 
 const triggerClassName = cn(
-  "h-11 w-full justify-start rounded-2xl border-border/60 bg-surface-strong/90 text-left font-normal",
-  "shadow-[inset_0_1px_0_rgba(255,255,255,0.65),0_8px_30px_rgba(15,23,42,0.06)]",
-  "hover:border-primary/30 hover:bg-surface-strong/90",
+  "w-full justify-start text-left font-normal",
 );
 
 function parseDateValue(value: string) {
@@ -42,27 +39,6 @@ function formatYearLabel(value: string) {
   return value ? `${value} 年` : "请选择年份";
 }
 
-function ClearButton({
-  ariaLabel,
-  onClick,
-}: {
-  ariaLabel: string;
-  onClick: () => void;
-}) {
-  return (
-    <Button
-      aria-label={ariaLabel}
-      className="h-11 w-11 shrink-0 rounded-2xl border-border/60 bg-surface/80"
-      onClick={onClick}
-      size="icon"
-      type="button"
-      variant="outline"
-    >
-      <X className="h-4 w-4" />
-    </Button>
-  );
-}
-
 export function DatePickerInput({
   value,
   onChange,
@@ -85,7 +61,7 @@ export function DatePickerInput({
   const label = ariaLabel ?? placeholder;
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={className}>
       <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild>
           <Button
@@ -94,18 +70,14 @@ export function DatePickerInput({
             type="button"
             variant="outline"
           >
-            <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">
-              {selectedDate ? formatDateLabel(value) : placeholder}
-            </span>
+            {selectedDate ? formatDateLabel(value) : placeholder}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0" sideOffset={8}>
+        <PopoverContent align="start" className="w-auto overflow-hidden p-0">
           <Calendar
             captionLayout="dropdown"
+            defaultMonth={selectedDate}
             endMonth={endMonth}
-            hideNavigation
-            initialFocus
             locale={zhCN}
             mode="single"
             onSelect={(date) => {
@@ -117,9 +89,6 @@ export function DatePickerInput({
           />
         </PopoverContent>
       </Popover>
-      {selectedDate ? (
-        <ClearButton ariaLabel={`清空${label}`} onClick={() => onChange("")} />
-      ) : null}
     </div>
   );
 }
@@ -148,7 +117,7 @@ export function YearPickerInput({
   const label = ariaLabel ?? "出生年份";
 
   return (
-    <div className={cn("flex items-center gap-2", className)}>
+    <div className={className}>
       <Popover onOpenChange={setOpen} open={open}>
         <PopoverTrigger asChild>
           <Button
@@ -157,19 +126,16 @@ export function YearPickerInput({
             type="button"
             variant="outline"
           >
-            <CalendarIcon className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{formatYearLabel(value)}</span>
+            {formatYearLabel(value)}
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-auto p-0" sideOffset={8}>
+        <PopoverContent align="start" className="w-auto overflow-hidden p-0">
           <Calendar
-            captionLayout="dropdown-years"
+            captionLayout="dropdown"
             className="w-[320px] sm:w-[360px]"
+            defaultMonth={displayMonth}
             endMonth={new Date(maxYear, 11, 31)}
-            hideNavigation
-            initialFocus
             mode="single"
-            month={displayMonth}
             onMonthChange={(month) => {
               onChange(String(month.getFullYear()));
               setOpen(false);
@@ -183,9 +149,6 @@ export function YearPickerInput({
           />
         </PopoverContent>
       </Popover>
-      {value ? (
-        <ClearButton ariaLabel={`清空${label}`} onClick={() => onChange("")} />
-      ) : null}
     </div>
   );
 }
